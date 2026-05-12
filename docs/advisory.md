@@ -7,12 +7,21 @@ malicious versions across 42 `@tanstack/*` npm packages, published between
 fork-to-base trust boundary, and runtime extraction of an OIDC token from the
 GitHub Actions runner process.
 
-Aikido later reported that the broader Mini Shai-Hulud campaign had expanded to
-373 malicious package-version entries across 169 npm package names, including
-Mistral SDK packages, enterprise automation, AI/MCP, auth, workflow, and
-developer tooling. This project does not claim coverage for additional package
-artifacts unless exact package/version indicators have been added to
-`data/affected-packages.json`.
+Socket's live campaign page reports 416 affected package artifacts across npm,
+PyPI, and Composer as of May 12, 2026, including the TanStack wave, Mistral SDK
+packages, UiPath packages, Squawk packages, OpenSearch, Guardrails AI, older SAP
+CAP packages, Intercom, and PyPI `lightning`. This project does not claim
+coverage for additional package artifacts unless exact package/version
+indicators have been added to `data/affected-packages.json`.
+
+Separate May 12, 2026 Nightmare-Eclipse / Chaotic Eclipse Windows disclosures
+for `YellowKey` and `GreenPlasma` are out of scope for this scanner. They are
+tracked here only as related public situational awareness because readers may see
+the same reporting stream. Do not add those repositories or screenshots to
+scanner detection data unless a confirmed TanStack, Mini Shai-Hulud package,
+payload, or campaign artifact overlaps. Manual triage strings from the public
+reporting include `Nightmare-Eclipse`, `YellowKey`, `GreenPlasma`,
+`CSRSS_TEST_SECTION`, and WinRE / `wpeinit` context.
 
 The key local indicators used by this project are:
 
@@ -29,6 +38,20 @@ The key local indicators used by this project are:
 - known affected `@mistralai/mistralai`, `@mistralai/mistralai-azure`, and
   `@mistralai/mistralai-gcp` package/version pairs from Aikido's May 12 update
   in `data/affected-packages.json`
+- known affected UiPath, TallyUI, DraftAuth, DraftLab, BeProduct, ML Toolkit,
+  TaskFlow, Supersurkhet, Tolka, OpenSearch, Dirigible AI, Mesadev, and selected
+  unscoped npm package/version pairs from Aikido's May 12 update in
+  `data/affected-packages.json`
+- known affected Squawk, SAP CAP, Intercom, and additional Socket-tracked npm
+  package/version pairs from Socket's live campaign table
+- lower-severity namespace warnings for namespaces reported in the active
+  campaign when exact package/version coverage may still be incomplete
+- known affected PyPI `mistralai` and `guardrails-ai` package/version pairs from
+  OX Security's May 12 update in `data/affected-packages.json`
+- known affected PyPI `lightning` and Composer `intercom/intercom-php`
+  package/version pairs from Socket's live campaign table
+- Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json`
+  references to known payload, network, token-description, and campaign strings
 
 Additional TanStack-postmortem IOCs retained for investigation context include
 the cache key
