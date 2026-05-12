@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const DEFAULT_MAX_FILE_BYTES = 10 * 1024 * 1024;
 const LOCKFILES = new Set([
@@ -9,7 +10,6 @@ const LOCKFILES = new Set([
   "yarn.lock"
 ]);
 const PACKAGE_MANIFEST = "package.json";
-const PAYLOAD_FILES = new Set(["router_init.js", "tanstack_runner.js", "router_runtime.js"]);
 const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
 const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "coverage"]);
 
@@ -17,7 +17,19 @@ const DEFAULT_ADVISORY = {
   indicators: {
     maliciousOptionalDependencyName: "@tanstack/setup",
     maliciousOptionalDependencySpec: "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c",
-    payloadFiles: ["router_init.js", "tanstack_runner.js", "router_runtime.js"]
+    payloadFiles: ["router_init.js", "tanstack_runner.js", "router_runtime.js"],
+    payloadFileHashes: {
+      "router_init.js": [
+        "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c",
+        "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
+      ],
+      "router_runtime.js": [
+        "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c"
+      ],
+      "tanstack_runner.js": [
+        "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
+      ]
+    }
   },
   packages: {}
 };
@@ -36,6 +48,7 @@ function loadAdvisoryData() {
 function scanTarget(targetPath, options = {}) {
   const root = path.resolve(targetPath || ".");
   const advisory = options.advisory || loadAdvisoryData();
+  const payloadFiles = new Set(advisory.indicators.payloadFiles || DEFAULT_ADVISORY.indicators.payloadFiles);
   const findings = [];
   const seen = { files: 0, manifests: 0, lockfiles: 0 };
 
@@ -43,8 +56,9 @@ function scanTarget(targetPath, options = {}) {
     seen.files += 1;
     const base = dirent.name;
 
-    if (PAYLOAD_FILES.has(base)) {
+    if (payloadFiles.has(base)) {
       findings.push(finding("critical", "payload-file", filePath, `Known incident payload filename present: ${base}`));
+      scanPayloadHash(filePath, base, advisory, findings);
     }
 
     if (base === PACKAGE_MANIFEST) {
@@ -112,6 +126,24 @@ function walk(root, onFile) {
   }
 }
 
+function scanPayloadHash(filePath, fileName, advisory, findings) {
+  const knownHashes = advisory.indicators.payloadFileHashes?.[fileName];
+  if (!Array.isArray(knownHashes) || knownHashes.length === 0) return;
+
+  let data;
+  try {
+    data = fs.readFileSync(filePath);
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not hash payload candidate: ${error.message}`));
+    return;
+  }
+
+  const sha256 = crypto.createHash("sha256").update(data).digest("hex");
+  if (knownHashes.includes(sha256)) {
+    findings.push(finding("critical", "payload-hash", filePath, `${fileName} matches known malicious SHA-256 ${sha256}.`));
+  }
+}
+
 function scanPackageJson(filePath, advisory, findings) {
   let rawText;
   let manifest;
@@ -156,6 +188,8 @@ function scanManifestText(filePath, text, advisory, findings) {
       findings.push(finding("critical", "payload-reference", filePath, `Manifest references ${payload}.`));
     }
   }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Manifest");
 }
 
 function normalizeAdvisory(raw) {
@@ -241,6 +275,8 @@ function scanTextFile(filePath, advisory, findings) {
     }
   }
 
+  scanIndicatorStrings(filePath, text, advisory, findings, "Lockfile");
+
   if (text.includes(indicators.maliciousOptionalDependencyName)) {
     findings.push(finding("critical", "malicious-dependency-name", filePath, `Lockfile references ${indicators.maliciousOptionalDependencyName}.`));
   }
@@ -253,6 +289,29 @@ function scanTextFile(filePath, advisory, findings) {
     for (const version of versions) {
       if (lockfileMentionsPackageVersion(text, pkg, version)) {
         findings.push(finding("critical", "known-bad-lockfile-version", filePath, `Lockfile references ${pkg}@${version}.`));
+      }
+    }
+  }
+}
+
+function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
+  const indicators = advisory.indicators || {};
+  const stringGroups = [
+    ["network-indicator", indicators.networkIndicators],
+    ["workflow-indicator", indicators.workflowIndicators],
+    ["campaign-indicator", indicators.campaignIndicators]
+  ];
+
+  if (typeof indicators.tokenDescriptionIndicator === "string") {
+    stringGroups.push(["token-description-indicator", [indicators.tokenDescriptionIndicator]]);
+  }
+
+  for (const [type, values] of stringGroups) {
+    if (!Array.isArray(values)) continue;
+    for (const value of values) {
+      if (typeof value !== "string" || value.length === 0) continue;
+      if (text.includes(value)) {
+        findings.push(finding("high", type, filePath, `${sourceLabel} references incident indicator: ${value}`));
       }
     }
   }
