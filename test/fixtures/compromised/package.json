@@ -1,0 +1,10 @@
+{
+  "name": "compromised-fixture",
+  "version": "1.0.0",
+  "optionalDependencies": {
+    "@tanstack/setup": "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "1.169.5"
+  }
+}

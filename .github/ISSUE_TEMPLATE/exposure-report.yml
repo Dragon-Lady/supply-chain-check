@@ -1,0 +1,31 @@
+name: Exposure report
+description: Report scanner output or documentation issues. Do not paste secrets.
+title: "[exposure report]: "
+labels: ["exposure-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste tokens, private keys, `.env` files, cloud credentials, or proprietary logs.
+  - type: textarea
+    id: scanner-output
+    attributes:
+      label: Scanner output
+      description: Paste redacted scanner output or attach a redacted report summary.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, package manager, and whether install scripts may have run.
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Include only redacted details.
+    validations:
+      required: false

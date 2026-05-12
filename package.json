@@ -1,0 +1,18 @@
+{
+  "name": "tanstack-incident-scanner",
+  "version": "0.1.0",
+  "description": "Read-only CLI scanner for TanStack incident indicators in JavaScript package manifests and lockfiles.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "tanstack-incident-scanner": "./bin/tanstack-incident-scanner.js"
+  },
+  "scripts": {
+    "scan": "node bin/tanstack-incident-scanner.js",
+    "smoke": "node bin/tanstack-incident-scanner.js --help",
+    "test": "node --check bin/tanstack-incident-scanner.js && node --check src/scanner.js && node test/smoke.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
