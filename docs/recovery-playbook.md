@@ -13,6 +13,8 @@ have installed compromised packages during the incident window.
 
 - If payload execution is possible, disconnect the host from the network.
 - Preserve lockfiles, package manifests, install logs, and scanner reports.
+- Preserve Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json`
+  if persistence indicators are suspected.
 - Avoid copying `node_modules`, build caches, unknown scripts, shell profiles, or
   editor extension state into a recovery environment.
 
@@ -28,6 +30,12 @@ Rotate credentials from a separate trusted device:
 Audit for recently created tokens, suspicious repositories, unexpected Actions
 workflows, self-hosted runners, and unusual cloud API activity.
 
+On Windows developer workstations, also review LSASS/logon-session telemetry for
+signs that a logon session was kept alive after user logoff. Microsoft/Windows
+security researchers have noted `LSASRV` ETW event `6182` as a delayed detection
+signal for Koh-style logon-session preservation; it is timer-based rather than
+real-time, so treat it as supporting evidence during host triage.
+
 ## 4. Recover Data Carefully
 
 Copy only needed documents and source files from a trusted recovery environment
@@ -40,6 +48,11 @@ If payload execution, persistence, or secret access is found, rebuild or reimage
 the host from a clean baseline. Reinstall dependencies from a clean lockfile
 pinned away from known-bad versions, with install scripts blocked unless a
 package has been reviewed.
+
+Before resuming AI/editor tooling, review Claude Code hooks and VS Code tasks
+from a clean environment. Remove unexpected commands, package-manager invocations,
+payload filenames, network indicators, or campaign marker strings. Do not assume
+`npm uninstall` or `pip uninstall` removed persistence from tool config files.
 
 ## Important Limit
 

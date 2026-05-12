@@ -83,7 +83,10 @@ function printHuman(report, writtenReportPath) {
   console.log(`Findings: ${report.summary.findings}`);
   console.log("");
 
+  printPlainLanguageSummary(report);
+
   if (report.findings.length > 0) {
+    console.log("Technical findings:");
     for (const item of report.findings) {
       console.log(`[${item.severity}] ${item.type}`);
       console.log(`  ${item.path}`);
@@ -101,6 +104,29 @@ function printHuman(report, writtenReportPath) {
     console.log("");
     console.log(`JSON report written: ${writtenReportPath}`);
   }
+}
+
+function printPlainLanguageSummary(report) {
+  if (report.risk === "likely-exposed") {
+    console.log("STOP");
+    console.log("This project references known compromised Mini Shai-Hulud indicators.");
+    console.log("Do not run npm, pnpm, yarn, bun, pip, composer, build, test, or dev-server commands here until reviewed.");
+    console.log("If this package may have already executed, rotate secrets from a clean machine and check dev-tool persistence.");
+    console.log("");
+    return;
+  }
+
+  if (report.risk === "possible-exposure" || report.risk === "review-needed") {
+    console.log("PAUSE");
+    console.log("This project has suspicious or active-campaign-adjacent dependency signals.");
+    console.log("Review the findings before running package installs or builds. Exact known-bad versions are listed as critical findings.");
+    console.log("");
+    return;
+  }
+
+  console.log("No known compromised package or payload indicators were found by this scanner.");
+  console.log("This does not prove the host is clean; it only covers the indicators this tool knows about.");
+  console.log("");
 }
 
 try {

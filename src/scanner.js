@@ -9,7 +9,10 @@ const LOCKFILES = new Set([
   "pnpm-lock.yaml",
   "yarn.lock"
 ]);
+const PYTHON_DEPENDENCY_FILES = new Set(["requirements.txt", "pyproject.toml", "uv.lock", "Pipfile.lock"]);
+const COMPOSER_DEPENDENCY_FILES = new Set(["composer.json", "composer.lock"]);
 const PACKAGE_MANIFEST = "package.json";
+const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json"]);
 const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
 const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "coverage"]);
 
@@ -31,7 +34,9 @@ const DEFAULT_ADVISORY = {
       ]
     }
   },
-  packages: {}
+  packages: {},
+  pypiPackages: {},
+  composerPackages: {}
 };
 
 function loadAdvisoryData() {
@@ -70,6 +75,21 @@ function scanTarget(targetPath, options = {}) {
     if (LOCKFILES.has(base)) {
       seen.lockfiles += 1;
       scanTextFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isPythonDependencyFile(base)) {
+      scanPythonDependencyFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (COMPOSER_DEPENDENCY_FILES.has(base)) {
+      scanComposerDependencyFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isToolConfigFile(filePath, base)) {
+      scanToolConfigFile(filePath, advisory, findings);
     }
   });
 
@@ -198,7 +218,9 @@ function normalizeAdvisory(raw) {
       ...DEFAULT_ADVISORY.indicators,
       ...(raw && typeof raw.indicators === "object" ? raw.indicators : {})
     },
-    packages: {}
+    packages: {},
+    pypiPackages: {},
+    composerPackages: {}
   };
 
   if (raw && raw.packages && typeof raw.packages === "object" && !Array.isArray(raw.packages)) {
@@ -214,6 +236,18 @@ function normalizeAdvisory(raw) {
     for (const [name, versions] of Object.entries(raw)) {
       if (name === "indicators") continue;
       addAdvisoryPackage(advisory.packages, name, versions);
+    }
+  }
+
+  if (raw && raw.pypiPackages && typeof raw.pypiPackages === "object" && !Array.isArray(raw.pypiPackages)) {
+    for (const [name, versions] of Object.entries(raw.pypiPackages)) {
+      addAdvisoryPackage(advisory.pypiPackages, normalizePythonPackageName(name), versions);
+    }
+  }
+
+  if (raw && raw.composerPackages && typeof raw.composerPackages === "object" && !Array.isArray(raw.composerPackages)) {
+    for (const [name, versions] of Object.entries(raw.composerPackages)) {
+      addAdvisoryPackage(advisory.composerPackages, name.toLowerCase(), versions);
     }
   }
 
@@ -241,6 +275,10 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
   if (/^github:/i.test(spec) || /github\.com[:/]/i.test(spec)) {
     const severity = section === "optionalDependencies" ? "high" : "medium";
     findings.push(finding(severity, "github-dependency", filePath, `${section}.${name} resolves from GitHub: ${spec}`));
+  }
+
+  if (matchesActiveNamespace(name, advisory)) {
+    findings.push(finding("medium", "active-campaign-namespace", filePath, `${section}.${name} is in a namespace reported in the active campaign; verify the exact version.`));
   }
 
   if (advisory.packages[name]?.includes(spec)) {
@@ -292,6 +330,71 @@ function scanTextFile(filePath, advisory, findings) {
       }
     }
   }
+
+  for (const namespace of advisory.indicators.activeNamespaces || []) {
+    if (typeof namespace === "string" && namespace.length > 0 && text.includes(namespace)) {
+      findings.push(finding("medium", "active-campaign-namespace", filePath, `Lockfile references namespace reported in the active campaign: ${namespace}`));
+    }
+  }
+}
+
+function scanPythonDependencyFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read Python dependency file: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Python dependency file");
+
+  for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
+    for (const version of versions) {
+      if (pythonFileMentionsPackageVersion(text, pkg, version)) {
+        findings.push(finding("critical", "known-bad-pypi-version", filePath, `Python dependency file references ${pkg}==${version}.`));
+      }
+    }
+  }
+}
+
+function scanComposerDependencyFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read Composer dependency file: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Composer dependency file");
+
+  for (const [pkg, versions] of Object.entries(advisory.composerPackages || {})) {
+    for (const version of versions) {
+      if (composerFileMentionsPackageVersion(text, pkg, version)) {
+        findings.push(finding("critical", "known-bad-composer-version", filePath, `Composer dependency file references ${pkg}@${version}.`));
+      }
+    }
+  }
+}
+
+function scanToolConfigFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read tool config file: ${error.message}`));
+    return;
+  }
+
+  const indicators = advisory.indicators;
+  for (const payload of indicators.payloadFiles || []) {
+    if (text.includes(payload)) {
+      findings.push(finding("critical", "tool-config-payload-reference", filePath, `Tool config references ${payload}.`));
+    }
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Tool config");
 }
 
 function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
@@ -328,6 +431,43 @@ function lockfileMentionsPackageVersion(text, pkg, version) {
   return patterns.some((pattern) => pattern.test(text));
 }
 
+function pythonFileMentionsPackageVersion(text, pkg, version) {
+  const escapedPkg = escapeRegExp(pkg);
+  const escapedVersion = escapeRegExp(version);
+  const normalizedText = text.toLowerCase();
+  const patterns = [
+    new RegExp(`(^|[\\s"'\\[]|name\\s*=\\s*["'])${escapedPkg}(["'\\]\\s]|\\s*(==|===|~=|>=|<=|=)\\s*${escapedVersion})`, "im"),
+    new RegExp(`${escapedPkg}[^\\n\\r]{0,200}${escapedVersion}`, "i")
+  ];
+  return patterns.some((pattern) => pattern.test(normalizedText));
+}
+
+function composerFileMentionsPackageVersion(text, pkg, version) {
+  const escapedPkg = escapeRegExp(pkg);
+  const escapedVersion = escapeRegExp(version);
+  return new RegExp(`${escapedPkg}[\\s\\S]{0,500}${escapedVersion}`, "i").test(text.toLowerCase());
+}
+
+function isPythonDependencyFile(base) {
+  return PYTHON_DEPENDENCY_FILES.has(base) || /^requirements.*\.txt$/i.test(base);
+}
+
+function isToolConfigFile(filePath, base) {
+  if (!TOOL_CONFIG_FILES.has(base)) return false;
+  const normalized = filePath.replace(/\\/g, "/");
+  return normalized.includes("/.claude/") || normalized.includes("/.vscode/");
+}
+
+function normalizePythonPackageName(name) {
+  return String(name).toLowerCase().replace(/_/g, "-");
+}
+
+function matchesActiveNamespace(packageName, advisory) {
+  const namespaces = advisory.indicators?.activeNamespaces;
+  if (!Array.isArray(namespaces)) return false;
+  return namespaces.some((namespace) => typeof namespace === "string" && namespace.length > 0 && packageName.startsWith(namespace));
+}
+
 function finding(severity, type, filePath, message) {
   return {
     severity,
@@ -359,6 +499,8 @@ function riskLevel(findings) {
 function guidanceForRisk(risk) {
   if (risk === "likely-exposed") {
     return [
+      "STOP: Do not run install, build, test, or dev-server commands in this project until reviewed.",
+      "This project references known compromised package or payload indicators.",
       "Stop installs, builds, and dev servers in the affected environment.",
       "If payload execution is possible, isolate the host from the network before cleanup.",
       "Do not revoke tokens from the suspected infected host first.",
@@ -369,6 +511,7 @@ function guidanceForRisk(risk) {
 
   if (risk === "possible-exposure" || risk === "review-needed") {
     return [
+      "PAUSE: Review these findings before running package installs or builds.",
       "Review findings before running more package installs.",
       "Prefer npm ci --ignore-scripts or equivalent script-blocking controls until dependency state is verified.",
       "Pin away from known-bad package versions and regenerate lockfiles from a clean environment."
