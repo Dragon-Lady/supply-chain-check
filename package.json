@@ -1,7 +1,7 @@
 {
   "name": "tanstack-incident-scanner",
   "version": "0.1.0",
-  "description": "Read-only CLI scanner for TanStack and related Mini Shai-Hulud indicators in JavaScript package manifests and lockfiles.",
+  "description": "Read-only CLI scanner for TanStack, Mini Shai-Hulud, and related package-supply-chain indicators.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {

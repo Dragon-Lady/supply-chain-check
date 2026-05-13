@@ -1,0 +1,94 @@
+{
+  "maliciousOptionalDependencyName": "@tanstack/setup",
+  "maliciousOptionalDependencySpec": "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c",
+  "payloadFiles": [
+    "router_init.js",
+    "tanstack_runner.js",
+    "router_runtime.js"
+  ],
+  "payloadFileHashes": {
+    "router_init.js": [
+      "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c",
+      "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
+    ],
+    "router_runtime.js": [
+      "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c"
+    ],
+    "tanstack_runner.js": [
+      "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
+    ]
+  },
+  "networkIndicators": [
+    "filev2.getsession.org",
+    "seed1.getsession.org",
+    "seed2.getsession.org",
+    "seed3.getsession.org",
+    "api.masscan.cloud",
+    "git-tanstack.com",
+    "litter.catbox.moe/h8nc9u.js",
+    "litter.catbox.moe/7rrc6l.mjs",
+    "rubygems.org/api/v1/gems",
+    "moderngov.lambeth.gov.uk/mgCalendarMonthView.aspx",
+    "democracy.wandsworth.gov.uk/mgCalendarMonthView.aspx",
+    "moderngov.southwark.gov.uk/mgCalendarMonthView.aspx"
+  ],
+  "workflowIndicators": [
+    "Linux-pnpm-store-6f9233a50def742c09fde54f56553d6b449a535adf87d4083690539f49ae4da11",
+    "claude <claude@users.noreply.github.com>",
+    "zblgg",
+    "voicproducoes"
+  ],
+  "campaignIndicators": [
+    "A Mini Shai-Hulud has Appeared",
+    "Shai-Hulud: Here We Go Again"
+  ],
+  "rubyPayloadFiles": [
+    "payload.rb",
+    "script.rb",
+    "evil.rb",
+    "yardload.rb",
+    "yard_plugin.rb",
+    "exploit.rb",
+    "extconf.rb",
+    "fetcher.rb"
+  ],
+  "rubyPayloadFileHashes": {
+    "payload.rb": [
+      "239440c830e17530dda0a8a06ed2708860998750a1e3ed2239e919465dc59420"
+    ],
+    "script.rb": [
+      "c2d6bcacc88177e0f2c8c262726f86f37e671b1692c8bc135bac4b610ddcf31a"
+    ]
+  },
+  "rubyIndicators": [
+    "/tmp/gemhome/.gem/credentials",
+    "/tmp/rubydocran_",
+    "ENV['HOME'] = '/tmp/gemhome'",
+    "ENV[\"HOME\"] = \"/tmp/gemhome\"",
+    "Gem::Package.build",
+    "gem push",
+    "File.binwrite",
+    "lib/result.txt",
+    "mgCalendarMonthView.aspx?M=1&Y=2026&GL=1&bcr=1",
+    "mgCalendarMonthView.aspx?GL=1&M=1&Y=2026"
+  ],
+  "tokenDescriptionIndicator": "IfYouRevokeThisTokenItWillWipeTheComputerOfTheOwner",
+  "activeNamespaces": [
+    "@beproduct/",
+    "@cap-js/",
+    "@dirigible-ai/",
+    "@draftauth/",
+    "@draftlab/",
+    "@mesadev/",
+    "@mistralai/",
+    "@ml-toolkit-ts/",
+    "@opensearch-project/",
+    "@squawk/",
+    "@supersurkhet/",
+    "@tallyui/",
+    "@tanstack/",
+    "@taskflow-corp/",
+    "@tolka/",
+    "@uipath/"
+  ]
+}

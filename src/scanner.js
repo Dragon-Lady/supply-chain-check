@@ -43,14 +43,36 @@ const DEFAULT_ADVISORY = {
 };
 
 function loadAdvisoryData() {
-  const dataPath = path.join(__dirname, "..", "data", "affected-packages.json");
+  const dataDir = path.join(__dirname, "..", "data");
   try {
-    const raw = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+    const raw = loadSplitAdvisoryData(dataDir);
     return normalizeAdvisory(raw);
   } catch (error) {
-    if (error.code === "ENOENT") return DEFAULT_ADVISORY;
+    const legacyPath = path.join(dataDir, "affected-packages.json");
+    try {
+      const raw = JSON.parse(fs.readFileSync(legacyPath, "utf8"));
+      return normalizeAdvisory(raw);
+    } catch (legacyError) {
+      if (error.code === "ENOENT" || legacyError.code === "ENOENT") return DEFAULT_ADVISORY;
+    }
     return DEFAULT_ADVISORY;
   }
+}
+
+function loadSplitAdvisoryData(dataDir) {
+  const advisory = readJsonFile(path.join(dataDir, "advisory.json"));
+  return {
+    ...advisory,
+    indicators: readJsonFile(path.join(dataDir, "indicators.json")),
+    packages: readJsonFile(path.join(dataDir, "packages", "npm.json")),
+    pypiPackages: readJsonFile(path.join(dataDir, "packages", "pypi.json")),
+    composerPackages: readJsonFile(path.join(dataDir, "packages", "composer.json")),
+    gemPackages: readJsonFile(path.join(dataDir, "packages", "rubygems.json"))
+  };
+}
+
+function readJsonFile(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
 function scanTarget(targetPath, options = {}) {

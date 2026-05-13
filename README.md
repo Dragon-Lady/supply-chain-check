@@ -17,13 +17,14 @@ package registries, or transmit scan results.
 ## Scope
 
 This scanner detects exact npm, PyPI, Composer, and selected RubyGems
-package/version indicators in `data/affected-packages.json` plus shared payload,
-tool-persistence, Ruby script, and campaign indicators.
+package/version indicators in `data/packages/` plus shared payload,
+tool-persistence, Ruby script, and campaign indicators from
+`data/indicators.json`.
 TanStack's official postmortem confirms 84 malicious versions across 42
 `@tanstack/*` packages, published on May 11, 2026 between 19:20 and 19:26 UTC.
 Socket's live campaign page reports 416 affected package artifacts across npm,
 PyPI, and Composer as of May 12, 2026. This scanner includes the exact
-package/version indicators currently represented in `data/affected-packages.json`.
+package/version indicators currently represented in `data/packages/`.
 Broader namespaces remain lower-severity review prompts unless an exact
 package/version indicator is present.
 Socket's GemStuffer report from May 13, 2026 describes 155 RubyGems package

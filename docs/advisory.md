@@ -12,7 +12,7 @@ PyPI, and Composer as of May 12, 2026, including the TanStack wave, Mistral SDK
 packages, UiPath packages, Squawk packages, OpenSearch, Guardrails AI, older SAP
 CAP packages, Intercom, and PyPI `lightning`. This project does not claim
 coverage for additional package artifacts unless exact package/version
-indicators have been added to `data/affected-packages.json`.
+indicators have been added to the relevant file under `data/packages/`.
 
 Socket's May 13, 2026 GemStuffer report describes a separate RubyGems
 registry-abuse campaign with 155 package artifacts. The reported technique uses
@@ -42,20 +42,20 @@ The key local indicators used by this project are:
   `ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c`
   and `2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96`
 - known affected `@tanstack/*` package/version pairs in
-  `data/affected-packages.json`
+  `data/packages/npm.json`
 - known affected `@mistralai/mistralai`, `@mistralai/mistralai-azure`, and
   `@mistralai/mistralai-gcp` package/version pairs from Aikido's May 12 update
-  in `data/affected-packages.json`
+  in `data/packages/npm.json`
 - known affected UiPath, TallyUI, DraftAuth, DraftLab, BeProduct, ML Toolkit,
   TaskFlow, Supersurkhet, Tolka, OpenSearch, Dirigible AI, Mesadev, and selected
   unscoped npm package/version pairs from Aikido's May 12 update in
-  `data/affected-packages.json`
+  `data/packages/npm.json`
 - known affected Squawk, SAP CAP, Intercom, and additional Socket-tracked npm
   package/version pairs from Socket's live campaign table
 - lower-severity namespace warnings for namespaces reported in the active
   campaign when exact package/version coverage may still be incomplete
 - known affected PyPI `mistralai` and `guardrails-ai` package/version pairs from
-  OX Security's May 12 update in `data/affected-packages.json`
+  OX Security's May 12 update in `data/packages/pypi.json`
 - known affected PyPI `lightning` and Composer `intercom/intercom-php`
   package/version pairs from Socket's live campaign table
 - selected GemStuffer RubyGems package/version pairs, payload filenames, Ruby
