@@ -91,6 +91,15 @@ forged commit identity `claude <claude@users.noreply.github.com>`. The scanner
 also searches manifests and lockfiles for selected network, workflow,
 token-description, and campaign marker strings stored in the advisory data.
 
+May 12 public analysis from Ayush Anand / Securityinbits describes an additional
+fallback C2 path in the unobfuscated Linux `transformers.pyz` payload. If the
+hardcoded `83.142.209.194` C2 fails, the payload searches GitHub commits for
+`FIRESCALE`, looks for a commit message matching
+`FIRESCALE\s+([A-Za-z0-9+/=]+)\.([A-Za-z0-9+/=]+)`, decodes the URL material,
+verifies the attacker signature, and uses the decoded URL as fallback C2. At
+the time of that report, the latest checked GitHub commit did not contain a
+fresh fallback C2 value.
+
 Manual destructive-payload review strings reported in public analysis include
 timezone markers such as `Jerusalem`, `Tel_Aviv`, and `Tehran`, random
 one-in-six execution gates, audio playback from `audio.mp3`, and destructive

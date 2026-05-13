@@ -16,6 +16,9 @@ have installed compromised packages during the incident window.
 - For Linux hosts exposed to the updated PyPI payload, preserve shell history,
   service-unit state, `/tmp/transformers.pyz` metadata if present, and any
   evidence of `/tmp`, home-directory, or timezone checks before rebuilding.
+- Preserve any payload evidence showing GitHub commit-search fallback C2 logic,
+  including `api.github.com/search/commits?q=FIRESCALE`, `FIRESCALE` commit
+  message markers, decoded fallback URLs, and signature-verification material.
 - For Ruby findings, preserve `Gemfile`, `Gemfile.lock`, `.gemspec`, suspicious
   `.rb` files, RubyGems publish logs, and any relevant `/tmp` staging paths.
 - Preserve Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json`

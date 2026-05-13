@@ -49,10 +49,14 @@ try {
 
 const tmpPyRoot = fs.mkdtempSync(path.join(__dirname, "tmp-pypi-"));
 try {
-  fs.writeFileSync(path.join(tmpPyRoot, "requirements.txt"), "guardrails-ai==0.10.1\nlightning==2.6.3\n");
+  fs.writeFileSync(
+    path.join(tmpPyRoot, "requirements.txt"),
+    "guardrails-ai==0.10.1\nlightning==2.6.3\n# api.github.com/search/commits?q=FIRESCALE\n"
+  );
   const pypiCompromised = scanTarget(tmpPyRoot);
   assert.strictEqual(pypiCompromised.risk, "likely-exposed");
   assert(pypiCompromised.findings.some((finding) => finding.type === "known-bad-pypi-version"));
+  assert(pypiCompromised.findings.some((finding) => finding.type === "network-indicator"));
 } finally {
   fs.rmSync(tmpPyRoot, { recursive: true, force: true });
 }

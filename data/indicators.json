@@ -64,7 +64,8 @@
     "A Mini Shai-Hulud has Appeared",
     "Shai-Hulud: Here We Go Again",
     "PUSH UR T3MPRR",
-    "FIRESCALE"
+    "FIRESCALE",
+    "FIRESCALE\\s+([A-Za-z0-9+/=]+)\\.([A-Za-z0-9+/=]+)"
   ],
   "rubyPayloadFiles": [
     "payload.rb",
