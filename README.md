@@ -94,6 +94,11 @@ Do not start by revoking tokens from the suspected infected host. First stop
 builds and package installs, isolate the host if execution is possible, then use
 a clean machine to rotate credentials and audit accounts.
 
+Additional May 12-13 public reporting describes country/language-gated
+destructive behavior in the Python payload, including Russian-language avoidance
+and a reported Israel/Iran location check with randomized file deletion. This is
+kept as triage context, not a standalone clean/compromised decision.
+
 See [docs/recovery-playbook.md](docs/recovery-playbook.md).
 
 ## Sources
@@ -106,6 +111,7 @@ See [docs/recovery-playbook.md](docs/recovery-playbook.md).
 - JFrog Security Research: https://research.jfrog.com/post/shai-hulud-here-we-go-again/
 - Aikido broader campaign update: https://www.aikido.dev/blog/mini-shai-hulud-is-back-tanstack-compromised
 - OX Security broader npm/PyPI campaign update: https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/
+- Resultsense / Decrypt PyPI malware summary: https://www.resultsense.com/news/2026-05-13-mistral-ai-pypi-supply-chain-malware-shai-hulud/
 - Snyk TanStack/Mini Shai-Hulud update: https://snyk.io/jp/blog/tanstack-npm-packages-compromised/
 - Socket live Mini Shai-Hulud campaign table: https://socket.dev/supply-chain-attacks/mini-shai-hulud
 - Socket GemStuffer RubyGems writeup: https://socket.dev/blog/gemstuffer

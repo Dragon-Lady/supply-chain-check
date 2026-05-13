@@ -13,6 +13,9 @@ have installed compromised packages during the incident window.
 
 - If payload execution is possible, disconnect the host from the network.
 - Preserve lockfiles, package manifests, install logs, and scanner reports.
+- For Linux hosts exposed to the updated PyPI payload, preserve shell history,
+  service-unit state, `/tmp/transformers.pyz` metadata if present, and any
+  evidence of `/tmp`, home-directory, or timezone checks before rebuilding.
 - For Ruby findings, preserve `Gemfile`, `Gemfile.lock`, `.gemspec`, suspicious
   `.rb` files, RubyGems publish logs, and any relevant `/tmp` staging paths.
 - Preserve Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json`
@@ -66,6 +69,10 @@ If payload execution, persistence, or secret access is found, rebuild or reimage
 the host from a clean baseline. Reinstall dependencies from a clean lockfile
 pinned away from known-bad versions, with install scripts blocked unless a
 package has been reviewed.
+
+For hosts that may match reported country/language-gated destructive branches,
+do not rely on the absence of obvious deletion as proof that the payload did not
+run; randomized gates may leave only partial telemetry.
 
 Before resuming AI/editor tooling, review Claude Code hooks and VS Code tasks
 from a clean environment. Remove unexpected commands, package-manager invocations,

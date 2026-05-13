@@ -7,6 +7,7 @@
 - Socket TanStack/Mini Shai-Hulud writeup: https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
 - Aikido broader Mini Shai-Hulud campaign update: https://www.aikido.dev/blog/mini-shai-hulud-is-back-tanstack-compromised
 - OX Security broader npm/PyPI campaign update: https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/
+- Resultsense / Decrypt PyPI malware summary: https://www.resultsense.com/news/2026-05-13-mistral-ai-pypi-supply-chain-malware-shai-hulud/
 - Snyk TanStack/Mini Shai-Hulud update: https://snyk.io/jp/blog/tanstack-npm-packages-compromised/
 - Socket live Mini Shai-Hulud campaign table: https://socket.dev/supply-chain-attacks/mini-shai-hulud
 - Socket GemStuffer RubyGems registry-abuse writeup: https://socket.dev/blog/gemstuffer

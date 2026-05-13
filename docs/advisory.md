@@ -28,6 +28,11 @@ attribution text into a credential stealer with cloud, Kubernetes, Vault,
 password-manager, developer-tooling, persistence, and possible destructive
 behavior. This scanner treats those PyPI payload and persistence indicators as
 concrete IOCs while keeping broader advisory-only claims as review context.
+Additional May 12-13 public reporting describes country/language-gated
+destructive behavior in the Python payload, including Russian-language avoidance
+and a reported Israel/Iran location check that may randomly trigger audio
+playback and file deletion. Treat those details as destructive-payload triage
+context, not standalone package exposure indicators.
 
 Separate May 12, 2026 Nightmare-Eclipse / Chaotic Eclipse Windows disclosures
 for `YellowKey` and `GreenPlasma` are out of scope for this scanner. They are
@@ -85,6 +90,13 @@ the second-stage URLs `litter.catbox.moe/h8nc9u.js` and
 forged commit identity `claude <claude@users.noreply.github.com>`. The scanner
 also searches manifests and lockfiles for selected network, workflow,
 token-description, and campaign marker strings stored in the advisory data.
+
+Manual destructive-payload review strings reported in public analysis include
+timezone markers such as `Jerusalem`, `Tel_Aviv`, and `Tehran`, random
+one-in-six execution gates, audio playback from `audio.mp3`, and destructive
+Linux file-removal logic. Do not treat any one of these generic strings alone as
+proof of compromise; use them only when reviewing a confirmed payload or exposed
+host.
 
 If one of these indicators is found, treat the environment as potentially
 exposed until reviewed. If payload execution or credential access is confirmed,
