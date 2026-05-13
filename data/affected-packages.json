@@ -2,9 +2,9 @@
   "incident": "May 2026 Mini Shai-Hulud npm supply-chain compromise",
   "lastUpdated": "2026-05-12",
   "scope": {
-    "scannerPackageSet": "TanStack @tanstack/* package/version indicators plus selected confirmed broader Mini Shai-Hulud npm and PyPI package/version indicators",
+    "scannerPackageSet": "TanStack @tanstack/* package/version indicators plus selected confirmed broader Mini Shai-Hulud npm, PyPI, Composer, and RubyGems indicators",
     "officialTanStackScope": "42 packages, 84 malicious versions, published on 2026-05-11 between 19:20 and 19:26 UTC",
-    "campaignContext": "Socket reports 416 affected package artifacts for the Mini Shai-Hulud campaign as of 2026-05-12, spanning npm, PyPI, and one Composer artifact. Exact scanner detections are stored in this file; namespace warnings remain lower-confidence review prompts."
+    "campaignContext": "Socket reports 416 affected package artifacts for the Mini Shai-Hulud campaign as of 2026-05-12, spanning npm, PyPI, and one Composer artifact. Socket reports 155 package artifacts for the GemStuffer RubyGems registry-abuse campaign as of 2026-05-13. Exact scanner detections are stored in this file; namespace warnings and filename-only Ruby indicators remain lower-confidence review prompts."
   },
   "sources": [
     "https://tanstack.com/blog/npm-supply-chain-compromise-postmortem",
@@ -15,7 +15,8 @@
     "https://www.aikido.dev/blog/mini-shai-hulud-is-back-tanstack-compromised",
     "https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/",
     "https://snyk.io/jp/blog/tanstack-npm-packages-compromised/",
-    "https://socket.dev/supply-chain-attacks/mini-shai-hulud"
+    "https://socket.dev/supply-chain-attacks/mini-shai-hulud",
+    "https://socket.dev/blog/gemstuffer"
   ],
   "indicators": {
     "maliciousOptionalDependencyName": "@tanstack/setup",
@@ -45,7 +46,11 @@
       "api.masscan.cloud",
       "git-tanstack.com",
       "litter.catbox.moe/h8nc9u.js",
-      "litter.catbox.moe/7rrc6l.mjs"
+      "litter.catbox.moe/7rrc6l.mjs",
+      "rubygems.org/api/v1/gems",
+      "moderngov.lambeth.gov.uk/mgCalendarMonthView.aspx",
+      "democracy.wandsworth.gov.uk/mgCalendarMonthView.aspx",
+      "moderngov.southwark.gov.uk/mgCalendarMonthView.aspx"
     ],
     "workflowIndicators": [
       "Linux-pnpm-store-6f9233a50def742c09fde54f56553d6b449a535adf87d4083690539f49ae4da11",
@@ -56,6 +61,36 @@
     "campaignIndicators": [
       "A Mini Shai-Hulud has Appeared",
       "Shai-Hulud: Here We Go Again"
+    ],
+    "rubyPayloadFiles": [
+      "payload.rb",
+      "script.rb",
+      "evil.rb",
+      "yardload.rb",
+      "yard_plugin.rb",
+      "exploit.rb",
+      "extconf.rb",
+      "fetcher.rb"
+    ],
+    "rubyPayloadFileHashes": {
+      "payload.rb": [
+        "239440c830e17530dda0a8a06ed2708860998750a1e3ed2239e919465dc59420"
+      ],
+      "script.rb": [
+        "c2d6bcacc88177e0f2c8c262726f86f37e671b1692c8bc135bac4b610ddcf31a"
+      ]
+    },
+    "rubyIndicators": [
+      "/tmp/gemhome/.gem/credentials",
+      "/tmp/rubydocran_",
+      "ENV['HOME'] = '/tmp/gemhome'",
+      "ENV[\"HOME\"] = \"/tmp/gemhome\"",
+      "Gem::Package.build",
+      "gem push",
+      "File.binwrite",
+      "lib/result.txt",
+      "mgCalendarMonthView.aspx?M=1&Y=2026&GL=1&bcr=1",
+      "mgCalendarMonthView.aspx?GL=1&M=1&Y=2026"
     ],
     "tokenDescriptionIndicator": "IfYouRevokeThisTokenItWillWipeTheComputerOfTheOwner",
     "activeNamespaces": [
@@ -850,6 +885,14 @@
   "composerPackages": {
     "intercom/intercom-php": [
       "5.0.2"
+    ]
+  },
+  "gemPackages": {
+    "lambeth71b": [
+      "0.0.2"
+    ],
+    "agenda-sample-result": [
+      "0.1.1"
     ]
   }
 }

@@ -11,6 +11,8 @@ const LOCKFILES = new Set([
 ]);
 const PYTHON_DEPENDENCY_FILES = new Set(["requirements.txt", "pyproject.toml", "uv.lock", "Pipfile.lock"]);
 const COMPOSER_DEPENDENCY_FILES = new Set(["composer.json", "composer.lock"]);
+const RUBY_DEPENDENCY_FILES = new Set(["Gemfile", "Gemfile.lock"]);
+const RUBY_SOURCE_EXTENSIONS = new Set([".rb"]);
 const PACKAGE_MANIFEST = "package.json";
 const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json"]);
 const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
@@ -36,7 +38,8 @@ const DEFAULT_ADVISORY = {
   },
   packages: {},
   pypiPackages: {},
-  composerPackages: {}
+  composerPackages: {},
+  gemPackages: {}
 };
 
 function loadAdvisoryData() {
@@ -85,6 +88,16 @@ function scanTarget(targetPath, options = {}) {
 
     if (COMPOSER_DEPENDENCY_FILES.has(base)) {
       scanComposerDependencyFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isRubyDependencyFile(filePath, base)) {
+      scanRubyDependencyFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isRubySourceFile(filePath)) {
+      scanRubySourceFile(filePath, base, advisory, findings);
       return;
     }
 
@@ -220,7 +233,8 @@ function normalizeAdvisory(raw) {
     },
     packages: {},
     pypiPackages: {},
-    composerPackages: {}
+    composerPackages: {},
+    gemPackages: {}
   };
 
   if (raw && raw.packages && typeof raw.packages === "object" && !Array.isArray(raw.packages)) {
@@ -248,6 +262,12 @@ function normalizeAdvisory(raw) {
   if (raw && raw.composerPackages && typeof raw.composerPackages === "object" && !Array.isArray(raw.composerPackages)) {
     for (const [name, versions] of Object.entries(raw.composerPackages)) {
       addAdvisoryPackage(advisory.composerPackages, name.toLowerCase(), versions);
+    }
+  }
+
+  if (raw && raw.gemPackages && typeof raw.gemPackages === "object" && !Array.isArray(raw.gemPackages)) {
+    for (const [name, versions] of Object.entries(raw.gemPackages)) {
+      addAdvisoryPackage(advisory.gemPackages, name.toLowerCase(), versions);
     }
   }
 
@@ -378,6 +398,77 @@ function scanComposerDependencyFile(filePath, advisory, findings) {
   }
 }
 
+function scanRubyDependencyFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read Ruby dependency file: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Ruby dependency file");
+  scanRubyTextIndicators(filePath, text, advisory, findings, "Ruby dependency file");
+
+  for (const [pkg, versions] of Object.entries(advisory.gemPackages || {})) {
+    for (const version of versions) {
+      if (rubyFileMentionsGemVersion(text, pkg, version)) {
+        findings.push(finding("critical", "known-bad-gem-version", filePath, `Ruby dependency file references ${pkg}@${version}.`));
+      }
+    }
+  }
+}
+
+function scanRubySourceFile(filePath, base, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read Ruby source file: ${error.message}`));
+    return;
+  }
+
+  const rubyPayloadFiles = advisory.indicators?.rubyPayloadFiles || [];
+  if (rubyPayloadFiles.includes(base)) {
+    findings.push(finding("medium", "ruby-payload-filename", filePath, `Ruby file uses a filename reported in GemStuffer samples: ${base}`));
+    scanRubyPayloadHash(filePath, base, advisory, findings);
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Ruby source file");
+  scanRubyTextIndicators(filePath, text, advisory, findings, "Ruby source file");
+}
+
+function scanRubyPayloadHash(filePath, fileName, advisory, findings) {
+  const knownHashes = advisory.indicators?.rubyPayloadFileHashes?.[fileName];
+  if (!Array.isArray(knownHashes) || knownHashes.length === 0) return;
+
+  let data;
+  try {
+    data = fs.readFileSync(filePath);
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not hash Ruby payload candidate: ${error.message}`));
+    return;
+  }
+
+  const sha256 = crypto.createHash("sha256").update(data).digest("hex");
+  if (knownHashes.includes(sha256)) {
+    findings.push(finding("critical", "ruby-payload-hash", filePath, `${fileName} matches known malicious SHA-256 ${sha256}.`));
+  }
+}
+
+function scanRubyTextIndicators(filePath, text, advisory, findings, sourceLabel) {
+  const indicators = advisory.indicators || {};
+  const values = indicators.rubyIndicators || [];
+  if (!Array.isArray(values)) return;
+
+  for (const value of values) {
+    if (typeof value !== "string" || value.length === 0) continue;
+    if (text.includes(value)) {
+      findings.push(finding("high", "ruby-gemstuffer-indicator", filePath, `${sourceLabel} references GemStuffer indicator: ${value}`));
+    }
+  }
+}
+
 function scanToolConfigFile(filePath, advisory, findings) {
   let text;
   try {
@@ -448,8 +539,27 @@ function composerFileMentionsPackageVersion(text, pkg, version) {
   return new RegExp(`${escapedPkg}[\\s\\S]{0,500}${escapedVersion}`, "i").test(text.toLowerCase());
 }
 
+function rubyFileMentionsGemVersion(text, pkg, version) {
+  const escapedPkg = escapeRegExp(pkg);
+  const escapedVersion = escapeRegExp(version);
+  const normalized = text.toLowerCase();
+  const patterns = [
+    new RegExp(`\\b${escapedPkg}\\b[\\s\\S]{0,300}\\b${escapedVersion}\\b`, "i"),
+    new RegExp(`s\\.name\\s*=\\s*['"]${escapedPkg}['"][\\s\\S]{0,300}s\\.version\\s*=\\s*['"]${escapedVersion}['"]`, "i")
+  ];
+  return patterns.some((pattern) => pattern.test(normalized));
+}
+
 function isPythonDependencyFile(base) {
   return PYTHON_DEPENDENCY_FILES.has(base) || /^requirements.*\.txt$/i.test(base);
+}
+
+function isRubyDependencyFile(filePath, base) {
+  return RUBY_DEPENDENCY_FILES.has(base) || path.extname(filePath) === ".gemspec";
+}
+
+function isRubySourceFile(filePath) {
+  return RUBY_SOURCE_EXTENSIONS.has(path.extname(filePath));
 }
 
 function isToolConfigFile(filePath, base) {

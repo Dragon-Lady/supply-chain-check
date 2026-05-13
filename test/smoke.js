@@ -70,6 +70,25 @@ try {
   fs.rmSync(tmpComposerRoot, { recursive: true, force: true });
 }
 
+const tmpRubyRoot = fs.mkdtempSync(path.join(__dirname, "tmp-ruby-"));
+try {
+  fs.writeFileSync(
+    path.join(tmpRubyRoot, "Gemfile.lock"),
+    "GEM\n  specs:\n    lambeth71b (0.0.2)\n"
+  );
+  fs.writeFileSync(
+    path.join(tmpRubyRoot, "payload.rb"),
+    "FileUtils.mkdir_p('/tmp/gemhome/.gem')\nENV['HOME'] = '/tmp/gemhome'\nNet::HTTP::Post.new(URI('https://rubygems.org/api/v1/gems'))\n"
+  );
+  const rubyCompromised = scanTarget(tmpRubyRoot);
+  assert.strictEqual(rubyCompromised.risk, "likely-exposed");
+  assert(rubyCompromised.findings.some((finding) => finding.type === "known-bad-gem-version"));
+  assert(rubyCompromised.findings.some((finding) => finding.type === "ruby-payload-filename"));
+  assert(rubyCompromised.findings.some((finding) => finding.type === "ruby-gemstuffer-indicator"));
+} finally {
+  fs.rmSync(tmpRubyRoot, { recursive: true, force: true });
+}
+
 const tmpSquawkRoot = fs.mkdtempSync(path.join(__dirname, "tmp-squawk-"));
 try {
   fs.writeFileSync(

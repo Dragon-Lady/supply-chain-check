@@ -13,6 +13,8 @@ have installed compromised packages during the incident window.
 
 - If payload execution is possible, disconnect the host from the network.
 - Preserve lockfiles, package manifests, install logs, and scanner reports.
+- For Ruby findings, preserve `Gemfile`, `Gemfile.lock`, `.gemspec`, suspicious
+  `.rb` files, RubyGems publish logs, and any relevant `/tmp` staging paths.
 - Preserve Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json`
   if persistence indicators are suspected.
 - Avoid copying `node_modules`, build caches, unknown scripts, shell profiles, or
@@ -24,6 +26,7 @@ Rotate credentials from a separate trusted device:
 
 - GitHub personal access tokens, OAuth grants, deploy keys, and Actions secrets
 - npm tokens and publish automation credentials
+- RubyGems API keys and publish automation credentials
 - AWS, GCP, Azure, Vault, Kubernetes, and other cloud credentials
 - SSH keys and CI/CD secrets
 
@@ -53,6 +56,11 @@ Before resuming AI/editor tooling, review Claude Code hooks and VS Code tasks
 from a clean environment. Remove unexpected commands, package-manager invocations,
 payload filenames, network indicators, or campaign marker strings. Do not assume
 `npm uninstall` or `pip uninstall` removed persistence from tool config files.
+
+For GemStuffer-style Ruby findings, also block or review outbound publish access
+to `rubygems.org/api/v1/gems` from CI jobs that do not intentionally publish
+gems. If a RubyGems publish credential may have been exposed or embedded in a
+script, revoke it from a clean machine.
 
 ## Important Limit
 

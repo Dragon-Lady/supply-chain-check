@@ -9,6 +9,7 @@
 - OX Security broader npm/PyPI campaign update: https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/
 - Snyk TanStack/Mini Shai-Hulud update: https://snyk.io/jp/blog/tanstack-npm-packages-compromised/
 - Socket live Mini Shai-Hulud campaign table: https://socket.dev/supply-chain-attacks/mini-shai-hulud
+- Socket GemStuffer RubyGems registry-abuse writeup: https://socket.dev/blog/gemstuffer
 
 ## Out-of-Scope Related Public Intel
 

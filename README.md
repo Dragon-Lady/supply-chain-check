@@ -1,7 +1,8 @@
 # TanStack Incident Scanner
 
 Read-only exposure scanner and recovery guidance for the May 2026 TanStack npm
-supply-chain incident and broader Mini Shai-Hulud npm/PyPI/Composer indicators.
+supply-chain incident, broader Mini Shai-Hulud npm/PyPI/Composer indicators,
+and related RubyGems registry-abuse indicators.
 
 This tool helps identify known indicators. It does not remove malware, revoke
 credentials, execute package scripts, or prove that a host is clean.
@@ -15,9 +16,9 @@ package registries, or transmit scan results.
 
 ## Scope
 
-This scanner detects exact npm, PyPI, and Composer package/version indicators in
-`data/affected-packages.json` plus shared payload, tool-persistence, and campaign
-indicators.
+This scanner detects exact npm, PyPI, Composer, and selected RubyGems
+package/version indicators in `data/affected-packages.json` plus shared payload,
+tool-persistence, Ruby script, and campaign indicators.
 TanStack's official postmortem confirms 84 malicious versions across 42
 `@tanstack/*` packages, published on May 11, 2026 between 19:20 and 19:26 UTC.
 Socket's live campaign page reports 416 affected package artifacts across npm,
@@ -25,6 +26,10 @@ PyPI, and Composer as of May 12, 2026. This scanner includes the exact
 package/version indicators currently represented in `data/affected-packages.json`.
 Broader namespaces remain lower-severity review prompts unless an exact
 package/version indicator is present.
+Socket's GemStuffer report from May 13, 2026 describes 155 RubyGems package
+artifacts using RubyGems as an exfiltration/data-drop channel. This scanner
+checks non-secret GemStuffer indicators only; published RubyGems API token values
+are intentionally not stored in this repository.
 
 ## Out-of-Scope Windows Disclosures
 
@@ -65,6 +70,9 @@ developers, security teams, and CI logs.
   from Socket's campaign table
 - Known compromised PyPI `mistralai`, `guardrails-ai`, and `lightning` versions
 - Known compromised Composer `intercom/intercom-php` version
+- Selected GemStuffer RubyGems package/version indicators and non-secret Ruby
+  payload indicators from Socket's May 13 report
+- Ruby/Bundler files: `Gemfile`, `Gemfile.lock`, `.gemspec`, and `.rb`
 - Lower-severity namespace warnings for namespaces reported in the active
   campaign when exact package/version coverage may still be incomplete
 - `@tanstack/setup`
@@ -96,6 +104,7 @@ See [docs/recovery-playbook.md](docs/recovery-playbook.md).
 - OX Security broader npm/PyPI campaign update: https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/
 - Snyk TanStack/Mini Shai-Hulud update: https://snyk.io/jp/blog/tanstack-npm-packages-compromised/
 - Socket live Mini Shai-Hulud campaign table: https://socket.dev/supply-chain-attacks/mini-shai-hulud
+- Socket GemStuffer RubyGems writeup: https://socket.dev/blog/gemstuffer
 
 ## License
 

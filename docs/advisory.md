@@ -14,6 +14,14 @@ CAP packages, Intercom, and PyPI `lightning`. This project does not claim
 coverage for additional package artifacts unless exact package/version
 indicators have been added to `data/affected-packages.json`.
 
+Socket's May 13, 2026 GemStuffer report describes a separate RubyGems
+registry-abuse campaign with 155 package artifacts. The reported technique uses
+Ruby payloads to scrape public-facing UK ModernGov council pages, package
+responses into `.gem` archives, and publish those archives to RubyGems as a
+data-drop/exfiltration channel. This scanner stores non-secret GemStuffer
+filenames, hashes, URLs, and Ruby script patterns. It intentionally does not
+store the public RubyGems API token strings from the report.
+
 Separate May 12, 2026 Nightmare-Eclipse / Chaotic Eclipse Windows disclosures
 for `YellowKey` and `GreenPlasma` are out of scope for this scanner. They are
 tracked here only as related public situational awareness because readers may see
@@ -50,6 +58,8 @@ The key local indicators used by this project are:
   OX Security's May 12 update in `data/affected-packages.json`
 - known affected PyPI `lightning` and Composer `intercom/intercom-php`
   package/version pairs from Socket's live campaign table
+- selected GemStuffer RubyGems package/version pairs, payload filenames, Ruby
+  script patterns, and SHA-256 hashes from Socket's May 13 report
 - Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json`
   references to known payload, network, token-description, and campaign strings
 
