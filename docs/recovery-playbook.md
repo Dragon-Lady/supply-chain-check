@@ -60,6 +60,12 @@ security researchers have noted `LSASRV` ETW event `6182` as a delayed detection
 signal for Koh-style logon-session preservation; it is timer-based rather than
 real-time, so treat it as supporting evidence during host triage.
 
+Adjacent Windows patch risk: Microsoft's May 2026 updates include
+`CVE-2026-41096`, a critical Windows DNS Client RCE. This is not evidence of
+TanStack / Mini Shai-Hulud compromise and is not scanned by this tool. Windows
+developer workstations and CI runners should apply the May 2026 cumulative
+updates and restrict DNS to trusted resolvers where possible.
+
 ## 4. Recover Data Carefully
 
 Copy only needed documents and source files from a trusted recovery environment

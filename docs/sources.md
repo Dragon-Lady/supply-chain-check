@@ -18,6 +18,9 @@
 - Chaotic Eclipse PGP-signed disclosure naming `YellowKey` and `GreenPlasma`: https://deadeclipse666.blogspot.com/2026/05/two-more-public-disclosures-it-will.html
 - Nightmare-Eclipse `YellowKey` repository: https://github.com/Nightmare-Eclipse/YellowKey
 - Nightmare-Eclipse `GreenPlasma` repository: https://github.com/Nightmare-Eclipse/GreenPlasma
+- Microsoft MSRC CVE-2026-41096 advisory: https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-41096
+- NVD CVE-2026-41096 record: https://nvd.nist.gov/vuln/detail/CVE-2026-41096
+- Zero Day Initiative May 2026 security update review: https://www.zerodayinitiative.com/blog/2026/5/12/the-may-2026-security-update-review
 
 These Windows disclosure links are retained only for manual context. They are
 not TanStack or Mini Shai-Hulud scanner indicators.
