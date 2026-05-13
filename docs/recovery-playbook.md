@@ -22,6 +22,21 @@ have installed compromised packages during the incident window.
 
 ## 3. Rotate From A Clean Machine
 
+Before revoking GitHub tokens, verify and remove the dead-man switch persistence
+described by JFrog:
+
+- Linux: stop and disable `gh-token-monitor.service`, then remove
+  `~/.config/systemd/user/gh-token-monitor.service`,
+  `~/.local/bin/gh-token-monitor.sh`, and `~/.config/gh-token-monitor/`.
+- Linux hosts exposed to the updated PyPI payload: stop and disable
+  `pgsql-monitor.service`, then remove
+  `~/.config/systemd/user/pgsql-monitor.service`,
+  `/etc/systemd/system/pgsql-monitor.service`, `~/.local/bin/pgmonitor.py`, and
+  `/usr/bin/pgmonitor.py` if present.
+- macOS: unload `~/Library/LaunchAgents/com.user.gh-token-monitor.plist`, then
+  remove that plist, `~/.local/bin/gh-token-monitor.sh`, and
+  `~/.config/gh-token-monitor/`.
+
 Rotate credentials from a separate trusted device:
 
 - GitHub personal access tokens, OAuth grants, deploy keys, and Actions secrets

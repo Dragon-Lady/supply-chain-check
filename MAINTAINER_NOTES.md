@@ -68,6 +68,18 @@ after exact package/version confirmation.
 
 - 2026-05-11: Tanner Linsley (`@tannerlinsley`), creator of TanStack, liked related public activity. Treat as a morale/visibility signal only, not formal endorsement or technical validation.
 - 2026-05-11: GitHub analysis showed a user scan reached Ubuntu and reported about 7 seconds per pass. Scope is partial Ubuntu/Linux coverage only; do not treat this as full matrix completion or broad platform validation. No errors were observed in the reported completed portion.
+- 2026-05-13: JFrog Security publicly reported false positives for
+  `GHSA-grrc-v84p-qwv3` (`@puppeteer/browsers` 3.0.1) and
+  `GHSA-rvxm-vq55-8p53` (`puppeteer-core` 25.0.1), noting that
+  automation is a tool rather than a judge. Do not add these advisory IDs as
+  malicious TanStack/Mini Shai-Hulud indicators without later corrected
+  confirmation. If users ask about them, route to manual review and explain
+  that advisory-scale noise can be large because `puppeteer-core` has very high
+  install volume.
+- 2026-05-13: Public reporting/social chatter indicates active abuse and
+  incentive-driven spread attempts around this campaign. Keep the scanner
+  defensive: read-only detection, containment-first guidance, and no malware
+  removal claims until trusted vendors publish tested removal steps.
 
 ## Fast Update Flow
 
