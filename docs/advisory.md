@@ -22,6 +22,13 @@ data-drop/exfiltration channel. This scanner stores non-secret GemStuffer
 filenames, hashes, URLs, and Ruby script patterns. It intentionally does not
 store the public RubyGems API token strings from the report.
 
+JFrog's May 13 update for `Shai-Hulud: Here We Go Again` reports that the PyPI
+second-stage payload served from `83.142.209.194/transformers.pyz` changed from
+attribution text into a credential stealer with cloud, Kubernetes, Vault,
+password-manager, developer-tooling, persistence, and possible destructive
+behavior. This scanner treats those PyPI payload and persistence indicators as
+concrete IOCs while keeping broader advisory-only claims as review context.
+
 Separate May 12, 2026 Nightmare-Eclipse / Chaotic Eclipse Windows disclosures
 for `YellowKey` and `GreenPlasma` are out of scope for this scanner. They are
 tracked here only as related public situational awareness because readers may see
@@ -38,9 +45,15 @@ The key local indicators used by this project are:
 - `router_init.js`
 - `tanstack_runner.js`
 - `router_runtime.js`
+- `transformers.pyz`
+- `pgmonitor.py`
+- `pgsql-monitor.service`
+- `gh-token-monitor.service`
 - known malicious payload SHA-256 values:
   `ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c`
   and `2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96`
+- known updated PyPI `transformers.pyz` SHA-256 value:
+  `5245eb032e336b85cff0dbb3450d591826bf2ef214fd30d7eba1a763664e151b`
 - known affected `@tanstack/*` package/version pairs in
   `data/packages/npm.json`
 - known affected `@mistralai/mistralai`, `@mistralai/mistralai-azure`, and

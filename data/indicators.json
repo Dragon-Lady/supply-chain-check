@@ -4,7 +4,13 @@
   "payloadFiles": [
     "router_init.js",
     "tanstack_runner.js",
-    "router_runtime.js"
+    "router_runtime.js",
+    "transformers.pyz",
+    "pgmonitor.py",
+    "pgsql-monitor.service",
+    "gh-token-monitor.sh",
+    "gh-token-monitor.service",
+    "com.user.gh-token-monitor.plist"
   ],
   "payloadFileHashes": {
     "router_init.js": [
@@ -16,6 +22,9 @@
     ],
     "tanstack_runner.js": [
       "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
+    ],
+    "transformers.pyz": [
+      "5245eb032e336b85cff0dbb3450d591826bf2ef214fd30d7eba1a763664e151b"
     ]
   },
   "networkIndicators": [
@@ -25,6 +34,12 @@
     "seed3.getsession.org",
     "api.masscan.cloud",
     "git-tanstack.com",
+    "83.142.209.194",
+    "83.142.209.194/transformers.pyz",
+    "83.142.209.194/v1/models",
+    "83.142.209.194/v1/weights",
+    "83.142.209.194/audio.mp3",
+    "api.github.com/search/commits?q=FIRESCALE",
     "litter.catbox.moe/h8nc9u.js",
     "litter.catbox.moe/7rrc6l.mjs",
     "rubygems.org/api/v1/gems",
@@ -35,12 +50,21 @@
   "workflowIndicators": [
     "Linux-pnpm-store-6f9233a50def742c09fde54f56553d6b449a535adf87d4083690539f49ae4da11",
     "claude <claude@users.noreply.github.com>",
+    "claude@users.noreply.github.com",
+    "dependabot/github_actions/format/setup-formatter",
+    ".github/workflows/codeql_analysis.yml",
+    "gh-token-monitor.service",
+    "pgsql-monitor.service",
+    "pgmonitor.py",
+    "MISTRAL_INIT",
     "zblgg",
     "voicproducoes"
   ],
   "campaignIndicators": [
     "A Mini Shai-Hulud has Appeared",
-    "Shai-Hulud: Here We Go Again"
+    "Shai-Hulud: Here We Go Again",
+    "PUSH UR T3MPRR",
+    "FIRESCALE"
   ],
   "rubyPayloadFiles": [
     "payload.rb",

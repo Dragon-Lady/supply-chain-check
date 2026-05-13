@@ -78,7 +78,9 @@ developers, security teams, and CI logs.
   campaign when exact package/version coverage may still be incomplete
 - `@tanstack/setup`
 - `github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c`
-- `router_init.js`, `tanstack_runner.js`, and `router_runtime.js`
+- `router_init.js`, `tanstack_runner.js`, `router_runtime.js`,
+  `/tmp/transformers.pyz`, `pgmonitor.py`, `pgsql-monitor.service`, and
+  `gh-token-monitor` persistence artifacts
 - Known malicious payload SHA-256 hashes when a payload file is present
 - Selected network, workflow, token-description, and campaign marker strings
 - Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json` config
@@ -101,6 +103,7 @@ See [docs/recovery-playbook.md](docs/recovery-playbook.md).
 - TanStack issue: https://github.com/TanStack/router/issues/7383
 - StepSecurity writeup: https://www.stepsecurity.io/blog/mini-shai-hulud-is-back-a-self-spreading-supply-chain-attack-hits-the-npm-ecosystem
 - Socket writeup: https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
+- JFrog Security Research: https://research.jfrog.com/post/shai-hulud-here-we-go-again/
 - Aikido broader campaign update: https://www.aikido.dev/blog/mini-shai-hulud-is-back-tanstack-compromised
 - OX Security broader npm/PyPI campaign update: https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/
 - Snyk TanStack/Mini Shai-Hulud update: https://snyk.io/jp/blog/tanstack-npm-packages-compromised/

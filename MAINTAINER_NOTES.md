@@ -80,6 +80,13 @@ after exact package/version confirmation.
   incentive-driven spread attempts around this campaign. Keep the scanner
   defensive: read-only detection, containment-first guidance, and no malware
   removal claims until trusted vendors publish tested removal steps.
+- 2026-05-13: TechCrunch/WIRED reported that Nitrogen ransomware claimed a
+  Foxconn breach affecting North American factory operations, with alleged
+  theft of customer project data from Apple, Google, Dell, Intel, Nvidia, and
+  others. Treat as adjacent hardware/manufacturing supply-chain context only.
+  Do not add scanner rules from this incident unless public reporting provides
+  concrete developer-package, file/hash, network, or tool-persistence IOCs that
+  overlap this scanner's local detection scope.
 
 ## Fast Update Flow
 
