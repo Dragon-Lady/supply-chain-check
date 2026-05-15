@@ -14,6 +14,17 @@ package manifests and lockfiles, and hashes known payload filenames. It does
 not run `npm install`, execute lifecycle scripts, import project code, contact
 package registries, or transmit scan results.
 
+## Privacy
+
+This scanner does not save, collect, upload, or transmit user data. It has no
+telemetry and does not contact a server while scanning. Results are printed to
+the terminal or written only to the local path an operator explicitly provides
+with `--report`.
+
+Do not paste secrets, tokens, private keys, `.env` files, or full private logs
+into issues or public reports. If a finding suggests credential exposure,
+preserve evidence locally and rotate credentials from a clean environment.
+
 ## Scope
 
 This scanner detects exact npm, PyPI, Composer, and selected RubyGems
