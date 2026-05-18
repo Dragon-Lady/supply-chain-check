@@ -14,7 +14,7 @@ Initial release state:
 ## Core Commands
 
 ```powershell
-cd C:\Users\tanya\tanstack-incident-scanner
+cd C:\path\to\tanstack-incident-scanner
 npm test
 node bin\tanstack-incident-scanner.js C:\path\to\project --report report.json
 node bin\tanstack-incident-scanner.js C:\path\to\project --json
