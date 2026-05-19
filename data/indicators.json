@@ -1,6 +1,12 @@
 {
   "maliciousOptionalDependencyName": "@tanstack/setup",
   "maliciousOptionalDependencySpec": "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c",
+  "maliciousOptionalDependencies": [
+    {
+      "name": "@antv/setup",
+      "spec": "github:antvis/G2#1916faa365f2788b6e193514872d51a242876569"
+    }
+  ],
   "payloadFiles": [
     "router_init.js",
     "tanstack_runner.js",
@@ -34,6 +40,8 @@
     "seed3.getsession.org",
     "api.masscan.cloud",
     "git-tanstack.com",
+    "t.m-kosche.com",
+    "https://t.m-kosche.com:443/api/public/otel/v1/traces",
     "83.142.209.194",
     "83.142.209.194/transformers.pyz",
     "83.142.209.194/v1/models",
@@ -63,6 +71,10 @@
   "campaignIndicators": [
     "A Mini Shai-Hulud has Appeared",
     "Shai-Hulud: Here We Go Again",
+    "niagA oG eW ereH :duluH-iahS",
+    "niaga og ew ereh :duluh-iahs",
+    "results/results-",
+    "fc2edea72",
     "PUSH UR T3MPRR",
     "FIRESCALE",
     "FIRESCALE\\s+([A-Za-z0-9+/=]+)\\.([A-Za-z0-9+/=]+)"
@@ -109,7 +121,9 @@
     "@mistralai/",
     "@ml-toolkit-ts/",
     "@opensearch-project/",
+    "@openclaw-cn/",
     "@squawk/",
+    "@starmind/",
     "@supersurkhet/",
     "@tallyui/",
     "@tanstack/",
@@ -118,8 +132,10 @@
     "@uipath/"
   ],
   "activePackages": [
+    "byte-parser",
     "canvas-nest.js",
     "echarts-for-react",
+    "openclaw-cn",
     "size-sensor",
     "timeago.js"
   ]

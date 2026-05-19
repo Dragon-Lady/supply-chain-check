@@ -134,6 +134,31 @@ try {
   fs.rmSync(tmpAntvRoot, { recursive: true, force: true });
 }
 
+const tmpAntvPayloadRoot = fs.mkdtempSync(path.join(__dirname, "tmp-antv-payload-"));
+try {
+  fs.writeFileSync(
+    path.join(tmpAntvPayloadRoot, "package.json"),
+    JSON.stringify({
+      scripts: { preinstall: "bun run index.js" },
+      optionalDependencies: {
+        "@antv/setup": "github:antvis/G2#1916faa365f2788b6e193514872d51a242876569"
+      }
+    }, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(tmpAntvPayloadRoot, "index.js"),
+    "globalThis.fc2edea72='x'; fetch('https://t.m-kosche.com:443/api/public/otel/v1/traces'); // niagA oG eW ereH :duluH-iahS results/results-123-1.json\n"
+  );
+  const antvPayload = scanTarget(tmpAntvPayloadRoot);
+  assert.strictEqual(antvPayload.risk, "likely-exposed");
+  assert(antvPayload.findings.some((finding) => finding.type === "malicious-dependency-name"));
+  assert(antvPayload.findings.some((finding) => finding.type === "malicious-dependency-spec"));
+  assert(antvPayload.findings.some((finding) => finding.type === "network-indicator"));
+  assert(antvPayload.findings.some((finding) => finding.type === "campaign-indicator"));
+} finally {
+  fs.rmSync(tmpAntvPayloadRoot, { recursive: true, force: true });
+}
+
 const tmpConfigRoot = fs.mkdtempSync(path.join(__dirname, "tmp-config-"));
 try {
   fs.mkdirSync(path.join(tmpConfigRoot, ".claude"));

@@ -42,6 +42,10 @@ Socket's May 19, 2026 @antv report describes an active npm publish wave tied to
 Mini Shai-Hulud and the npm maintainer account `atool`. This scanner warns on
 `@antv/*` packages and selected related packages by name while the exact
 affected-version list is still developing.
+Socket's technical update for the same wave describes an install-time
+`index.js` payload with direct C2, GitHub fallback exfiltration, and worm-like
+npm propagation using stolen npm tokens. The scanner now checks JavaScript files
+for the exact high-signal C2 and GitHub exfil markers from that analysis.
 Socket's GemStuffer report from May 13, 2026 describes 155 RubyGems package
 artifacts using RubyGems as an exfiltration/data-drop channel. This scanner
 checks non-secret GemStuffer indicators only; published RubyGems API token values
@@ -87,6 +91,11 @@ developers, security teams, and CI logs.
 - Developing @antv / atool npm publish-wave package indicators from Socket's
   May 19 report, including `@antv/*`, `echarts-for-react`, `timeago.js`,
   `size-sensor`, and `canvas-nest.js`
+- @antv payload indicators from Socket's technical analysis, including
+  `@antv/setup`, `github:antvis/G2#1916faa365f2788b6e193514872d51a242876569`,
+  `t.m-kosche.com`, reversed Shai-Hulud GitHub repository markers,
+  `results/results-`, and the `fc2edea72` decoder marker
+- JavaScript source files for exact incident network and campaign strings
 - Known compromised PyPI `mistralai`, `guardrails-ai`, and `lightning` versions
 - Known compromised Composer `intercom/intercom-php` version
 - Selected GemStuffer RubyGems package/version indicators and non-secret Ruby
