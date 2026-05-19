@@ -4,6 +4,7 @@
 - GitHub Security Advisory GHSA-g7cv-rxg3-hmpx / CVE-2026-45321: https://github.com/advisories/GHSA-g7cv-rxg3-hmpx
 - TanStack Router issue #7383: https://github.com/TanStack/router/issues/7383
 - StepSecurity technical writeup: https://www.stepsecurity.io/blog/mini-shai-hulud-is-back-a-self-spreading-supply-chain-attack-hits-the-npm-ecosystem
+- JFrog Security Research: https://research.jfrog.com/post/shai-hulud-here-we-go-again/
 - Socket TanStack/Mini Shai-Hulud writeup: https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
 - Aikido broader Mini Shai-Hulud campaign update: https://www.aikido.dev/blog/mini-shai-hulud-is-back-tanstack-compromised
 - OX Security broader npm/PyPI campaign update: https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/
