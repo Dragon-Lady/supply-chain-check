@@ -120,6 +120,20 @@ try {
   fs.rmSync(tmpUiPathRoot, { recursive: true, force: true });
 }
 
+const tmpAntvRoot = fs.mkdtempSync(path.join(__dirname, "tmp-antv-"));
+try {
+  fs.writeFileSync(
+    path.join(tmpAntvRoot, "package.json"),
+    JSON.stringify({ dependencies: { "@antv/g2": "^5.3.0", "echarts-for-react": "^3.0.2" } }, null, 2)
+  );
+  const antvDevelopingCampaign = scanTarget(tmpAntvRoot);
+  assert.strictEqual(antvDevelopingCampaign.risk, "review-needed");
+  assert(antvDevelopingCampaign.findings.some((finding) => finding.type === "active-campaign-namespace"));
+  assert(antvDevelopingCampaign.findings.some((finding) => finding.type === "active-campaign-package"));
+} finally {
+  fs.rmSync(tmpAntvRoot, { recursive: true, force: true });
+}
+
 const tmpConfigRoot = fs.mkdtempSync(path.join(__dirname, "tmp-config-"));
 try {
   fs.mkdirSync(path.join(tmpConfigRoot, ".claude"));

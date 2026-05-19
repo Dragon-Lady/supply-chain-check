@@ -323,6 +323,10 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
     findings.push(finding("medium", "active-campaign-namespace", filePath, `${section}.${name} is in a namespace reported in the active campaign; verify the exact version.`));
   }
 
+  if (matchesActivePackage(name, advisory)) {
+    findings.push(finding("medium", "active-campaign-package", filePath, `${section}.${name} is a package reported in the active campaign; verify the exact version.`));
+  }
+
   if (advisory.packages[name]?.includes(spec)) {
     findings.push(finding("critical", "known-bad-requested-version", filePath, `${section}.${name} requests compromised version ${spec}.`));
   }
@@ -376,6 +380,12 @@ function scanTextFile(filePath, advisory, findings) {
   for (const namespace of advisory.indicators.activeNamespaces || []) {
     if (typeof namespace === "string" && namespace.length > 0 && text.includes(namespace)) {
       findings.push(finding("medium", "active-campaign-namespace", filePath, `Lockfile references namespace reported in the active campaign: ${namespace}`));
+    }
+  }
+
+  for (const pkg of advisory.indicators.activePackages || []) {
+    if (typeof pkg === "string" && pkg.length > 0 && text.includes(pkg)) {
+      findings.push(finding("medium", "active-campaign-package", filePath, `Lockfile references package reported in the active campaign: ${pkg}`));
     }
   }
 }
@@ -598,6 +608,12 @@ function matchesActiveNamespace(packageName, advisory) {
   const namespaces = advisory.indicators?.activeNamespaces;
   if (!Array.isArray(namespaces)) return false;
   return namespaces.some((namespace) => typeof namespace === "string" && namespace.length > 0 && packageName.startsWith(namespace));
+}
+
+function matchesActivePackage(packageName, advisory) {
+  const packages = advisory.indicators?.activePackages;
+  if (!Array.isArray(packages)) return false;
+  return packages.some((name) => name === packageName);
 }
 
 function finding(severity, type, filePath, message) {

@@ -11,6 +11,7 @@
 - Snyk TanStack/Mini Shai-Hulud update: https://snyk.io/jp/blog/tanstack-npm-packages-compromised/
 - Socket live Mini Shai-Hulud campaign table: https://socket.dev/supply-chain-attacks/mini-shai-hulud
 - Socket GemStuffer RubyGems registry-abuse writeup: https://socket.dev/blog/gemstuffer
+- Socket @antv active publish-wave writeup: https://socket.dev/blog/antv-packages-compromised
 
 ## Out-of-Scope Related Public Intel
 

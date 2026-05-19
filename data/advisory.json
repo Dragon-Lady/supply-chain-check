@@ -1,10 +1,10 @@
 {
   "incident": "May 2026 Mini Shai-Hulud npm supply-chain compromise",
-  "lastUpdated": "2026-05-13",
+  "lastUpdated": "2026-05-19",
   "scope": {
     "scannerPackageSet": "TanStack @tanstack/* package/version indicators plus selected confirmed broader Mini Shai-Hulud npm, PyPI, Composer, and RubyGems indicators",
     "officialTanStackScope": "42 packages, 84 malicious versions, published on 2026-05-11 between 19:20 and 19:26 UTC",
-    "campaignContext": "Socket reports 416 affected package artifacts for the Mini Shai-Hulud campaign as of 2026-05-12, spanning npm, PyPI, and one Composer artifact. JFrog reports more than 170 npm packages and 2 PyPI packages affected by Shai-Hulud: Here We Go Again, with the PyPI second-stage payload updated into a credential stealer as of May 13. Socket reports 155 package artifacts for the GemStuffer RubyGems registry-abuse campaign as of 2026-05-13. Exact scanner detections are stored in this file; namespace warnings and filename-only Ruby indicators remain lower-confidence review prompts."
+    "campaignContext": "Socket reports 416 affected package artifacts for the Mini Shai-Hulud campaign as of 2026-05-12, spanning npm, PyPI, and one Composer artifact. JFrog reports more than 170 npm packages and 2 PyPI packages affected by Shai-Hulud: Here We Go Again, with the PyPI second-stage payload updated into a credential stealer as of May 13. Socket reports 155 package artifacts for the GemStuffer RubyGems registry-abuse campaign as of 2026-05-13. Socket reports an active May 19 @antv npm publish wave tied to Mini Shai-Hulud and the npm maintainer account atool. Exact scanner detections are stored in this file; namespace, package-name, and filename-only indicators remain lower-confidence review prompts until exact malicious versions are confirmed."
   },
   "sources": [
     "https://tanstack.com/blog/npm-supply-chain-compromise-postmortem",
@@ -18,6 +18,7 @@
     "https://www.resultsense.com/news/2026-05-13-mistral-ai-pypi-supply-chain-malware-shai-hulud/",
     "https://snyk.io/jp/blog/tanstack-npm-packages-compromised/",
     "https://socket.dev/supply-chain-attacks/mini-shai-hulud",
-    "https://socket.dev/blog/gemstuffer"
+    "https://socket.dev/blog/gemstuffer",
+    "https://socket.dev/blog/antv-packages-compromised"
   ]
 }
