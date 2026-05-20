@@ -1,16 +1,16 @@
 {
-  "name": "tanstack-incident-scanner",
+  "name": "supply-chain-check",
   "version": "0.1.0",
-  "description": "Read-only CLI scanner for TanStack, Mini Shai-Hulud, and related package-supply-chain indicators.",
+  "description": "Read-only dependency and source risk checker for pre-execution supply-chain review.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
-    "tanstack-incident-scanner": "./bin/tanstack-incident-scanner.js"
+    "supply-chain-check": "./bin/supply-chain-check.js"
   },
   "scripts": {
-    "scan": "node bin/tanstack-incident-scanner.js",
-    "smoke": "node bin/tanstack-incident-scanner.js --help",
-    "test": "node --check bin/tanstack-incident-scanner.js && node --check src/scanner.js && node test/smoke.js"
+    "scan": "node bin/supply-chain-check.js",
+    "smoke": "node bin/supply-chain-check.js --help",
+    "test": "node --check bin/supply-chain-check.js && node --check src/scanner.js && node test/smoke.js"
   },
   "engines": {
     "node": ">=18"

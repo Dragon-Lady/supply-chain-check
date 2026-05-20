@@ -21,21 +21,15 @@ const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "cov
 
 const DEFAULT_ADVISORY = {
   indicators: {
-    maliciousOptionalDependencyName: "@tanstack/setup",
-    maliciousOptionalDependencySpec: "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c",
-    payloadFiles: ["router_init.js", "tanstack_runner.js", "router_runtime.js"],
-    payloadFileHashes: {
-      "router_init.js": [
-        "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c",
-        "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
-      ],
-      "router_runtime.js": [
-        "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c"
-      ],
-      "tanstack_runner.js": [
-        "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
-      ]
-    }
+    maliciousOptionalDependencyName: "terminal-logger-utils",
+    maliciousOptionalDependencySpec: "",
+    payloadFiles: [],
+    payloadFileHashes: {},
+    maliciousOptionalDependencies: [
+      { name: "pretty-logger-utils" },
+      { name: "ts-logger-pack" },
+      { name: "pinno-loggers" }
+    ]
   },
   packages: {},
   pypiPackages: {},
@@ -137,7 +131,7 @@ function scanTarget(targetPath, options = {}) {
   const dedupedFindings = dedupeFindings(findings);
   const risk = riskLevel(dedupedFindings);
   return {
-    tool: "tanstack-incident-scanner",
+    tool: "supply-chain-check",
     scannedAt: new Date().toISOString(),
     target: root,
     risk,
@@ -218,7 +212,7 @@ function scanPackageJson(filePath, advisory, findings) {
 
   scanManifestText(filePath, rawText, advisory, findings);
 
-  if (manifest.name && manifest.version && advisory.packages[manifest.name]?.includes(manifest.version)) {
+  if (manifest.name && manifest.version && versionIsListed(advisory.packages[manifest.name], manifest.version)) {
     findings.push(finding("critical", "known-bad-version", filePath, `${manifest.name}@${manifest.version} is listed as compromised.`));
   }
 
@@ -235,8 +229,12 @@ function scanPackageJson(filePath, advisory, findings) {
   const scripts = manifest.scripts || {};
   for (const scriptName of LIFECYCLE_SCRIPTS) {
     if (typeof scripts[scriptName] === "string") {
-      const severity = scriptName === "prepare" && /bun\s+run|router_|tanstack_/i.test(scripts[scriptName]) ? "high" : "medium";
-      findings.push(finding(severity, "lifecycle-script", filePath, `Lifecycle script "${scriptName}" is present: ${scripts[scriptName]}`));
+      const scriptBody = scripts[scriptName];
+      if (scriptName === "postinstall" && /\butils\.cjs\b/i.test(scriptBody)) {
+        findings.push(finding("critical", "dprk-npm-rat-postinstall", filePath, `postinstall runs utils.cjs, matching the OX DPRK npm RAT dropper pattern: ${scriptBody}`));
+      }
+      const severity = scriptName === "postinstall" && /\butils\.cjs\b/i.test(scriptBody) ? "high" : "medium";
+      findings.push(finding(severity, "lifecycle-script", filePath, `Lifecycle script "${scriptName}" is present: ${scriptBody}`));
     }
   }
 }
@@ -322,7 +320,7 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
     }
   }
 
-  if (spec.includes(indicators.maliciousOptionalDependencySpec)) {
+  if (indicators.maliciousOptionalDependencySpec && spec.includes(indicators.maliciousOptionalDependencySpec)) {
     findings.push(finding("critical", "malicious-dependency-spec", filePath, `${section}.${name} points to the known malicious GitHub commit.`));
   }
 
@@ -345,7 +343,7 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
     findings.push(finding("medium", "active-campaign-package", filePath, `${section}.${name} is a package reported in the active campaign; verify the exact version.`));
   }
 
-  if (advisory.packages[name]?.includes(spec)) {
+  if (versionIsListed(advisory.packages[name], spec)) {
     findings.push(finding("critical", "known-bad-requested-version", filePath, `${section}.${name} requests compromised version ${spec}.`));
   }
 }
@@ -383,7 +381,7 @@ function scanTextFile(filePath, advisory, findings) {
     findings.push(finding("critical", "malicious-dependency-name", filePath, `Lockfile references ${indicators.maliciousOptionalDependencyName}.`));
   }
 
-  if (text.includes(indicators.maliciousOptionalDependencySpec)) {
+  if (indicators.maliciousOptionalDependencySpec && text.includes(indicators.maliciousOptionalDependencySpec)) {
     findings.push(finding("critical", "malicious-dependency-spec", filePath, "Lockfile references the known malicious GitHub commit."));
   }
 
@@ -397,7 +395,12 @@ function scanTextFile(filePath, advisory, findings) {
   }
 
   for (const [pkg, versions] of Object.entries(advisory.packages)) {
+    if (packageIsListedAllVersions(versions) && text.includes(pkg)) {
+      findings.push(finding("critical", "known-bad-lockfile-package", filePath, `Lockfile references ${pkg}, which is listed as compromised for all observed versions.`));
+      continue;
+    }
     for (const version of versions) {
+      if (version === "*") continue;
       if (lockfileMentionsPackageVersion(text, pkg, version)) {
         findings.push(finding("critical", "known-bad-lockfile-version", filePath, `Lockfile references ${pkg}@${version}.`));
       }
@@ -564,7 +567,8 @@ function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
   const stringGroups = [
     ["network-indicator", indicators.networkIndicators],
     ["workflow-indicator", indicators.workflowIndicators],
-    ["campaign-indicator", indicators.campaignIndicators]
+    ["campaign-indicator", indicators.campaignIndicators],
+    ["dprk-npm-rat-indicator", indicators.dprkNpmRatIndicators]
   ];
 
   if (typeof indicators.tokenDescriptionIndicator === "string") {
@@ -659,6 +663,15 @@ function matchesActivePackage(packageName, advisory) {
   return packages.some((name) => name === packageName);
 }
 
+function versionIsListed(versions, version) {
+  if (!Array.isArray(versions)) return false;
+  return versions.includes("*") || versions.includes(version);
+}
+
+function packageIsListedAllVersions(versions) {
+  return Array.isArray(versions) && versions.includes("*");
+}
+
 function finding(severity, type, filePath, message) {
   return {
     severity,
@@ -694,7 +707,6 @@ function guidanceForRisk(risk) {
       "This project references known compromised package or payload indicators.",
       "Stop installs, builds, and dev servers in the affected environment.",
       "If payload execution is possible, isolate the host from the network before cleanup.",
-      "Do not revoke tokens from the suspected infected host first.",
       "Rotate GitHub, npm, cloud, Vault, Kubernetes, SSH, and CI secrets from a clean machine.",
       "Treat confirmed execution or credential access as a host compromise and rebuild from a clean baseline."
     ];
@@ -710,7 +722,7 @@ function guidanceForRisk(risk) {
   }
 
   return [
-    "No known TanStack incident indicators were found by this scanner.",
+    "No known supply-chain indicators were found by this checker.",
     "This does not prove the host is clean; it only means these specific indicators were not observed."
   ];
 }

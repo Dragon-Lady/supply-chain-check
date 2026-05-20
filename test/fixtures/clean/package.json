@@ -1,7 +1,0 @@
-{
-  "name": "clean-fixture",
-  "version": "1.0.0",
-  "dependencies": {
-    "@tanstack/react-router": "1.169.4"
-  }
-}

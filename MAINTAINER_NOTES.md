@@ -1,106 +1,25 @@
 # Maintainer Notes
 
-Current public repo:
-https://github.com/Dragon-Lady/tanstack-incident-scanner
+Repository: https://github.com/Dragon-Lady/supply-chain-check
 
-Initial release state:
+`supply-chain-check` is the pre-execution package/source review lane. Keep host
+incident response in its own repository.
 
-- Branch: `main`
-- Initial commit: `15085b4 Initial TanStack incident scanner`
-- Runtime: Node.js >= 18
-- Dependencies: none
-- Safety stance: read-only scanner, no package installs, no script execution, no malware removal claims
-
-## Core Commands
+## Local Validation
 
 ```powershell
-cd C:\path\to\tanstack-incident-scanner
 npm test
-node bin\tanstack-incident-scanner.js C:\path\to\project --report report.json
-node bin\tanstack-incident-scanner.js C:\path\to\project --json
+node bin\supply-chain-check.js C:\path\to\project --report report.json
+node bin\supply-chain-check.js C:\path\to\project --json
 ```
 
-## Current Indicators
+## Adding Indicators
 
-- `@tanstack/setup`
-- `github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c`
-- `router_init.js`
-- `tanstack_runner.js`
-- `router_runtime.js`
-- network/workflow/token/campaign marker strings in `data/indicators.json`
-- payload SHA-256 `ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c`
-- payload SHA-256 `2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96`
-- affected package/version pairs in `data/packages/`
+- Add exact package names and versions under `data/packages/`.
+- Use `"*"` only when the package name itself is reported malicious for all
+  observed versions in the campaign.
+- Add source/behavior strings under `data/indicators.json`.
+- Add or update smoke tests for every new indicator family.
+- Keep docs short, defensive, and free of exploit reproduction steps.
 
-## Data Layout
-
-- `data/advisory.json`: incident metadata, scope, and public sources.
-- `data/indicators.json`: shared strings, payload filenames, hashes, network
-  indicators, namespace warnings, and campaign markers.
-- `data/packages/npm.json`: npm package/version indicators.
-- `data/packages/pypi.json`: PyPI package/version indicators.
-- `data/packages/composer.json`: Composer package/version indicators.
-- `data/packages/rubygems.json`: RubyGems package/version indicators.
-
-## Campaign Scope Note
-
-TanStack's official postmortem confirms 84 malicious versions across 42
-`@tanstack/*` packages, published on May 11, 2026 between 19:20 and 19:26 UTC.
-The associated GitHub Security Advisory is GHSA-g7cv-rxg3-hmpx /
-CVE-2026-45321.
-
-As of the May 12, 2026 update, Aikido reporting puts the broader Mini
-Shai-Hulud campaign at 373 malicious package-version entries across 169 npm
-package names. The scanner includes exact Mistral SDK package/version
-indicators from that update, but additional namespaces should only be added
-after exact package/version confirmation.
-
-## Public Response Rules
-
-- Do not ask users to paste secrets, `.env` files, private keys, tokens, or full logs.
-- Do not claim the tool proves a host is clean.
-- If indicators are found, advise containment first.
-- Do not advise revoking tokens from the suspected infected machine.
-- Credential rotation should happen from a clean machine.
-- If payload execution, persistence, or secret exposure is plausible, recommend rebuild/reimage.
-
-## Public Signal Log
-
-- 2026-05-11: Tanner Linsley (`@tannerlinsley`), creator of TanStack, liked related public activity. Treat as a morale/visibility signal only, not formal endorsement or technical validation.
-- 2026-05-11: GitHub analysis showed a user scan reached Ubuntu and reported about 7 seconds per pass. Scope is partial Ubuntu/Linux coverage only; do not treat this as full matrix completion or broad platform validation. No errors were observed in the reported completed portion.
-- 2026-05-13: JFrog Security publicly reported false positives for
-  `GHSA-grrc-v84p-qwv3` (`@puppeteer/browsers` 3.0.1) and
-  `GHSA-rvxm-vq55-8p53` (`puppeteer-core` 25.0.1), noting that
-  automation is a tool rather than a judge. Do not add these advisory IDs as
-  malicious TanStack/Mini Shai-Hulud indicators without later corrected
-  confirmation. If users ask about them, route to manual review and explain
-  that advisory-scale noise can be large because `puppeteer-core` has very high
-  install volume.
-- 2026-05-13: Public reporting/social chatter indicates active abuse and
-  incentive-driven spread attempts around this campaign. Keep the scanner
-  defensive: read-only detection, containment-first guidance, and no malware
-  removal claims until trusted vendors publish tested removal steps.
-- 2026-05-13: TechCrunch/WIRED reported that Nitrogen ransomware claimed a
-  Foxconn breach affecting North American factory operations, with alleged
-  theft of customer project data from Apple, Google, Dell, Intel, Nvidia, and
-  others. Treat as adjacent hardware/manufacturing supply-chain context only.
-  Do not add scanner rules from this incident unless public reporting provides
-  concrete developer-package, file/hash, network, or tool-persistence IOCs that
-  overlap this scanner's local detection scope.
-
-## Fast Update Flow
-
-1. Update the relevant file under `data/packages/` for new confirmed package/version indicators.
-   Update `data/indicators.json` for shared strings, hashes, payload filenames,
-   network indicators, or campaign markers.
-2. Add a fixture or smoke assertion if the scanner behavior changes.
-3. Run `npm test`.
-4. Commit with a narrow message.
-5. Push `main`.
-
-## Good Next Improvements
-
-- Add `--severity-threshold` for CI use.
-- Add `--ignore-review-needed` if lifecycle script findings are too noisy.
-- Add examples for npm, pnpm, yarn, and monorepo scans.
-- Add a signed GitHub release once public feedback stabilizes.
+This tool must remain read-only and dependency-free.

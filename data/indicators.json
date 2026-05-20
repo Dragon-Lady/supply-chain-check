@@ -1,147 +1,56 @@
 {
-  "maliciousOptionalDependencyName": "@tanstack/setup",
-  "maliciousOptionalDependencySpec": "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c",
+  "maliciousOptionalDependencyName": "terminal-logger-utils",
+  "maliciousOptionalDependencySpec": "",
   "maliciousOptionalDependencies": [
     {
-      "name": "@antv/setup",
-      "spec": "github:antvis/G2#1916faa365f2788b6e193514872d51a242876569"
+      "name": "pretty-logger-utils",
+      "source": "OX Security DPRK npm RAT report, 2026-05-20"
+    },
+    {
+      "name": "ts-logger-pack",
+      "source": "OX Security DPRK npm RAT report, 2026-05-20"
+    },
+    {
+      "name": "pinno-loggers",
+      "source": "OX Security DPRK npm RAT report, 2026-05-20"
     }
   ],
-  "payloadFiles": [
-    "router_init.js",
-    "tanstack_runner.js",
-    "router_runtime.js",
-    "transformers.pyz",
-    "pgmonitor.py",
-    "pgsql-monitor.service",
-    "gh-token-monitor.sh",
-    "gh-token-monitor.service",
-    "com.user.gh-token-monitor.plist"
-  ],
-  "payloadFileHashes": {
-    "router_init.js": [
-      "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c",
-      "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
-    ],
-    "router_runtime.js": [
-      "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c"
-    ],
-    "tanstack_runner.js": [
-      "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
-    ],
-    "transformers.pyz": [
-      "5245eb032e336b85cff0dbb3450d591826bf2ef214fd30d7eba1a763664e151b"
-    ]
-  },
+  "payloadFiles": [],
+  "payloadFileHashes": {},
   "networkIndicators": [
-    "filev2.getsession.org",
-    "seed1.getsession.org",
-    "seed2.getsession.org",
-    "seed3.getsession.org",
-    "api.masscan.cloud",
-    "git-tanstack.com",
-    "t.m-kosche.com",
-    "https://t.m-kosche.com:443/api/public/otel/v1/traces",
-    "83.142.209.194",
-    "83.142.209.194/transformers.pyz",
-    "83.142.209.194/v1/models",
-    "83.142.209.194/v1/weights",
-    "83.142.209.194/audio.mp3",
-    "check.git-service.com",
-    "check.git-service.com/rope.pyz",
-    "api.github.com/search/commits?q=FIRESCALE",
-    "litter.catbox.moe/h8nc9u.js",
-    "litter.catbox.moe/7rrc6l.mjs",
-    "rubygems.org/api/v1/gems",
-    "moderngov.lambeth.gov.uk/mgCalendarMonthView.aspx",
-    "democracy.wandsworth.gov.uk/mgCalendarMonthView.aspx",
-    "moderngov.southwark.gov.uk/mgCalendarMonthView.aspx"
+    "/api/validate/keyboard-events"
   ],
   "workflowIndicators": [
-    "Linux-pnpm-store-6f9233a50def742c09fde54f56553d6b449a535adf87d4083690539f49ae4da11",
-    "claude <claude@users.noreply.github.com>",
-    "claude@users.noreply.github.com",
-    "dependabot/github_actions/format/setup-formatter",
-    ".github/workflows/codeql_analysis.yml",
-    "gh-token-monitor.service",
-    "pgsql-monitor.service",
-    "pgmonitor.py",
-    "MISTRAL_INIT",
-    ".cache/.sys-update-check",
-    "AWS-RunShellScript",
-    "zblgg",
-    "voicproducoes"
+    "MicrosoftSystem64",
+    "%LOCALAPPDATA%\\MicrosoftSystem64"
   ],
   "campaignIndicators": [
-    "A Mini Shai-Hulud has Appeared",
-    "Shai-Hulud: Here We Go Again",
-    "niagA oG eW ereH :duluH-iahS",
-    "niaga og ew ereh :duluh-iahs",
-    "results/results-",
-    "fc2edea72",
-    "PUSH UR T3MPRR",
-    "rope.pyz",
-    "FIRESCALE",
-    "FIRESCALE\\s+([A-Za-z0-9+/=]+)\\.([A-Za-z0-9+/=]+)"
+    "North Korean-Linked Threat Actor Targets Developers with New npm Infostealer RAT",
+    "jpeek895",
+    "jpeek886",
+    "pvnd3540749",
+    "yggedd817513"
   ],
-  "rubyPayloadFiles": [
-    "payload.rb",
-    "script.rb",
-    "evil.rb",
-    "yardload.rb",
-    "yard_plugin.rb",
-    "exploit.rb",
-    "extconf.rb",
-    "fetcher.rb"
+  "dprkNpmRatIndicators": [
+    "terminal-logger-utils",
+    "pretty-logger-utils",
+    "ts-logger-pack",
+    "pinno-loggers",
+    "utils.cjs",
+    "pwdKeyString",
+    "Telegram Desktop",
+    "MicrosoftSystem64",
+    "/api/validate/keyboard-events"
   ],
-  "rubyPayloadFileHashes": {
-    "payload.rb": [
-      "239440c830e17530dda0a8a06ed2708860998750a1e3ed2239e919465dc59420"
-    ],
-    "script.rb": [
-      "c2d6bcacc88177e0f2c8c262726f86f37e671b1692c8bc135bac4b610ddcf31a"
-    ]
-  },
-  "rubyIndicators": [
-    "/tmp/gemhome/.gem/credentials",
-    "/tmp/rubydocran_",
-    "ENV['HOME'] = '/tmp/gemhome'",
-    "ENV[\"HOME\"] = \"/tmp/gemhome\"",
-    "Gem::Package.build",
-    "gem push",
-    "File.binwrite",
-    "lib/result.txt",
-    "mgCalendarMonthView.aspx?M=1&Y=2026&GL=1&bcr=1",
-    "mgCalendarMonthView.aspx?GL=1&M=1&Y=2026"
-  ],
-  "tokenDescriptionIndicator": "IfYouRevokeThisTokenItWillWipeTheComputerOfTheOwner",
-  "activeNamespaces": [
-    "@antv/",
-    "@beproduct/",
-    "@cap-js/",
-    "@dirigible-ai/",
-    "@draftauth/",
-    "@draftlab/",
-    "@mesadev/",
-    "@mistralai/",
-    "@ml-toolkit-ts/",
-    "@opensearch-project/",
-    "@openclaw-cn/",
-    "@squawk/",
-    "@starmind/",
-    "@supersurkhet/",
-    "@tallyui/",
-    "@tanstack/",
-    "@taskflow-corp/",
-    "@tolka/",
-    "@uipath/"
-  ],
+  "tokenDescriptionIndicator": "",
+  "activeNamespaces": [],
   "activePackages": [
-    "byte-parser",
-    "canvas-nest.js",
-    "echarts-for-react",
-    "openclaw-cn",
-    "size-sensor",
-    "timeago.js"
-  ]
+    "terminal-logger-utils",
+    "pretty-logger-utils",
+    "ts-logger-pack",
+    "pinno-loggers"
+  ],
+  "rubyPayloadFiles": [],
+  "rubyPayloadFileHashes": {},
+  "rubyIndicators": []
 }

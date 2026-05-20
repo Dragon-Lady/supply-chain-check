@@ -58,12 +58,12 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`tanstack-incident-scanner
+  console.log(`supply-chain-check
 
-Read-only exposure scanner for the May 2026 TanStack npm supply-chain incident.
+Read-only dependency and source risk checker for pre-execution supply-chain review.
 
 Usage:
-  node bin/tanstack-incident-scanner.js [target] [--json] [--report report.json]
+  node bin/supply-chain-check.js [target] [--json] [--report report.json]
 
 Options:
   --json              print JSON report to stdout
@@ -76,7 +76,7 @@ Exit codes:
 }
 
 function printHuman(report, writtenReportPath) {
-  console.log("TanStack Incident Scanner");
+  console.log("Supply Chain Check");
   console.log(`Target: ${report.target}`);
   console.log(`Risk: ${report.risk}`);
   console.log(`Scanned: ${report.summary.filesScanned} files, ${report.summary.packageManifestsScanned} package manifests, ${report.summary.lockfilesScanned} lockfiles`);
@@ -109,22 +109,22 @@ function printHuman(report, writtenReportPath) {
 function printPlainLanguageSummary(report) {
   if (report.risk === "likely-exposed") {
     console.log("STOP");
-    console.log("This project references known compromised Mini Shai-Hulud indicators.");
-    console.log("Do not run npm, pnpm, yarn, bun, pip, composer, build, test, or dev-server commands here until reviewed.");
-    console.log("If this package may have already executed, rotate secrets from a clean machine and check dev-tool persistence.");
+    console.log("This project references known malicious dependency or source indicators.");
+    console.log("Do not run package install, build, test, or dev-server commands here until reviewed.");
+    console.log("If anything may have already executed, move to host incident response and use a clean machine for account work.");
     console.log("");
     return;
   }
 
   if (report.risk === "possible-exposure" || report.risk === "review-needed") {
     console.log("PAUSE");
-    console.log("This project has suspicious or active-campaign-adjacent dependency signals.");
-    console.log("Review the findings before running package installs or builds. Exact known-bad versions are listed as critical findings.");
+    console.log("This project has suspicious or campaign-adjacent dependency signals.");
+    console.log("Review the findings before running package installs or builds.");
     console.log("");
     return;
   }
 
-  console.log("No known compromised package or payload indicators were found by this scanner.");
+  console.log("No known supply-chain indicators were found by this checker.");
   console.log("This does not prove the host is clean; it only covers the indicators this tool knows about.");
   console.log("");
 }

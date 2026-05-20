@@ -1,152 +1,70 @@
-# TanStack Incident Scanner
+# supply-chain-check
 
-Read-only exposure scanner and recovery guidance for the May 2026 TanStack npm
-supply-chain incident, broader Mini Shai-Hulud npm/PyPI/Composer indicators,
-and related RubyGems registry-abuse indicators.
+Read-only dependency and source risk checker for pre-execution supply-chain
+review.
 
-This tool helps identify known indicators. It does not remove malware, revoke
-credentials, execute package scripts, or prove that a host is clean.
+This tool is the calmer pre-execution lane. It is for checking a project,
+package, or cloned repository before trusting it.
 
 ## Safety
 
-The scanner is read-only and dependency-free. It walks local files, parses
-package manifests and lockfiles, and hashes known payload filenames. It does
-not run `npm install`, execute lifecycle scripts, import project code, contact
-package registries, or transmit scan results.
-
-## Privacy
-
-This scanner does not save, collect, upload, or transmit user data. It has no
-telemetry and does not contact a server while scanning. Results are printed to
-the terminal or written only to the local path an operator explicitly provides
-with `--report`.
-
-Do not paste secrets, tokens, private keys, `.env` files, or full private logs
-into issues or public reports. If a finding suggests credential exposure,
-preserve evidence locally and rotate credentials from a clean environment.
+- Read-only checks only.
+- No package installs.
+- No lifecycle script execution.
+- No registry calls.
+- No cleanup automation.
+- No credential handling.
+- No telemetry or upload of scan results.
 
 ## Scope
 
-This scanner detects exact npm, PyPI, Composer, and selected RubyGems
-package/version indicators in `data/packages/` plus shared payload,
-tool-persistence, Ruby script, and campaign indicators from
-`data/indicators.json`.
-TanStack's official postmortem confirms 84 malicious versions across 42
-`@tanstack/*` packages, published on May 11, 2026 between 19:20 and 19:26 UTC.
-Socket's live campaign page reports 416 affected package artifacts across npm,
-PyPI, and Composer as of May 12, 2026. This scanner includes the exact
-package/version indicators currently represented in `data/packages/`.
-Broader namespaces remain lower-severity review prompts unless an exact
-package/version indicator is present.
-Socket's May 19, 2026 @antv report describes an active npm publish wave tied to
-Mini Shai-Hulud and the npm maintainer account `atool`. This scanner warns on
-`@antv/*` packages and selected related packages by name while the exact
-affected-version list is still developing.
-Socket's technical update for the same wave describes an install-time
-`index.js` payload with direct C2, GitHub fallback exfiltration, and worm-like
-npm propagation using stolen npm tokens. The scanner now checks JavaScript files
-for the exact high-signal C2 and GitHub exfil markers from that analysis.
-Socket's GemStuffer report from May 13, 2026 describes 155 RubyGems package
-artifacts using RubyGems as an exfiltration/data-drop channel. This scanner
-checks non-secret GemStuffer indicators only; published RubyGems API token values
-are intentionally not stored in this repository.
+Current built-in indicators cover OX Security's May 20, 2026 DPRK-linked npm
+infostealer/RAT report:
 
-## Out-of-Scope Windows Disclosures
+- `terminal-logger-utils`
+- `pretty-logger-utils`
+- `ts-logger-pack`
+- `pinno-loggers`
+- `postinstall` scripts that run `utils.cjs`
+- `/api/validate/keyboard-events`
+- `pwdKeyString`
+- `Telegram Desktop`
+- `MicrosoftSystem64`
 
-On May 12, 2026, Dark Web Informer amplified separate Nightmare-Eclipse /
-Chaotic Eclipse disclosures for `YellowKey` and `GreenPlasma`. These are not
-TanStack or Mini Shai-Hulud package indicators and this scanner does not test or
-reproduce them. For manual defensive triage only, public screenshots and writeups
-mention `Nightmare-Eclipse`, `YellowKey`, `GreenPlasma`, `CSRSS_TEST_SECTION`,
-and WinRE / `wpeinit` context.
+The checker also reports package lifecycle scripts and GitHub-resolved
+dependencies for review because those are common package-supply-chain risk
+surfaces.
 
-## Quick Start
+## Usage
 
 ```powershell
-node .\bin\tanstack-incident-scanner.js C:\path\to\project --report report.json
+node .\bin\supply-chain-check.js C:\path\to\project --report report.json
 ```
 
 ```bash
-node ./bin/tanstack-incident-scanner.js /path/to/project --report report.json
+node ./bin/supply-chain-check.js /path/to/project --report report.json
 ```
 
 Use `--json` to print a machine-readable report to stdout.
 
 Exit code `2` means likely exposure indicators were found.
 
-Human-readable output starts with a plain-language `STOP`, `PAUSE`, or clean-scan
-summary for non-specialist users, followed by exact technical findings for
-developers, security teams, and CI logs.
-
-## What It Checks
-
-- Known compromised `@tanstack/*` package versions
-- Known compromised `@squawk/*` package versions from Socket's campaign table
-- Known compromised `@mistralai/*` package versions from Aikido's May 12 update
-- Known compromised UiPath, TallyUI, DraftAuth, DraftLab, BeProduct,
-  ML Toolkit, TaskFlow, Supersurkhet, Tolka, OpenSearch, Dirigible AI, Mesadev,
-  and selected unscoped package versions from Aikido's May 12 update
-- Known compromised SAP CAP, Intercom, and older Mini Shai-Hulud npm artifacts
-  from Socket's campaign table
-- Developing @antv / atool npm publish-wave package indicators from Socket's
-  May 19 report, including `@antv/*`, `echarts-for-react`, `timeago.js`,
-  `size-sensor`, and `canvas-nest.js`
-- @antv payload indicators from Socket's technical analysis, including
-  `@antv/setup`, `github:antvis/G2#1916faa365f2788b6e193514872d51a242876569`,
-  `t.m-kosche.com`, reversed Shai-Hulud GitHub repository markers,
-  `results/results-`, and the `fc2edea72` decoder marker
-- JavaScript source files for exact incident network and campaign strings
-- Known compromised PyPI `mistralai`, `guardrails-ai`, `lightning`, and
-  `durabletask` versions
-- Known compromised Composer `intercom/intercom-php` version
-- Selected GemStuffer RubyGems package/version indicators and non-secret Ruby
-  payload indicators from Socket's May 13 report
-- Ruby/Bundler files: `Gemfile`, `Gemfile.lock`, `.gemspec`, and `.rb`
-- Lower-severity namespace warnings for namespaces reported in the active
-  campaign when exact package/version coverage may still be incomplete
-- `@tanstack/setup`
-- `github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c`
-- `router_init.js`, `tanstack_runner.js`, `router_runtime.js`,
-  `/tmp/transformers.pyz`, `pgmonitor.py`, `pgsql-monitor.service`, and
-  `gh-token-monitor` persistence artifacts
-- Known malicious payload SHA-256 hashes when a payload file is present
-- Selected network, workflow, token-description, and campaign marker strings
-- Claude Code `.claude/settings*.json` and VS Code `.vscode/tasks.json` config
-  references to known payload and campaign indicators
-- Install lifecycle scripts: `preinstall`, `install`, `postinstall`, `prepare`
-- GitHub-resolved dependencies in manifests
-
 ## If Indicators Are Found
 
-Do not start by revoking tokens from the suspected infected host. First stop
-builds and package installs, isolate the host if execution is possible, then use
-a clean machine to rotate credentials and audit accounts.
+Do not run package-manager, build, test, or dev-server commands in the affected
+tree until reviewed.
 
-Additional May 12-13 public reporting describes country/language-gated
-destructive behavior in the Python payload, including Russian-language avoidance
-and a reported Israel/Iran location check with randomized file deletion. This is
-kept as triage context, not a standalone clean/compromised decision.
+If the indicator is only a dependency reference and nothing executed, remove the
+dependency and regenerate lockfiles from a clean/quarantined environment.
 
-See [docs/recovery-playbook.md](docs/recovery-playbook.md).
+If an install hook, binary, editor task, agent hook, or devcontainer may have
+executed, move to host incident response. Rotate secrets only from a clean
+machine.
 
-## Sources
+## Source
 
-- TanStack official postmortem: https://tanstack.com/blog/npm-supply-chain-compromise-postmortem
-- GitHub Security Advisory: https://github.com/advisories/GHSA-g7cv-rxg3-hmpx
-- TanStack issue: https://github.com/TanStack/router/issues/7383
-- StepSecurity writeup: https://www.stepsecurity.io/blog/mini-shai-hulud-is-back-a-self-spreading-supply-chain-attack-hits-the-npm-ecosystem
-- Socket writeup: https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack
-- JFrog Security Research: https://research.jfrog.com/post/shai-hulud-here-we-go-again/
-- Aikido broader campaign update: https://www.aikido.dev/blog/mini-shai-hulud-is-back-tanstack-compromised
-- OX Security broader npm/PyPI campaign update: https://www.ox.security/blog/shai-hulud-here-we-go-again-170-packages-hit-across-npm-pypi/
-- Resultsense / Decrypt PyPI malware summary: https://www.resultsense.com/news/2026-05-13-mistral-ai-pypi-supply-chain-malware-shai-hulud/
-- Snyk TanStack/Mini Shai-Hulud update: https://snyk.io/jp/blog/tanstack-npm-packages-compromised/
-- Socket live Mini Shai-Hulud campaign table: https://socket.dev/supply-chain-attacks/mini-shai-hulud
-- Socket GemStuffer RubyGems writeup: https://socket.dev/blog/gemstuffer
-- Socket @antv active publish-wave writeup: https://socket.dev/blog/antv-packages-compromised
-- Endor Labs durabletask PyPI compromise writeup: https://www.endorlabs.com/learn/trojanized-microsoft-sdk-durabletask-1-4-1-through-1-4-3-deliver-credential-stealing-malware
-- Wiz durabletask / TeamPCP writeup: https://www.wiz.io/blog/durabletask-teampcp-supply-chain-attack
-- StepSecurity durabletask supply-chain writeup: https://www.stepsecurity.io/blog/microsofts-durabletask-pypi-package-compromised-in-supply-chain-attack
+- OX Security DPRK npm RAT writeup:
+  https://www.ox.security/blog/north-korean-npm-infostealer-rat/
 
 ## License
 
