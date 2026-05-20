@@ -47,6 +47,8 @@
     "83.142.209.194/v1/models",
     "83.142.209.194/v1/weights",
     "83.142.209.194/audio.mp3",
+    "check.git-service.com",
+    "check.git-service.com/rope.pyz",
     "api.github.com/search/commits?q=FIRESCALE",
     "litter.catbox.moe/h8nc9u.js",
     "litter.catbox.moe/7rrc6l.mjs",
@@ -65,6 +67,8 @@
     "pgsql-monitor.service",
     "pgmonitor.py",
     "MISTRAL_INIT",
+    ".cache/.sys-update-check",
+    "AWS-RunShellScript",
     "zblgg",
     "voicproducoes"
   ],
@@ -76,6 +80,7 @@
     "results/results-",
     "fc2edea72",
     "PUSH UR T3MPRR",
+    "rope.pyz",
     "FIRESCALE",
     "FIRESCALE\\s+([A-Za-z0-9+/=]+)\\.([A-Za-z0-9+/=]+)"
   ],

@@ -13,6 +13,9 @@
 - Socket live Mini Shai-Hulud campaign table: https://socket.dev/supply-chain-attacks/mini-shai-hulud
 - Socket GemStuffer RubyGems registry-abuse writeup: https://socket.dev/blog/gemstuffer
 - Socket @antv active publish-wave writeup: https://socket.dev/blog/antv-packages-compromised
+- Endor Labs durabletask PyPI compromise writeup: https://www.endorlabs.com/learn/trojanized-microsoft-sdk-durabletask-1-4-1-through-1-4-3-deliver-credential-stealing-malware
+- Wiz durabletask / TeamPCP writeup: https://www.wiz.io/blog/durabletask-teampcp-supply-chain-attack
+- StepSecurity durabletask supply-chain writeup: https://www.stepsecurity.io/blog/microsofts-durabletask-pypi-package-compromised-in-supply-chain-attack
 
 ## Out-of-Scope Related Public Intel
 
