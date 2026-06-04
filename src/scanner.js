@@ -75,6 +75,7 @@ function scanTarget(targetPath, options = {}) {
   const advisory = options.advisory || loadAdvisoryData();
   const payloadFiles = new Set(advisory.indicators.payloadFiles || DEFAULT_ADVISORY.indicators.payloadFiles);
   const findings = [];
+  const trustSignals = [];
   const seen = { files: 0, manifests: 0, lockfiles: 0 };
 
   walk(root, (filePath, dirent) => {
@@ -88,13 +89,13 @@ function scanTarget(targetPath, options = {}) {
 
     if (base === PACKAGE_MANIFEST) {
       seen.manifests += 1;
-      scanPackageJson(filePath, advisory, findings);
+      scanPackageJson(filePath, advisory, findings, trustSignals);
       return;
     }
 
     if (LOCKFILES.has(base)) {
       seen.lockfiles += 1;
-      scanTextFile(filePath, advisory, findings);
+      scanTextFile(filePath, advisory, findings, trustSignals);
       return;
     }
 
@@ -129,6 +130,7 @@ function scanTarget(targetPath, options = {}) {
   });
 
   const dedupedFindings = dedupeFindings(findings);
+  const dedupedTrustSignals = dedupeTrustSignals(trustSignals);
   const risk = riskLevel(dedupedFindings);
   return {
     tool: "supply-chain-check",
@@ -139,8 +141,10 @@ function scanTarget(targetPath, options = {}) {
       filesScanned: seen.files,
       packageManifestsScanned: seen.manifests,
       lockfilesScanned: seen.lockfiles,
+      trustSignals: dedupedTrustSignals.length,
       findings: dedupedFindings.length
     },
+    trustSignals: dedupedTrustSignals,
     findings: dedupedFindings,
     guidance: guidanceForRisk(risk)
   };
@@ -199,7 +203,7 @@ function scanPayloadHash(filePath, fileName, advisory, findings) {
   }
 }
 
-function scanPackageJson(filePath, advisory, findings) {
+function scanPackageJson(filePath, advisory, findings, trustSignals) {
   let rawText;
   let manifest;
   try {
@@ -211,6 +215,7 @@ function scanPackageJson(filePath, advisory, findings) {
   }
 
   scanManifestText(filePath, rawText, advisory, findings);
+  scanNpmStagedPublishSignals(filePath, rawText, trustSignals);
 
   if (manifest.name && manifest.version && versionIsListed(advisory.packages[manifest.name], manifest.version)) {
     findings.push(finding("critical", "known-bad-version", filePath, `${manifest.name}@${manifest.version} is listed as compromised.`));
@@ -348,7 +353,7 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
   }
 }
 
-function scanTextFile(filePath, advisory, findings) {
+function scanTextFile(filePath, advisory, findings, trustSignals) {
   let stat;
   try {
     stat = fs.statSync(filePath);
@@ -376,6 +381,7 @@ function scanTextFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Lockfile");
+  scanNpmStagedPublishSignals(filePath, text, trustSignals);
 
   if (text.includes(indicators.maliciousOptionalDependencyName)) {
     findings.push(finding("critical", "malicious-dependency-name", filePath, `Lockfile references ${indicators.maliciousOptionalDependencyName}.`));
@@ -643,6 +649,26 @@ function isToolConfigFile(filePath, base) {
   return normalized.includes("/.claude/") || normalized.includes("/.vscode/");
 }
 
+function scanNpmStagedPublishSignals(filePath, text, trustSignals) {
+  if (!Array.isArray(trustSignals)) return;
+
+  if (/"approver"\s*:\s*"[^"]+"/i.test(text) || /^\s*approver:\s*\S+/im.test(text)) {
+    trustSignals.push(trustSignal(
+      "npm-staged-publish-approver",
+      filePath,
+      "Registry metadata includes an approver field; pnpm 11.5 treats staged publish approval as strong trust evidence."
+    ));
+  }
+
+  if (/\bnpm\s+stage\s+(publish|approve|reject|view|list|download)\b/i.test(text) || /\bpnpm\s+stage\s+(publish|approve|reject|view|list|download)\b/i.test(text)) {
+    trustSignals.push(trustSignal(
+      "npm-staged-publish-workflow",
+      filePath,
+      "Project text references npm staged publishing workflow commands."
+    ));
+  }
+}
+
 function isJavaScriptSourceFile(filePath) {
   return JAVASCRIPT_SOURCE_EXTENSIONS.has(path.extname(filePath));
 }
@@ -681,11 +707,31 @@ function finding(severity, type, filePath, message) {
   };
 }
 
+function trustSignal(type, filePath, message) {
+  return {
+    type,
+    path: filePath,
+    message
+  };
+}
+
 function dedupeFindings(findings) {
   const seen = new Set();
   const result = [];
   for (const item of findings) {
     const key = `${item.severity}\0${item.type}\0${item.path}\0${item.message}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(item);
+  }
+  return result;
+}
+
+function dedupeTrustSignals(signals) {
+  const seen = new Set();
+  const result = [];
+  for (const item of signals) {
+    const key = `${item.type}\0${item.path}\0${item.message}`;
     if (seen.has(key)) continue;
     seen.add(key);
     result.push(item);

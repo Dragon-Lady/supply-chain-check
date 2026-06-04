@@ -78,4 +78,38 @@ try {
   fs.rmSync(reviewRoot, { recursive: true, force: true });
 }
 
+const stagedPublishRoot = makeFixture("scc-staged-publish-");
+try {
+  write(
+    path.join(stagedPublishRoot, "pnpm-lock.yaml"),
+    [
+      "packages:",
+      "  leftpad@1.0.0:",
+      "    resolution:",
+      "      integrity: sha512-test",
+      "    registryMeta:",
+      "      approver: tanya",
+      ""
+    ].join("\n")
+  );
+  write(
+    path.join(stagedPublishRoot, "package.json"),
+    JSON.stringify({
+      name: "staged-publish-fixture",
+      version: "1.0.0",
+      scripts: {
+        release: "npm stage publish"
+      }
+    }, null, 2)
+  );
+
+  const report = scanTarget(stagedPublishRoot);
+  assert.strictEqual(report.risk, "no-known-indicators");
+  assert.strictEqual(report.findings.length, 0);
+  assert(report.trustSignals.some((signal) => signal.type === "npm-staged-publish-approver"));
+  assert(report.trustSignals.some((signal) => signal.type === "npm-staged-publish-workflow"));
+} finally {
+  fs.rmSync(stagedPublishRoot, { recursive: true, force: true });
+}
+
 console.log("smoke tests passed");

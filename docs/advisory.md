@@ -15,3 +15,11 @@ data, environment variables, clipboard data, and typed password fields.
 
 This checker does not perform cleanup and does not claim a host is clean. If
 anything may have executed, move from project review to host incident response.
+
+## npm Staged Publish Trust Signal
+
+As of pnpm 11.5, package registry metadata carrying an `approver` field is
+recognized as strong trust evidence because npm staged publishes require
+maintainer 2FA approval before a version becomes installable. `supply-chain-check`
+records this as a `trustSignals` entry and does not treat staged publish
+approval metadata as a supply-chain finding.

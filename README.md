@@ -35,6 +35,12 @@ The checker also reports package lifecycle scripts and GitHub-resolved
 dependencies for review because those are common package-supply-chain risk
 surfaces.
 
+The checker records npm staged-publish approval evidence as `trustSignals`, not
+as findings. pnpm 11.5 recognizes package registry metadata with an `approver`
+field as strong trust evidence because staged publishes require a maintainer 2FA
+approval before release. This avoids false positives where approved staged
+publishes look like trust downgrades.
+
 ## Usage
 
 ```powershell
@@ -65,6 +71,10 @@ machine.
 
 - OX Security DPRK npm RAT writeup:
   https://www.ox.security/blog/north-korean-npm-infostealer-rat/
+- Socket / pnpm 11.5 staged publish recognition:
+  https://socket.dev/blog/pnpm-11-5-adds-support-for-recognizing-npm-staged-publishes
+- npm staged publishing docs:
+  https://docs.npmjs.com/cli/v11/commands/npm-stage/
 
 ## License
 
