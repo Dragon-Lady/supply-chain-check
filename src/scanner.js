@@ -17,6 +17,7 @@ const PACKAGE_MANIFEST = "package.json";
 const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json"]);
 const DEPLOYMENT_CONFIG_FILES = new Set(["Dockerfile", "docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
 const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
+const MIASMA_MARKER_FILES = new Set(["ARCHITECTURE.MD", "INTEGRATION_TESTING.md", "README.md", "bunfig.toml"]);
 const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
 const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "coverage"]);
 const LITELLM_AFFECTED_MIN = "1.74.2";
@@ -101,6 +102,8 @@ function scanTarget(targetPath, options = {}) {
     seen.files += 1;
     const base = dirent.name;
 
+    scanMiasmaPath(filePath, findings);
+
     if (payloadFiles.has(base)) {
       findings.push(finding("critical", "payload-file", filePath, `Known incident payload filename present: ${base}`));
       scanPayloadHash(filePath, base, advisory, findings);
@@ -140,6 +143,11 @@ function scanTarget(targetPath, options = {}) {
 
     if (isToolConfigFile(filePath, base)) {
       scanToolConfigFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isMiasmaMarkerFile(base)) {
+      scanMiasmaMarkerFile(filePath, findings);
       return;
     }
 
@@ -239,6 +247,7 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
   }
 
   scanManifestText(filePath, rawText, advisory, findings);
+  scanMiasmaText(filePath, rawText, findings, "Manifest");
   scanNpmStagedPublishSignals(filePath, rawText, trustSignals);
 
   if (manifest.name && manifest.version && versionIsListed(advisory.packages[manifest.name], manifest.version)) {
@@ -407,6 +416,7 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Lockfile");
+  scanMiasmaText(filePath, text, findings, "Lockfile");
   scanLiteLlmText(filePath, text, findings, "Lockfile");
   scanNpmStagedPublishSignals(filePath, text, trustSignals);
 
@@ -463,6 +473,7 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Python dependency file");
+  scanMiasmaText(filePath, text, findings, "Python dependency file");
   scanLiteLlmText(filePath, text, findings, "Python dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
@@ -582,6 +593,7 @@ function scanToolConfigFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Tool config");
+  scanMiasmaText(filePath, text, findings, "Tool config");
   scanLiteLlmText(filePath, text, findings, "Tool config");
 }
 
@@ -595,6 +607,7 @@ function scanDeploymentConfigFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Deployment config");
+  scanMiasmaText(filePath, text, findings, "Deployment config");
   scanLiteLlmText(filePath, text, findings, "Deployment config");
 }
 
@@ -608,7 +621,59 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "JavaScript source file");
+  scanMiasmaText(filePath, text, findings, "JavaScript source file");
   scanLiteLlmText(filePath, text, findings, "JavaScript source file");
+}
+
+function scanMiasmaPath(filePath, findings) {
+  const normalized = filePath.replace(/\\/g, "/");
+  if (normalized.endsWith("/.github/setup.js")) {
+    findings.push(finding("critical", "miasma-setup-dropper-file", filePath, "Miasma-style .github/setup.js dropper path is present."));
+  }
+  if (normalized.endsWith("/.cursor/rules/setup.mdc")) {
+    findings.push(finding("high", "miasma-cursor-rule-file", filePath, "Miasma-style Cursor rule file path is present."));
+  }
+}
+
+function scanMiasmaMarkerFile(filePath, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read repository metadata file: ${error.message}`));
+    return;
+  }
+  scanMiasmaText(filePath, text, findings, "Repository metadata");
+}
+
+function scanMiasmaText(filePath, text, findings, sourceLabel) {
+  if (/Miasma-Open-Source-Release|Mini Shai-Hulud|Team PCP|TeamPCP/i.test(text)) {
+    findings.push(finding("critical", "miasma-toolkit-marker", filePath, `${sourceLabel} references Miasma/Mini Shai-Hulud toolkit markers.`));
+  }
+  if (/SessionStart/i.test(text) && /\.github\/setup\.js|setup\.js|bun\s+run|node\s+\.github/i.test(text)) {
+    findings.push(finding("critical", "miasma-agent-sessionstart-hook", filePath, `${sourceLabel} defines an AI-agent SessionStart hook that appears to launch repo-local code.`));
+  }
+  if (/folderOpen/i.test(text) && /\.github\/setup\.js|setup\.js|bun\s+run|node\s+\.github/i.test(text)) {
+    findings.push(finding("critical", "miasma-vscode-folderopen-task", filePath, `${sourceLabel} defines a VS Code folderOpen task that appears to launch repo-local code.`));
+  }
+  if (/alwaysApply\s*:?\s*true/i.test(text) && /\.github\/setup\.js|setup\.js|run the payload|bun\s+run|node\s+\.github/i.test(text)) {
+    findings.push(finding("high", "miasma-cursor-always-apply-rule", filePath, `${sourceLabel} contains an alwaysApply Cursor-style rule tied to payload execution.`));
+  }
+  if (/skip-checks:true/i.test(text)) {
+    findings.push(finding("high", "miasma-skip-checks-commit-marker", filePath, `${sourceLabel} references skip-checks:true, used by Miasma repository mutation to suppress CI.`));
+  }
+  if (/MCP_SUFFIXES|['"]-mcp['"]|['"]-mpc['"]|TYPO_MODE|TARGET_PACKAGES/i.test(text)) {
+    findings.push(finding("medium", "miasma-mcp-typosquat-marker", filePath, `${sourceLabel} references MCP-suffixed typosquat or Miasma typo-mutator controls.`));
+  }
+  if (/WORKFLOW_ID|REPO_ID_SUFFIX/i.test(text) && /GITHUB_WORKFLOW_REF|GITHUB_REPOSITORY/i.test(text)) {
+    findings.push(finding("high", "miasma-github-oidc-targeting-marker", filePath, `${sourceLabel} references targeted GitHub Actions OIDC propagation controls.`));
+  }
+  if (/\/etc\/sudoers\.d/i.test(text) && /NOPASSWD:ALL|Privileged|\/etc\/resolv\.conf/i.test(text)) {
+    findings.push(finding("high", "miasma-runner-evasion-marker", filePath, `${sourceLabel} references Miasma-style runner sudo/DNS evasion behavior.`));
+  }
+  if (/AWS-RunShellScript/i.test(text) && /ssm:SendCommand|DescribeInstanceInformation/i.test(text)) {
+    findings.push(finding("high", "miasma-aws-ssm-propagation-marker", filePath, `${sourceLabel} references AWS SSM propagation behavior.`));
+  }
 }
 
 function scanLiteLlmDependencySpec(filePath, section, name, spec, findings) {
@@ -775,13 +840,20 @@ function isRubySourceFile(filePath) {
 }
 
 function isToolConfigFile(filePath, base) {
-  if (!TOOL_CONFIG_FILES.has(base)) return false;
+  if (!TOOL_CONFIG_FILES.has(base) && base !== "setup.mdc") return false;
   const normalized = filePath.replace(/\\/g, "/");
-  return normalized.includes("/.claude/") || normalized.includes("/.vscode/");
+  return normalized.includes("/.claude/")
+    || normalized.includes("/.gemini/")
+    || normalized.includes("/.cursor/")
+    || normalized.includes("/.vscode/");
 }
 
 function isDeploymentConfigFile(base) {
   return DEPLOYMENT_CONFIG_FILES.has(base);
+}
+
+function isMiasmaMarkerFile(base) {
+  return MIASMA_MARKER_FILES.has(base);
 }
 
 function scanNpmStagedPublishSignals(filePath, text, trustSignals) {
