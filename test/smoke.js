@@ -131,4 +131,33 @@ try {
   fs.rmSync(nodeIpcRoot, { recursive: true, force: true });
 }
 
+const liteLlmRoot = makeFixture("scc-litellm-");
+try {
+  write(path.join(liteLlmRoot, "requirements.txt"), "litellm==1.83.6\nstarlette==1.0.0\n");
+  write(
+    path.join(liteLlmRoot, "docker-compose.yml"),
+    [
+      "services:",
+      "  litellm:",
+      "    image: ghcr.io/berriai/litellm:main",
+      "    command: litellm --host 0.0.0.0 --port 4000",
+      "    environment:",
+      "      - OPENAI_API_KEY=${OPENAI_API_KEY}",
+      "    labels:",
+      "      - route=/mcp-rest/test/connection",
+      "      - route=/mcp-rest/test/tools/list",
+    ].join("\n")
+  );
+
+  const report = scanTarget(liteLlmRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "litellm-cve-2026-42271-vulnerable-version"));
+  assert(report.findings.some((finding) => finding.type === "litellm-starlette-host-header-chain"));
+  assert(report.findings.some((finding) => finding.type === "litellm-mcp-test-route-reference"));
+  assert(report.findings.some((finding) => finding.type === "litellm-public-bind"));
+  assert(report.findings.some((finding) => finding.type === "litellm-provider-key-blast-radius"));
+} finally {
+  fs.rmSync(liteLlmRoot, { recursive: true, force: true });
+}
+
 console.log("smoke tests passed");

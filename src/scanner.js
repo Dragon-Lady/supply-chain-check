@@ -15,9 +15,28 @@ const RUBY_DEPENDENCY_FILES = new Set(["Gemfile", "Gemfile.lock"]);
 const RUBY_SOURCE_EXTENSIONS = new Set([".rb"]);
 const PACKAGE_MANIFEST = "package.json";
 const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json"]);
+const DEPLOYMENT_CONFIG_FILES = new Set(["Dockerfile", "docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
 const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
 const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
 const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "coverage"]);
+const LITELLM_AFFECTED_MIN = "1.74.2";
+const LITELLM_FIXED = "1.83.7";
+const STARLETTE_FIXED = "1.0.1";
+const LITELLM_MCP_TEST_ROUTES = [
+  "/mcp-rest/test/connection",
+  "/mcp-rest/test/tools/list"
+];
+const PROVIDER_KEY_ENV_TERMS = [
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "AZURE_API_KEY",
+  "AZURE_OPENAI_API_KEY",
+  "AWS_ACCESS_KEY_ID",
+  "GOOGLE_API_KEY",
+  "GEMINI_API_KEY",
+  "MISTRAL_API_KEY",
+  "COHERE_API_KEY"
+];
 
 const DEFAULT_ADVISORY = {
   indicators: {
@@ -121,6 +140,11 @@ function scanTarget(targetPath, options = {}) {
 
     if (isToolConfigFile(filePath, base)) {
       scanToolConfigFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isDeploymentConfigFile(base)) {
+      scanDeploymentConfigFile(filePath, advisory, findings);
       return;
     }
 
@@ -351,6 +375,8 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
   if (versionIsListed(advisory.packages[name], spec)) {
     findings.push(finding("critical", "known-bad-requested-version", filePath, `${section}.${name} requests compromised version ${spec}.`));
   }
+
+  scanLiteLlmDependencySpec(filePath, section, name, spec, findings);
 }
 
 function scanTextFile(filePath, advisory, findings, trustSignals) {
@@ -381,6 +407,7 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Lockfile");
+  scanLiteLlmText(filePath, text, findings, "Lockfile");
   scanNpmStagedPublishSignals(filePath, text, trustSignals);
 
   if (text.includes(indicators.maliciousOptionalDependencyName)) {
@@ -436,6 +463,7 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Python dependency file");
+  scanLiteLlmText(filePath, text, findings, "Python dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
     for (const version of versions) {
@@ -554,6 +582,20 @@ function scanToolConfigFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Tool config");
+  scanLiteLlmText(filePath, text, findings, "Tool config");
+}
+
+function scanDeploymentConfigFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read deployment config file: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Deployment config");
+  scanLiteLlmText(filePath, text, findings, "Deployment config");
 }
 
 function scanJavaScriptSourceFile(filePath, advisory, findings) {
@@ -566,6 +608,59 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "JavaScript source file");
+  scanLiteLlmText(filePath, text, findings, "JavaScript source file");
+}
+
+function scanLiteLlmDependencySpec(filePath, section, name, spec, findings) {
+  const normalizedName = normalizePythonPackageName(name);
+  if (normalizedName !== "litellm" && normalizedName !== "starlette") return;
+
+  const versions = versionsInSpec(spec);
+  for (const version of versions) {
+    if (normalizedName === "litellm" && isVersionInRange(version, LITELLM_AFFECTED_MIN, LITELLM_FIXED)) {
+      findings.push(finding("critical", "litellm-cve-2026-42271-vulnerable-version", filePath, `${section}.${name} references LiteLLM ${version}, affected by CVE-2026-42271. Upgrade to litellm>=${LITELLM_FIXED}.`));
+    }
+    if (normalizedName === "starlette" && compareDottedVersion(version, STARLETTE_FIXED) < 0) {
+      findings.push(finding("medium", "starlette-host-header-review", filePath, `${section}.${name} references Starlette ${version}. If deployed with LiteLLM, upgrade to starlette>=${STARLETTE_FIXED}.`));
+    }
+  }
+}
+
+function scanLiteLlmText(filePath, text, findings, sourceLabel) {
+  const hasLiteLlm = /\blitellm\b|LiteLLM|LITELLM|mcp-rest/.test(text);
+  const liteLlmVersions = packageVersionsInText(text, "litellm");
+  const starletteVersions = packageVersionsInText(text, "starlette");
+
+  for (const version of liteLlmVersions) {
+    if (isVersionInRange(version, LITELLM_AFFECTED_MIN, LITELLM_FIXED)) {
+      findings.push(finding("critical", "litellm-cve-2026-42271-vulnerable-version", filePath, `${sourceLabel} references LiteLLM ${version}, affected by CVE-2026-42271. Upgrade to litellm>=${LITELLM_FIXED}.`));
+    }
+  }
+
+  if (hasLiteLlm) {
+    for (const version of starletteVersions) {
+      if (compareDottedVersion(version, STARLETTE_FIXED) < 0) {
+        findings.push(finding("high", "litellm-starlette-host-header-chain", filePath, `${sourceLabel} references LiteLLM with Starlette ${version}; review the unauthenticated RCE chain and upgrade to starlette>=${STARLETTE_FIXED}.`));
+      }
+    }
+  }
+
+  for (const route of LITELLM_MCP_TEST_ROUTES) {
+    if (text.includes(route)) {
+      findings.push(finding("high", "litellm-mcp-test-route-reference", filePath, `${sourceLabel} references LiteLLM MCP test route ${route}. Block/restrict this route if reachable.`));
+    }
+  }
+
+  if (hasLiteLlm && /\b(0\.0\.0\.0|\[::\]|::)\b|--host\s+0\.0\.0\.0\b/i.test(text)) {
+    findings.push(finding("high", "litellm-public-bind", filePath, `${sourceLabel} appears to bind a LiteLLM-related service to all interfaces.`));
+  }
+
+  if (hasLiteLlm) {
+    const keyTerms = PROVIDER_KEY_ENV_TERMS.filter((term) => text.includes(term));
+    if (keyTerms.length > 0) {
+      findings.push(finding("medium", "litellm-provider-key-blast-radius", filePath, `${sourceLabel} references LiteLLM with provider credential environment names: ${keyTerms.join(", ")}. Do not expose proxy/admin/MCP routes publicly.`));
+    }
+  }
 }
 
 function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
@@ -614,6 +709,42 @@ function pythonFileMentionsPackageVersion(text, pkg, version) {
   return patterns.some((pattern) => pattern.test(normalizedText));
 }
 
+function packageVersionsInText(text, packageName) {
+  const escaped = escapeRegExp(packageName);
+  const versions = new Set();
+  const patterns = [
+    new RegExp(`\\b${escaped}\\b\\s*(?:==|===|=|~=|>=|<=|>|<)\\s*["']?([0-9]+\\.[0-9]+\\.[0-9]+)`, "gi"),
+    new RegExp(`\\b${escaped}\\b["']?\\s*[:=]\\s*["']?[^0-9\\n\\r]{0,12}([0-9]+\\.[0-9]+\\.[0-9]+)`, "gi"),
+    new RegExp(`name\\s*=\\s*["']${escaped}["'][\\s\\S]{0,300}?version\\s*=\\s*["']([0-9]+\\.[0-9]+\\.[0-9]+)["']`, "gi")
+  ];
+  for (const pattern of patterns) {
+    for (const match of text.matchAll(pattern)) {
+      versions.add(match[1]);
+    }
+  }
+  return Array.from(versions);
+}
+
+function versionsInSpec(spec) {
+  return Array.from(String(spec).matchAll(/([0-9]+\.[0-9]+\.[0-9]+)/g), (match) => match[1]);
+}
+
+function isVersionInRange(version, inclusiveMin, exclusiveMax) {
+  return compareDottedVersion(version, inclusiveMin) >= 0 && compareDottedVersion(version, exclusiveMax) < 0;
+}
+
+function compareDottedVersion(a, b) {
+  const left = String(a).split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const right = String(b).split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const length = Math.max(left.length, right.length);
+  for (let i = 0; i < length; i += 1) {
+    const l = left[i] || 0;
+    const r = right[i] || 0;
+    if (l !== r) return l > r ? 1 : -1;
+  }
+  return 0;
+}
+
 function composerFileMentionsPackageVersion(text, pkg, version) {
   const escapedPkg = escapeRegExp(pkg);
   const escapedVersion = escapeRegExp(version);
@@ -647,6 +778,10 @@ function isToolConfigFile(filePath, base) {
   if (!TOOL_CONFIG_FILES.has(base)) return false;
   const normalized = filePath.replace(/\\/g, "/");
   return normalized.includes("/.claude/") || normalized.includes("/.vscode/");
+}
+
+function isDeploymentConfigFile(base) {
+  return DEPLOYMENT_CONFIG_FILES.has(base);
 }
 
 function scanNpmStagedPublishSignals(filePath, text, trustSignals) {
