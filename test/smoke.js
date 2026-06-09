@@ -112,4 +112,23 @@ try {
   fs.rmSync(stagedPublishRoot, { recursive: true, force: true });
 }
 
+const nodeIpcRoot = makeFixture("scc-node-ipc-");
+try {
+  write(
+    path.join(nodeIpcRoot, "package.json"),
+    JSON.stringify({ name: "node-ipc-fixture", version: "1.0.0", dependencies: { "node-ipc": "12.0.1" } }, null, 2)
+  );
+  write(
+    path.join(nodeIpcRoot, "package-lock.json"),
+    JSON.stringify({ packages: { "node_modules/node-ipc": { version: "9.2.3" } } })
+  );
+
+  const report = scanTarget(nodeIpcRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version"));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-version"));
+} finally {
+  fs.rmSync(nodeIpcRoot, { recursive: true, force: true });
+}
+
 console.log("smoke tests passed");
