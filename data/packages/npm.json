@@ -14,6 +14,9 @@
   "csc154-internall-depend": [
     "*"
   ],
+  "@validate-sdk/v2": [
+    "*"
+  ],
   "node-ipc": [
     "9.1.6",
     "9.2.3",

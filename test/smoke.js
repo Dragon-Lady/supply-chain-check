@@ -147,6 +147,22 @@ try {
   fs.rmSync(csc154Root, { recursive: true, force: true });
 }
 
+const validateSdkRoot = makeFixture("scc-validate-sdk-");
+try {
+  write(
+    path.join(validateSdkRoot, "package.json"),
+    JSON.stringify({ name: "validate-sdk-fixture", version: "1.0.0", dependencies: { "@validate-sdk/v2": "^1.0.0" } }, null, 2)
+  );
+  write(path.join(validateSdkRoot, "package-lock.json"), "node_modules/@validate-sdk/v2\n");
+
+  const report = scanTarget(validateSdkRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version"));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package"));
+} finally {
+  fs.rmSync(validateSdkRoot, { recursive: true, force: true });
+}
+
 const liteLlmRoot = makeFixture("scc-litellm-");
 try {
   write(path.join(liteLlmRoot, "requirements.txt"), "litellm==1.83.6\nstarlette==1.0.0\n");

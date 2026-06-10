@@ -51,6 +51,7 @@
     "ts-logger-pack",
     "pinno-loggers",
     "csc154-internall-depend",
+    "@validate-sdk/v2",
     "langchain-core-mcp",
     "openai-mcp",
     "instructor-mcp",
