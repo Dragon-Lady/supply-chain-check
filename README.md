@@ -31,6 +31,17 @@ infostealer/RAT report:
 - `Telegram Desktop`
 - `MicrosoftSystem64`
 
+The checker also covers the June 2026 Mini Shai-Hulud / Miasma / Hades PyPI
+waves reported by Socket and SecurityWeek:
+
+- affected PyPI package versions from the Hades IOC lists
+- `*-setup.pth` Python startup hooks
+- Bun bootstrap and `_index.js` launcher behavior
+- `sys.path` payload-search loaders
+- Hades GitHub/CI exfiltration markers such as `Run Copilot`,
+  `format-results`, and the Hades repository-description string
+- native `.abi3.so` extension layouts paired with `_index.js`
+
 The checker also reports package lifecycle scripts and GitHub-resolved
 dependencies for review because those are common package-supply-chain risk
 surfaces.
@@ -71,6 +82,12 @@ machine.
 
 - OX Security DPRK npm RAT writeup:
   https://www.ox.security/blog/north-korean-npm-infostealer-rat/
+- Socket Hades PyPI wave analysis:
+  https://socket.dev/blog/shai-hulud-descends-to-hades-miasma-pypi-wave
+- Socket newer Miasma/Hades PyPI wave analysis:
+  https://socket.dev/blog/mini-shai-hulud-miasma-and-hades-worms-target-bioinformatics-and-mcp-developers-via-malicious
+- SecurityWeek Shai-Hulud Miasma/Hades summary:
+  https://www.securityweek.com/over-100-npm-pypi-packages-hit-in-new-shai-hulud-supply-chain-attacks/
 - Socket / pnpm 11.5 staged publish recognition:
   https://socket.dev/blog/pnpm-11-5-adds-support-for-recognizing-npm-staged-publishes
 - npm staged publishing docs:

@@ -205,4 +205,54 @@ try {
   fs.rmSync(miasmaRoot, { recursive: true, force: true });
 }
 
+const hadesRoot = makeFixture("scc-hades-");
+try {
+  const hadesBunUrl = ["https://github.com/oven-sh/bun/releases/", "download/bun-v1.3.", "13/bun-linux-x64.zip"].join("");
+  const hadesBunSentinel = [".bun", "_ran"].join("");
+  const hadesTitle = ["Hades - The End for the ", "Damned"].join("");
+  const hadesC2 = ["thebeautiful", "marchoftime"].join("");
+  const hadesSshPath = ["/tmp/.sshu", "-setup.js"].join("");
+  const hadesWorkflowMarker = ["Run ", "Copilot format", "-results results/results-", "*.json"].join("");
+  write(path.join(hadesRoot, "requirements.txt"), "langchain-core-mcp==1.4.2\nopenai-mcp==2.41.1\n");
+  write(
+    path.join(hadesRoot, ".venv", "lib", "python3.12", "site-packages", "langchain_core-setup.pth"),
+    [
+      "import os, sys, subprocess, urllib.request, tempfile",
+      "payload = None",
+      "for d in sys.path:",
+      "    candidate = os.path.join(d, '_index.js')",
+      "    if os.path.exists(candidate): payload = candidate",
+      `bun_url = '${hadesBunUrl}'`,
+      "subprocess.run(['bun', 'run', payload], check=False)",
+      `open(os.path.join(tempfile.gettempdir(), '${hadesBunSentinel}'), 'w').close()`
+    ].join("\n")
+  );
+  write(
+    path.join(hadesRoot, ".venv", "lib", "python3.12", "site-packages", "_index.js"),
+    [
+      "/* analysis bait */",
+      `const marker = '${hadesTitle}';`,
+      `const c2 = '${hadesC2}';`,
+      `const ssh = '${hadesSshPath}';`,
+      "const docker = '/var/run/docker.sock';",
+      `console.log('${hadesWorkflowMarker}');`
+    ].join("\n")
+  );
+  write(path.join(hadesRoot, "pkg", "ensmallen_haswell.abi3.so"), "placeholder");
+
+  const report = scanTarget(hadesRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  const types = new Set(report.findings.map((finding) => finding.type));
+  assert(types.has("known-bad-pypi-version"));
+  assert(types.has("hades-pth-startup-hook-file"));
+  assert(types.has("hades-pth-bun-loader"));
+  assert(types.has("hades-syspath-payload-loader"));
+  assert(types.has("hades-python-payload-filename"));
+  assert(types.has("hades-github-exfil-marker"));
+  assert(types.has("hades-follow-on-indicator"));
+  assert(types.has("hades-known-native-extension"));
+} finally {
+  fs.rmSync(hadesRoot, { recursive: true, force: true });
+}
+
 console.log("smoke tests passed");

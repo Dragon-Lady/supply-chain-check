@@ -17,7 +17,10 @@ const PACKAGE_MANIFEST = "package.json";
 const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json"]);
 const DEPLOYMENT_CONFIG_FILES = new Set(["Dockerfile", "docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
 const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
-const MIASMA_MARKER_FILES = new Set(["ARCHITECTURE.MD", "INTEGRATION_TESTING.md", "README.md", "bunfig.toml"]);
+const PYTHON_STARTUP_HOOK_EXTENSIONS = new Set([".pth"]);
+const NATIVE_EXTENSION_EXTENSIONS = new Set([".so"]);
+const MIASMA_MARKER_FILES = new Set(["ARCHITECTURE.MD", "INTEGRATION_TESTING.md", "README.md", "bunfig.toml", "binding.gyp"]);
+const HADES_NATIVE_EXTENSION_FILES = new Set(["ensmallen_haswell.abi3.so", "ensmallen_core2.abi3.so"]);
 const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
 const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "coverage"]);
 const LITELLM_AFFECTED_MIN = "1.74.2";
@@ -103,6 +106,7 @@ function scanTarget(targetPath, options = {}) {
     const base = dirent.name;
 
     scanMiasmaPath(filePath, findings);
+    scanHadesPath(filePath, findings);
 
     if (payloadFiles.has(base)) {
       findings.push(finding("critical", "payload-file", filePath, `Known incident payload filename present: ${base}`));
@@ -123,6 +127,16 @@ function scanTarget(targetPath, options = {}) {
 
     if (isPythonDependencyFile(base)) {
       scanPythonDependencyFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isPythonStartupHookFile(filePath)) {
+      scanPythonStartupHookFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isNativePythonExtensionFile(filePath)) {
+      scanNativePythonExtensionFile(filePath, findings);
       return;
     }
 
@@ -248,6 +262,7 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
 
   scanManifestText(filePath, rawText, advisory, findings);
   scanMiasmaText(filePath, rawText, findings, "Manifest");
+  scanHadesText(filePath, rawText, findings, "Manifest");
   scanNpmStagedPublishSignals(filePath, rawText, trustSignals);
 
   if (manifest.name && manifest.version && versionIsListed(advisory.packages[manifest.name], manifest.version)) {
@@ -417,6 +432,7 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Lockfile");
   scanMiasmaText(filePath, text, findings, "Lockfile");
+  scanHadesText(filePath, text, findings, "Lockfile");
   scanLiteLlmText(filePath, text, findings, "Lockfile");
   scanNpmStagedPublishSignals(filePath, text, trustSignals);
 
@@ -474,6 +490,7 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Python dependency file");
   scanMiasmaText(filePath, text, findings, "Python dependency file");
+  scanHadesText(filePath, text, findings, "Python dependency file");
   scanLiteLlmText(filePath, text, findings, "Python dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
@@ -482,6 +499,33 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
         findings.push(finding("critical", "known-bad-pypi-version", filePath, `Python dependency file references ${pkg}==${version}.`));
       }
     }
+  }
+}
+
+function scanPythonStartupHookFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read Python startup hook file: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Python startup hook");
+  scanMiasmaText(filePath, text, findings, "Python startup hook");
+  scanHadesText(filePath, text, findings, "Python startup hook");
+}
+
+function scanNativePythonExtensionFile(filePath, findings) {
+  const base = path.basename(filePath);
+  if (HADES_NATIVE_EXTENSION_FILES.has(base)) {
+    findings.push(finding("critical", "hades-known-native-extension", filePath, `Native extension filename reported in Hades PyPI artifacts: ${base}`));
+    return;
+  }
+
+  const siblingPayload = path.join(path.dirname(filePath), "_index.js");
+  if (base.endsWith(".abi3.so") && fs.existsSync(siblingPayload)) {
+    findings.push(finding("high", "hades-native-extension-payload-pair", filePath, "Python native extension is paired with _index.js, matching the Hades import-time launcher layout."));
   }
 }
 
@@ -594,6 +638,7 @@ function scanToolConfigFile(filePath, advisory, findings) {
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Tool config");
   scanMiasmaText(filePath, text, findings, "Tool config");
+  scanHadesText(filePath, text, findings, "Tool config");
   scanLiteLlmText(filePath, text, findings, "Tool config");
 }
 
@@ -608,6 +653,7 @@ function scanDeploymentConfigFile(filePath, advisory, findings) {
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Deployment config");
   scanMiasmaText(filePath, text, findings, "Deployment config");
+  scanHadesText(filePath, text, findings, "Deployment config");
   scanLiteLlmText(filePath, text, findings, "Deployment config");
 }
 
@@ -622,6 +668,7 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
 
   scanIndicatorStrings(filePath, text, advisory, findings, "JavaScript source file");
   scanMiasmaText(filePath, text, findings, "JavaScript source file");
+  scanHadesText(filePath, text, findings, "JavaScript source file");
   scanLiteLlmText(filePath, text, findings, "JavaScript source file");
 }
 
@@ -632,6 +679,20 @@ function scanMiasmaPath(filePath, findings) {
   }
   if (normalized.endsWith("/.cursor/rules/setup.mdc")) {
     findings.push(finding("high", "miasma-cursor-rule-file", filePath, "Miasma-style Cursor rule file path is present."));
+  }
+}
+
+function scanHadesPath(filePath, findings) {
+  const normalized = filePath.replace(/\\/g, "/");
+  const base = path.basename(filePath);
+  if (/-setup\.pth$/i.test(base)) {
+    findings.push(finding("high", "hades-pth-startup-hook-file", filePath, "Hades-style Python startup hook filename is present."));
+  }
+  if (base === "_index.js" && /site-packages|\.venv|\/venv\/|\.dist-info|\.whl|py3-none-any/i.test(normalized)) {
+    findings.push(finding("high", "hades-python-payload-filename", filePath, "Hades-style _index.js payload filename is present in a Python package context."));
+  }
+  if (normalized.endsWith("/.github/workflows/codeql.yml")) {
+    findings.push(finding("medium", "hades-codeql-workflow-path", filePath, "Unexpected CodeQL workflow changes are listed as a Hades follow-on indicator; review provenance."));
   }
 }
 
@@ -673,6 +734,56 @@ function scanMiasmaText(filePath, text, findings, sourceLabel) {
   }
   if (/AWS-RunShellScript/i.test(text) && /ssm:SendCommand|DescribeInstanceInformation/i.test(text)) {
     findings.push(finding("high", "miasma-aws-ssm-propagation-marker", filePath, `${sourceLabel} references AWS SSM propagation behavior.`));
+  }
+}
+
+function scanHadesText(filePath, text, findings, sourceLabel) {
+  const hasExecutablePthImport = /^\s*import[ \t]/m.test(text);
+  const hasBunBootstrap = matchesAnyPattern(text, [
+    ["oven-sh\\/bun\\/releases\\/", "download"],
+    ["bun-v\\d+\\.\\d+\\.\\d+"],
+    ["bun\\.sh\\/", "install"],
+    ["Bun\\/1\\.3\\."]
+  ]);
+  const hasPythonExecution = /subprocess\.(run|Popen|call)|os\.system|exec\(/i.test(text);
+  const hasPythonNetworkFetch = /urllib\.request|urlretrieve|requests\.get|curl\b|wget\b|fetch\(/i.test(text);
+
+  if (hasExecutablePthImport && /_index\.js/i.test(text) && hasBunBootstrap && hasPythonExecution) {
+    findings.push(finding("critical", "hades-pth-bun-loader", filePath, `${sourceLabel} contains executable .pth-style Bun loader logic for _index.js.`));
+  }
+  if (/sys\.path/i.test(text) && /_index\.js/i.test(text) && /bun|subprocess/i.test(text)) {
+    findings.push(finding("critical", "hades-syspath-payload-loader", filePath, `${sourceLabel} searches sys.path for _index.js and attempts Bun/subprocess execution.`));
+  }
+  if (hasExecutablePthImport && /_index\.js/i.test(text) && hasPythonNetworkFetch && hasPythonExecution) {
+    findings.push(finding("high", "hades-executable-pth-network-launcher", filePath, `${sourceLabel} combines executable .pth import, network retrieval, subprocess execution, and JavaScript payload handoff.`));
+  }
+  if (matchesAnyPattern(text, [
+    ["Hades\\s*-\\s*The End for the ", "Damned"],
+    ["IfYouYankThisToken", "ItWillNukeTheComputerOfTheOwnerFully"],
+    ["results\\/results-", "\\*\\.json"],
+    ["results\\/results-"],
+    ["format", "-results"],
+    ["Run ", "Copilot"]
+  ])) {
+    findings.push(finding("high", "hades-github-exfil-marker", filePath, `${sourceLabel} references Hades GitHub or CI exfiltration markers.`));
+  }
+  if (matchesAnyPattern(text, [
+    ["\\.bun", "_ran"],
+    ["\\/tmp\\/b\\.zip"],
+    ["\\/tmp\\/b\\/bun"],
+    ["tempfile\\.gettempdir"],
+    ["bun\\s+run\\s+_index\\.js"]
+  ])) {
+    findings.push(finding("high", "hades-runtime-artifact-marker", filePath, `${sourceLabel} references Hades Bun runtime bootstrap artifacts.`));
+  }
+  if (matchesAnyPattern(text, [
+    ["thebeautiful", "marchoftime"],
+    ["thebeautiful", "snadsoftime"],
+    ["\\/tmp\\/\\.sshu", "-setup\\.js"],
+    ["\\/var\\/run\\/docker\\.sock"],
+    ["harden-runner"]
+  ])) {
+    findings.push(finding("high", "hades-follow-on-indicator", filePath, `${sourceLabel} references Hades follow-on hunting strings or host targets.`));
   }
 }
 
@@ -734,7 +845,8 @@ function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
     ["network-indicator", indicators.networkIndicators],
     ["workflow-indicator", indicators.workflowIndicators],
     ["campaign-indicator", indicators.campaignIndicators],
-    ["dprk-npm-rat-indicator", indicators.dprkNpmRatIndicators]
+    ["dprk-npm-rat-indicator", indicators.dprkNpmRatIndicators],
+    ["hades-indicator", indicators.hadesIndicators]
   ];
 
   if (typeof indicators.tokenDescriptionIndicator === "string") {
@@ -829,6 +941,14 @@ function rubyFileMentionsGemVersion(text, pkg, version) {
 
 function isPythonDependencyFile(base) {
   return PYTHON_DEPENDENCY_FILES.has(base) || /^requirements.*\.txt$/i.test(base);
+}
+
+function isPythonStartupHookFile(filePath) {
+  return PYTHON_STARTUP_HOOK_EXTENSIONS.has(path.extname(filePath));
+}
+
+function isNativePythonExtensionFile(filePath) {
+  return NATIVE_EXTENSION_EXTENSIONS.has(path.extname(filePath));
 }
 
 function isRubyDependencyFile(filePath, base) {
@@ -982,6 +1102,10 @@ function guidanceForRisk(risk) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function matchesAnyPattern(text, patternParts) {
+  return patternParts.some((parts) => new RegExp(parts.join(""), "i").test(text));
 }
 
 module.exports = {

@@ -42,13 +42,19 @@
     "MicrosoftSystem64",
     "/api/validate/keyboard-events"
   ],
+  "hadesIndicators": [],
   "tokenDescriptionIndicator": "",
   "activeNamespaces": [],
   "activePackages": [
     "terminal-logger-utils",
     "pretty-logger-utils",
     "ts-logger-pack",
-    "pinno-loggers"
+    "pinno-loggers",
+    "langchain-core-mcp",
+    "openai-mcp",
+    "instructor-mcp",
+    "tiktoken-mcp",
+    "ray-mcp-server"
   ],
   "rubyPayloadFiles": [],
   "rubyPayloadFileHashes": {},

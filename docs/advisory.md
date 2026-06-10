@@ -13,6 +13,19 @@ a second-stage bundled Node executable, and targets developer workstation data
 such as Telegram data, SSH keys, cloud configuration, crypto wallets, browser
 data, environment variables, clipboard data, and typed password fields.
 
+## Mini Shai-Hulud / Miasma / Hades PyPI Waves
+
+The June 2026 Socket and SecurityWeek reporting is included for pre-execution
+review because the Hades branch moved Shai-Hulud-style tradecraft into PyPI
+wheels. The checker flags affected PyPI package versions, `*-setup.pth` Python
+startup hooks, Bun bootstrap strings, `_index.js` launchers, `sys.path` payload
+searching, GitHub/CI exfiltration markers, and suspicious `.abi3.so` native
+extension layouts paired with `_index.js`.
+
+The generic pattern matters more than one exact Bun version: executable `.pth`
+plus network retrieval plus subprocess execution plus staged JavaScript payload
+is a high-risk install/startup execution chain.
+
 This checker does not perform cleanup and does not claim a host is clean. If
 anything may have executed, move from project review to host incident response.
 
