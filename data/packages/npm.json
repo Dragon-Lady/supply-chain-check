@@ -11,6 +11,9 @@
   "pinno-loggers": [
     "*"
   ],
+  "csc154-internall-depend": [
+    "*"
+  ],
   "node-ipc": [
     "9.1.6",
     "9.2.3",

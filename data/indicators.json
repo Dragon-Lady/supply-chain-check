@@ -50,6 +50,7 @@
     "pretty-logger-utils",
     "ts-logger-pack",
     "pinno-loggers",
+    "csc154-internall-depend",
     "langchain-core-mcp",
     "openai-mcp",
     "instructor-mcp",

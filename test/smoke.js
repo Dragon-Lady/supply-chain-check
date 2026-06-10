@@ -131,6 +131,22 @@ try {
   fs.rmSync(nodeIpcRoot, { recursive: true, force: true });
 }
 
+const csc154Root = makeFixture("scc-csc154-");
+try {
+  write(
+    path.join(csc154Root, "package.json"),
+    JSON.stringify({ name: "csc154-fixture", version: "1.0.0", dependencies: { "csc154-internall-depend": "^1.0.0" } }, null, 2)
+  );
+  write(path.join(csc154Root, "package-lock.json"), "node_modules/csc154-internall-depend\n");
+
+  const report = scanTarget(csc154Root);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version"));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package"));
+} finally {
+  fs.rmSync(csc154Root, { recursive: true, force: true });
+}
+
 const liteLlmRoot = makeFixture("scc-litellm-");
 try {
   write(path.join(liteLlmRoot, "requirements.txt"), "litellm==1.83.6\nstarlette==1.0.0\n");
