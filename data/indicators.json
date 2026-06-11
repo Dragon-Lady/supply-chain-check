@@ -69,6 +69,7 @@
     "pinno-loggers",
     "csc154-internall-depend",
     "@validate-sdk/v2",
+    "google-cloud-secret-manager-config-poc",
     "@solana-labs/ancor",
     "@solana-labs/etherjs",
     "@solana-labs/spl-toke",

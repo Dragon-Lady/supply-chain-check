@@ -163,6 +163,22 @@ try {
   fs.rmSync(validateSdkRoot, { recursive: true, force: true });
 }
 
+const googleSecretManagerPocRoot = makeFixture("scc-google-secret-manager-poc-");
+try {
+  write(
+    path.join(googleSecretManagerPocRoot, "package.json"),
+    JSON.stringify({ name: "google-secret-manager-poc-fixture", version: "1.0.0", dependencies: { "google-cloud-secret-manager-config-poc": "^1.0.0" } }, null, 2)
+  );
+  write(path.join(googleSecretManagerPocRoot, "package-lock.json"), "node_modules/google-cloud-secret-manager-config-poc\n");
+
+  const report = scanTarget(googleSecretManagerPocRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version"));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package"));
+} finally {
+  fs.rmSync(googleSecretManagerPocRoot, { recursive: true, force: true });
+}
+
 const solanaFakeFixRoot = makeFixture("scc-solana-fakefix-");
 try {
   write(

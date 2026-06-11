@@ -52,6 +52,9 @@ report:
 - Deno `run -A`, hidden PowerShell/Windows loader, Registry Run key, mutex, and
   EXE-dropper indicators
 
+GitHub Advisory `GHSA-g6v5-9xpp-6hpx` also marks the npm package
+`google-cloud-secret-manager-config-poc` as malware with all versions affected.
+
 The checker also reports package lifecycle scripts and GitHub-resolved
 dependencies for review because those are common package-supply-chain risk
 surfaces.
@@ -100,6 +103,8 @@ machine.
   https://www.securityweek.com/over-100-npm-pypi-packages-hit-in-new-shai-hulud-supply-chain-attacks/
 - JFrog Solana FakeFix / CMS Windows loader report:
   https://research.jfrog.com/post/solana-fakefix/
+- GitHub Advisory for `google-cloud-secret-manager-config-poc`:
+  https://github.com/advisories/GHSA-g6v5-9xpp-6hpx
 - Socket / pnpm 11.5 staged publish recognition:
   https://socket.dev/blog/pnpm-11-5-adds-support-for-recognizing-npm-staged-publishes
 - npm staged publishing docs:

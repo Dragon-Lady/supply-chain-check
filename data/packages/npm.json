@@ -17,6 +17,9 @@
   "@validate-sdk/v2": [
     "*"
   ],
+  "google-cloud-secret-manager-config-poc": [
+    "*"
+  ],
   "@solana-labs/ancor": [
     "*"
   ],
