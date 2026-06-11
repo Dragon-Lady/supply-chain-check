@@ -187,8 +187,8 @@ try {
       name: "ottercookie-fixture",
       version: "1.0.0",
       dependencies: {
-        "bjs-biginteger": "5.0.6",
-        "bjs-lint-builder": "1.0.5"
+        "bjs-biginteger": "5.0.6", // push-guard: ignore
+        "bjs-lint-builder": "1.0.5" // push-guard: ignore
       },
       scripts: {
         postinstall: "node test.js"
@@ -199,24 +199,24 @@ try {
     path.join(otterCookieRoot, "package-lock.json"),
     JSON.stringify({
       packages: {
-        "node_modules/bjs-biginteger": { version: "5.0.6" },
-        "node_modules/bjs-lint-builders": { version: "1.1.0" }
+        "node_modules/bjs-biginteger": { version: "5.0.6" }, // push-guard: ignore
+        "node_modules/bjs-lint-builders": { version: "1.1.0" } // push-guard: ignore
       }
     })
   );
   write(
     path.join(otterCookieRoot, "test.js"),
     [
-      "const primary = 'https://cloudflareinsights.vercel.app/api/v1';",
-      "const secondary = 'https://cloudflarefirewall.vercel.app/api/v1';",
-      "const legacy = 'https://cloudflaresecurity.vercel.app/api/ssh-key';"
+      "const primary = 'https://cloudflareinsights.vercel.app/api/v1';", // push-guard: ignore
+      "const secondary = 'https://cloudflarefirewall.vercel.app/api/v1';", // push-guard: ignore
+      "const legacy = 'https://cloudflaresecurity.vercel.app/api/ssh-key';" // push-guard: ignore
     ].join("\n")
   );
 
   const report = scanTarget(otterCookieRoot);
   assert.strictEqual(report.risk, "likely-exposed");
-  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("bjs-biginteger")));
-  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-version" && finding.message.includes("bjs-lint-builders@1.1.0")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("bjs-biginteger"))); // push-guard: ignore
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-version" && finding.message.includes("bjs-lint-builders@1.1.0"))); // push-guard: ignore
   assert(report.findings.some((finding) => finding.type === "ottercookie-indicator"));
 } finally {
   fs.rmSync(otterCookieRoot, { recursive: true, force: true });
