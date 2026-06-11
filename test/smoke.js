@@ -179,6 +179,49 @@ try {
   fs.rmSync(googleSecretManagerPocRoot, { recursive: true, force: true });
 }
 
+const otterCookieRoot = makeFixture("scc-ottercookie-");
+try {
+  write(
+    path.join(otterCookieRoot, "package.json"),
+    JSON.stringify({
+      name: "ottercookie-fixture",
+      version: "1.0.0",
+      dependencies: {
+        "bjs-biginteger": "5.0.6",
+        "bjs-lint-builder": "1.0.5"
+      },
+      scripts: {
+        postinstall: "node test.js"
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(otterCookieRoot, "package-lock.json"),
+    JSON.stringify({
+      packages: {
+        "node_modules/bjs-biginteger": { version: "5.0.6" },
+        "node_modules/bjs-lint-builders": { version: "1.1.0" }
+      }
+    })
+  );
+  write(
+    path.join(otterCookieRoot, "test.js"),
+    [
+      "const primary = 'https://cloudflareinsights.vercel.app/api/v1';",
+      "const secondary = 'https://cloudflarefirewall.vercel.app/api/v1';",
+      "const legacy = 'https://cloudflaresecurity.vercel.app/api/ssh-key';"
+    ].join("\n")
+  );
+
+  const report = scanTarget(otterCookieRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("bjs-biginteger")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-version" && finding.message.includes("bjs-lint-builders@1.1.0")));
+  assert(report.findings.some((finding) => finding.type === "ottercookie-indicator"));
+} finally {
+  fs.rmSync(otterCookieRoot, { recursive: true, force: true });
+}
+
 const solanaFakeFixRoot = makeFixture("scc-solana-fakefix-");
 try {
   write(

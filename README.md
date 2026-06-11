@@ -55,6 +55,11 @@ report:
 GitHub Advisory `GHSA-g6v5-9xpp-6hpx` also marks the npm package
 `google-cloud-secret-manager-config-poc` as malware with all versions affected.
 
+Panther's April 2026 OtterCookie report adds exact-version npm detections for
+wrapper and payload packages including `bjs-biginteger`,
+`bjs-lint-builder(s)`, `hjs-lint-builders`, `sjs-builder(s)`, and
+`npm-doc-builder`, plus Vercel-hosted C2 indicators.
+
 The checker also reports package lifecycle scripts and GitHub-resolved
 dependencies for review because those are common package-supply-chain risk
 surfaces.
@@ -105,6 +110,8 @@ machine.
   https://research.jfrog.com/post/solana-fakefix/
 - GitHub Advisory for `google-cloud-secret-manager-config-poc`:
   https://github.com/advisories/GHSA-g6v5-9xpp-6hpx
+- Panther OtterCookie npm campaign:
+  https://panther.com/blog/tracking-an-ottercookie-infostealer-campaign-across-npm
 - Socket / pnpm 11.5 staged publish recognition:
   https://socket.dev/blog/pnpm-11-5-adds-support-for-recognizing-npm-staged-publishes
 - npm staged publishing docs:

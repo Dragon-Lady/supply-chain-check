@@ -20,6 +20,29 @@
   "google-cloud-secret-manager-config-poc": [
     "*"
   ],
+  "bjs-lint-builders": [
+    "1.0.4",
+    "1.0.5",
+    "1.1.0"
+  ],
+  "bjs-lint-builder": [
+    "1.0.5"
+  ],
+  "bjs-biginteger": [
+    "5.0.6"
+  ],
+  "hjs-lint-builders": [
+    "1.0.4"
+  ],
+  "sjs-builders": [
+    "1.0.4"
+  ],
+  "sjs-builder": [
+    "1.0.4"
+  ],
+  "npm-doc-builder": [
+    "1.0.5"
+  ],
   "@solana-labs/ancor": [
     "*"
   ],

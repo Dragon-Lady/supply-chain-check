@@ -871,6 +871,7 @@ function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
     ["campaign-indicator", indicators.campaignIndicators],
     ["dprk-npm-rat-indicator", indicators.dprkNpmRatIndicators],
     ["hades-indicator", indicators.hadesIndicators],
+    ["ottercookie-indicator", indicators.otterCookieIndicators],
     ["solana-fakefix-indicator", indicators.solanaFakeFixIndicators]
   ];
 
