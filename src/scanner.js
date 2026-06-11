@@ -10,6 +10,7 @@ const LOCKFILES = new Set([
   "yarn.lock"
 ]);
 const PYTHON_DEPENDENCY_FILES = new Set(["requirements.txt", "pyproject.toml", "uv.lock", "Pipfile.lock"]);
+const PYTHON_SOURCE_EXTENSIONS = new Set([".py"]);
 const COMPOSER_DEPENDENCY_FILES = new Set(["composer.json", "composer.lock"]);
 const RUBY_DEPENDENCY_FILES = new Set(["Gemfile", "Gemfile.lock"]);
 const RUBY_SOURCE_EXTENSIONS = new Set([".rb"]);
@@ -132,6 +133,11 @@ function scanTarget(targetPath, options = {}) {
 
     if (isPythonStartupHookFile(filePath)) {
       scanPythonStartupHookFile(filePath, advisory, findings);
+      return;
+    }
+
+    if (isPythonSourceFile(filePath)) {
+      scanPythonSourceFile(filePath, advisory, findings);
       return;
     }
 
@@ -494,6 +500,10 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
   scanLiteLlmText(filePath, text, findings, "Python dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
+    if (packageIsListedAllVersions(versions) && pythonFileMentionsPackage(text, pkg)) {
+      findings.push(finding("critical", "known-bad-pypi-package", filePath, `Python dependency file references ${pkg}, which is listed as compromised for all observed versions.`));
+      continue;
+    }
     for (const version of versions) {
       if (pythonFileMentionsPackageVersion(text, pkg, version)) {
         findings.push(finding("critical", "known-bad-pypi-version", filePath, `Python dependency file references ${pkg}==${version}.`));
@@ -514,6 +524,20 @@ function scanPythonStartupHookFile(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, text, advisory, findings, "Python startup hook");
   scanMiasmaText(filePath, text, findings, "Python startup hook");
   scanHadesText(filePath, text, findings, "Python startup hook");
+}
+
+function scanPythonSourceFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read Python source file: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "Python source file");
+  scanMiasmaText(filePath, text, findings, "Python source file");
+  scanHadesText(filePath, text, findings, "Python source file");
 }
 
 function scanNativePythonExtensionFile(filePath, findings) {
@@ -846,7 +870,8 @@ function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
     ["workflow-indicator", indicators.workflowIndicators],
     ["campaign-indicator", indicators.campaignIndicators],
     ["dprk-npm-rat-indicator", indicators.dprkNpmRatIndicators],
-    ["hades-indicator", indicators.hadesIndicators]
+    ["hades-indicator", indicators.hadesIndicators],
+    ["solana-fakefix-indicator", indicators.solanaFakeFixIndicators]
   ];
 
   if (typeof indicators.tokenDescriptionIndicator === "string") {
@@ -882,6 +907,16 @@ function pythonFileMentionsPackageVersion(text, pkg, version) {
   const patterns = [
     new RegExp(`(^|[\\s"'\\[]|name\\s*=\\s*["'])${escapedPkg}(["'\\]\\s]|\\s*(==|===|~=|>=|<=|=)\\s*${escapedVersion})`, "im"),
     new RegExp(`${escapedPkg}[^\\n\\r]{0,200}${escapedVersion}`, "i")
+  ];
+  return patterns.some((pattern) => pattern.test(normalizedText));
+}
+
+function pythonFileMentionsPackage(text, pkg) {
+  const escapedPkg = escapeRegExp(pkg);
+  const normalizedText = text.toLowerCase();
+  const patterns = [
+    new RegExp(`(^|[\\s"'\\[]|name\\s*=\\s*["'])${escapedPkg}(["'\\]\\s]|\\s*(==|===|~=|>=|<=|=)\\s*[^\\n\\r]+)`, "im"),
+    new RegExp(`\\b${escapedPkg}\\b`, "i")
   ];
   return patterns.some((pattern) => pattern.test(normalizedText));
 }
@@ -945,6 +980,10 @@ function isPythonDependencyFile(base) {
 
 function isPythonStartupHookFile(filePath) {
   return PYTHON_STARTUP_HOOK_EXTENSIONS.has(path.extname(filePath));
+}
+
+function isPythonSourceFile(filePath) {
+  return PYTHON_SOURCE_EXTENSIONS.has(path.extname(filePath));
 }
 
 function isNativePythonExtensionFile(filePath) {

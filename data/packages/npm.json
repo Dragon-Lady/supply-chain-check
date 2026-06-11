@@ -17,6 +17,69 @@
   "@validate-sdk/v2": [
     "*"
   ],
+  "@solana-labs/ancor": [
+    "*"
+  ],
+  "@solana-labs/etherjs": [
+    "*"
+  ],
+  "@solana-labs/spl-toke": [
+    "*"
+  ],
+  "@solana-labs/web3-js": [
+    "*"
+  ],
+  "@solana-labs/web3.js": [
+    "*"
+  ],
+  "@solana-labs/web3js": [
+    "*"
+  ],
+  "cms-github": [
+    "*"
+  ],
+  "cms-helpgit": [
+    "*"
+  ],
+  "cms-storehub": [
+    "*"
+  ],
+  "shopifyto-cms": [
+    "*"
+  ],
+  "solana-js-client": [
+    "*"
+  ],
+  "solana-mev-bot": [
+    "*"
+  ],
+  "solana-rpc-client": [
+    "*"
+  ],
+  "solana-web3-community": [
+    "*"
+  ],
+  "solana-web3-fixed": [
+    "*"
+  ],
+  "solana-web3-fork": [
+    "*"
+  ],
+  "solana-web3-lts": [
+    "*"
+  ],
+  "solana-web3-patched": [
+    "*"
+  ],
+  "solana-web3-stable": [
+    "*"
+  ],
+  "solana-web3-v1": [
+    "*"
+  ],
+  "to-cms": [
+    "*"
+  ],
   "node-ipc": [
     "9.1.6",
     "9.2.3",

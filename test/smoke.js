@@ -163,6 +163,62 @@ try {
   fs.rmSync(validateSdkRoot, { recursive: true, force: true });
 }
 
+const solanaFakeFixRoot = makeFixture("scc-solana-fakefix-");
+try {
+  write(
+    path.join(solanaFakeFixRoot, "package.json"),
+    JSON.stringify({
+      name: "solana-fakefix-fixture",
+      version: "1.0.0",
+      dependencies: {
+        "@solana-labs/web3.js": "^2.0.0",
+        "cms-storehub": "^1.0.0"
+      },
+      scripts: {
+        postinstall: "node install.js"
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(solanaFakeFixRoot, "package-lock.json"),
+    [
+      "node_modules/@solana-labs/web3.js",
+      "node_modules/cms-storehub"
+    ].join("\n")
+  );
+  write(
+    path.join(solanaFakeFixRoot, "requirements.txt"),
+    "solana-web3-py==0.0.1\nspl-token-py\n"
+  );
+  write(
+    path.join(solanaFakeFixRoot, "pkg", "__init__.py"),
+    [
+      "targets = ['.config/solana/id.json', '.solana/id.json', 'wallet.json', '.ssh/id_ed25519', '.aws/credentials']",
+      "url = 'https://api.telegram.org/bot<redacted>/sendMessage'",
+      "rpc = 'http://104.239.66.223:8899'"
+    ].join("\n")
+  );
+  write(
+    path.join(solanaFakeFixRoot, "loader.js"),
+    [
+      "const c2 = 'http://77.90.185.225/v026a4a141fd9e7d2dd.js';",
+      "const cmd = 'deno run -A';",
+      "const persist = 'HKCU:\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run';",
+      "const headless = 'conhost.exe --headless';"
+    ].join("\n")
+  );
+
+  const report = scanTarget(solanaFakeFixRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  const types = new Set(report.findings.map((finding) => finding.type));
+  assert(types.has("known-bad-requested-version"));
+  assert(types.has("known-bad-lockfile-package"));
+  assert(types.has("known-bad-pypi-package"));
+  assert(types.has("solana-fakefix-indicator"));
+} finally {
+  fs.rmSync(solanaFakeFixRoot, { recursive: true, force: true });
+}
+
 const liteLlmRoot = makeFixture("scc-litellm-");
 try {
   write(path.join(liteLlmRoot, "requirements.txt"), "litellm==1.83.6\nstarlette==1.0.0\n");

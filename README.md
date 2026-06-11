@@ -42,6 +42,16 @@ waves reported by Socket and SecurityWeek:
   `format-results`, and the Hades repository-description string
 - native `.abi3.so` extension layouts paired with `_index.js`
 
+The checker also covers JFrog's June 2026 Solana FakeFix / CMS Windows loader
+report:
+
+- malicious Solana-themed npm and PyPI package names
+- CMS-themed npm loader package names
+- Solana keypair, wallet, SSH, AWS, `.env`, and Telegram-exfil indicators
+- suspicious Solana RPC redirection and fake update URL markers
+- Deno `run -A`, hidden PowerShell/Windows loader, Registry Run key, mutex, and
+  EXE-dropper indicators
+
 The checker also reports package lifecycle scripts and GitHub-resolved
 dependencies for review because those are common package-supply-chain risk
 surfaces.
@@ -88,6 +98,8 @@ machine.
   https://socket.dev/blog/mini-shai-hulud-miasma-and-hades-worms-target-bioinformatics-and-mcp-developers-via-malicious
 - SecurityWeek Shai-Hulud Miasma/Hades summary:
   https://www.securityweek.com/over-100-npm-pypi-packages-hit-in-new-shai-hulud-supply-chain-attacks/
+- JFrog Solana FakeFix / CMS Windows loader report:
+  https://research.jfrog.com/post/solana-fakefix/
 - Socket / pnpm 11.5 staged publish recognition:
   https://socket.dev/blog/pnpm-11-5-adds-support-for-recognizing-npm-staged-publishes
 - npm staged publishing docs:
