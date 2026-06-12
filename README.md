@@ -60,6 +60,21 @@ wrapper and payload packages including `bjs-biginteger`,
 `bjs-lint-builder(s)`, `hjs-lint-builders`, `sjs-builder(s)`, and
 `npm-doc-builder`, plus Vercel-hosted C2 indicators.
 
+SafeDep's Astro config-as-code report adds review checks for suspicious
+`astro.config.*` loader behavior, blockchain/C2 relay markers, horizontally
+hidden executable-looking payload lines, and `.gitignore` entries that hide
+reported PR helper artifacts.
+
+The Hacker News June 2026 OpenClaw coverage adds review checks for OpenClaw
+versions before `2026.4.23` and high-risk OpenClaw configuration that combines
+open inbound DMs, wildcard sender allowlists, or host/main/disabled sandbox
+mode.
+
+GitHub's June 2026 npm v12 notice adds review checks for old npm pins,
+dependency install-script approval readiness, Git dependency sources, remote
+tarball dependency sources, and broad repo `.npmrc` opt-ins that bypass the new
+default-deny posture. These are local operator notifications only.
+
 The checker also reports package lifecycle scripts and GitHub-resolved
 dependencies for review because those are common package-supply-chain risk
 surfaces.
@@ -112,6 +127,14 @@ machine.
   https://github.com/advisories/GHSA-g6v5-9xpp-6hpx
 - Panther OtterCookie npm campaign:
   https://panther.com/blog/tracking-an-ottercookie-infostealer-campaign-across-npm
+- SafeDep Astro config blockchain C2 supply-chain report:
+  https://safedep.io/astro-config-blockchain-c2-supply-chain/
+- The Hacker News OpenClaw prompt-injection and agent-phishing report:
+  https://thehackernews.com/2026/06/new-attacks-trick-openclaw-ai-agent.html
+- GitHub npm v12 breaking changes notice:
+  https://github.blog/changelog/2026-06-09-upcoming-breaking-changes-for-npm-v12/
+- The Hacker News npm v12 install-script default change summary:
+  https://thehackernews.com/2026/06/github-to-disable-npm-install-scripts.html
 - Socket / pnpm 11.5 staged publish recognition:
   https://socket.dev/blog/pnpm-11-5-adds-support-for-recognizing-npm-staged-publishes
 - npm staged publishing docs:

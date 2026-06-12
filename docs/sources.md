@@ -8,6 +8,10 @@
 - Socket Hades PyPI wave analysis: https://socket.dev/blog/shai-hulud-descends-to-hades-miasma-pypi-wave
 - Socket newer Miasma/Hades PyPI wave analysis: https://socket.dev/blog/mini-shai-hulud-miasma-and-hades-worms-target-bioinformatics-and-mcp-developers-via-malicious
 - SecurityWeek Shai-Hulud Miasma/Hades summary: https://www.securityweek.com/over-100-npm-pypi-packages-hit-in-new-shai-hulud-supply-chain-attacks/
+- SafeDep Astro config blockchain C2 supply-chain report: https://safedep.io/astro-config-blockchain-c2-supply-chain/
+- The Hacker News OpenClaw prompt-injection and agent-phishing report: https://thehackernews.com/2026/06/new-attacks-trick-openclaw-ai-agent.html
+- GitHub npm v12 breaking changes notice: https://github.blog/changelog/2026-06-09-upcoming-breaking-changes-for-npm-v12/
+- The Hacker News npm v12 install-script default change summary: https://thehackernews.com/2026/06/github-to-disable-npm-install-scripts.html
 - Socket: pnpm 11.5 staged publish recognition: https://socket.dev/blog/pnpm-11-5-adds-support-for-recognizing-npm-staged-publishes
 - npm staged publishing command docs: https://docs.npmjs.com/cli/v11/commands/npm-stage/
 - GitHub changelog: staged publishing and npm install-time controls: https://github.blog/changelog/2026-05-22-staged-publishing-and-new-install-time-controls-for-npm/

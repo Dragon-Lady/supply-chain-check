@@ -15,6 +15,8 @@ const COMPOSER_DEPENDENCY_FILES = new Set(["composer.json", "composer.lock"]);
 const RUBY_DEPENDENCY_FILES = new Set(["Gemfile", "Gemfile.lock"]);
 const RUBY_SOURCE_EXTENSIONS = new Set([".rb"]);
 const PACKAGE_MANIFEST = "package.json";
+const GITIGNORE_FILE = ".gitignore";
+const NPM_CONFIG_FILE = ".npmrc";
 const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json"]);
 const DEPLOYMENT_CONFIG_FILES = new Set(["Dockerfile", "docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
 const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
@@ -27,6 +29,9 @@ const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "cov
 const LITELLM_AFFECTED_MIN = "1.74.2";
 const LITELLM_FIXED = "1.83.7";
 const STARLETTE_FIXED = "1.0.1";
+const OPENCLAW_FIXED = "2026.4.23";
+const OPENCLAW_CONFIG_FILES = new Set([".crabbox.yaml", ".crabbox.yml"]);
+const NPM_V12_PREPARE_MIN = "11.16.0";
 const LITELLM_MCP_TEST_ROUTES = [
   "/mcp-rest/test/connection",
   "/mcp-rest/test/tools/list"
@@ -117,6 +122,26 @@ function scanTarget(targetPath, options = {}) {
     if (base === PACKAGE_MANIFEST) {
       seen.manifests += 1;
       scanPackageJson(filePath, advisory, findings, trustSignals);
+      return;
+    }
+
+    if (base === GITIGNORE_FILE) {
+      scanGitignoreFile(filePath, findings);
+      return;
+    }
+
+    if (base === NPM_CONFIG_FILE) {
+      scanNpmConfigFile(filePath, findings, trustSignals);
+      return;
+    }
+
+    if (isAstroConfigFile(filePath, base)) {
+      scanAstroConfigFile(filePath, findings);
+      return;
+    }
+
+    if (isOpenClawConfigFile(filePath, base)) {
+      scanOpenClawConfigFile(filePath, findings);
       return;
     }
 
@@ -269,6 +294,8 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
   scanManifestText(filePath, rawText, advisory, findings);
   scanMiasmaText(filePath, rawText, findings, "Manifest");
   scanHadesText(filePath, rawText, findings, "Manifest");
+  scanOpenClawText(filePath, rawText, findings, "Manifest");
+  scanNpmV12Manifest(filePath, rawText, manifest, findings, trustSignals);
   scanNpmStagedPublishSignals(filePath, rawText, trustSignals);
 
   if (manifest.name && manifest.version && versionIsListed(advisory.packages[manifest.name], manifest.version)) {
@@ -407,6 +434,8 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
   }
 
   scanLiteLlmDependencySpec(filePath, section, name, spec, findings);
+  scanOpenClawDependencySpec(filePath, section, name, spec, findings);
+  scanNpmV12DependencySpec(filePath, section, name, spec, findings);
 }
 
 function scanTextFile(filePath, advisory, findings, trustSignals) {
@@ -440,6 +469,8 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
   scanMiasmaText(filePath, text, findings, "Lockfile");
   scanHadesText(filePath, text, findings, "Lockfile");
   scanLiteLlmText(filePath, text, findings, "Lockfile");
+  scanOpenClawText(filePath, text, findings, "Lockfile");
+  scanNpmV12LockfileText(filePath, text, findings);
   scanNpmStagedPublishSignals(filePath, text, trustSignals);
 
   if (text.includes(indicators.maliciousOptionalDependencyName)) {
@@ -664,6 +695,7 @@ function scanToolConfigFile(filePath, advisory, findings) {
   scanMiasmaText(filePath, text, findings, "Tool config");
   scanHadesText(filePath, text, findings, "Tool config");
   scanLiteLlmText(filePath, text, findings, "Tool config");
+  scanOpenClawText(filePath, text, findings, "Tool config");
 }
 
 function scanDeploymentConfigFile(filePath, advisory, findings) {
@@ -679,6 +711,7 @@ function scanDeploymentConfigFile(filePath, advisory, findings) {
   scanMiasmaText(filePath, text, findings, "Deployment config");
   scanHadesText(filePath, text, findings, "Deployment config");
   scanLiteLlmText(filePath, text, findings, "Deployment config");
+  scanOpenClawText(filePath, text, findings, "Deployment config");
 }
 
 function scanJavaScriptSourceFile(filePath, advisory, findings) {
@@ -694,6 +727,55 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
   scanMiasmaText(filePath, text, findings, "JavaScript source file");
   scanHadesText(filePath, text, findings, "JavaScript source file");
   scanLiteLlmText(filePath, text, findings, "JavaScript source file");
+  scanOpenClawText(filePath, text, findings, "JavaScript source file");
+}
+
+function scanGitignoreFile(filePath, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read .gitignore: ${error.message}`));
+    return;
+  }
+
+  scanGitignoreText(filePath, text, findings);
+}
+
+function scanAstroConfigFile(filePath, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read Astro config: ${error.message}`));
+    return;
+  }
+
+  scanAstroConfigText(filePath, text, findings);
+}
+
+function scanOpenClawConfigFile(filePath, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read OpenClaw config: ${error.message}`));
+    return;
+  }
+
+  scanOpenClawText(filePath, text, findings, "OpenClaw config");
+}
+
+function scanNpmConfigFile(filePath, findings, trustSignals) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read .npmrc: ${error.message}`));
+    return;
+  }
+
+  scanNpmV12ConfigText(filePath, text, findings, trustSignals);
 }
 
 function scanMiasmaPath(filePath, findings) {
@@ -718,6 +800,68 @@ function scanHadesPath(filePath, findings) {
   if (normalized.endsWith("/.github/workflows/codeql.yml")) {
     findings.push(finding("medium", "hades-codeql-workflow-path", filePath, "Unexpected CodeQL workflow changes are listed as a Hades follow-on indicator; review provenance."));
   }
+}
+
+function scanGitignoreText(filePath, text, findings) {
+  if (/\b(branch_structure\.json|temp_auto_push\.bat|temp_interactive_push\.bat)\b/i.test(text)) {
+    findings.push(finding(
+      "high",
+      "gitignore-hidden-pr-tooling",
+      filePath,
+      ".gitignore hides PR automation/helper artifact names reported with Astro config C2 injection."
+    ));
+  }
+}
+
+function scanAstroConfigText(filePath, text, findings) {
+  const hasCreateRequire = /\bcreateRequire\s*\(/i.test(text);
+  const hasEvalSink = /\b(eval|Function)\s*\(/i.test(text);
+  const hasNetworkLoader = /\brequire\s*\(\s*['"](?:node:)?https?['"]\s*\)|\bfrom\s+['"](?:node:)?https?['"]|\bhttps?\s*\.\s*(?:request|get)\s*\(|\bfetch\s*\(/i.test(text);
+  const hasGlobalMutation = /global\s*(?:\.|\[)/i.test(text);
+  const hasBlockchainRelay = /trongrid|aptoslabs|bsc-dataseed|publicnode|eth_getTransactionByHash|Sec-V|TMfKQEd7TJJa5xNZJZ2Lep838vrzrs7mAP/i.test(text);
+  const hasHiddenExecutableLine = text
+    .split(/\r?\n/)
+    .some((line) => line.length > 300 && /[ \t]{80,}\S/.test(line) && astroConfigLineHasLoaderSignal(line));
+
+  if (hasCreateRequire && (hasEvalSink || hasNetworkLoader || hasGlobalMutation || hasBlockchainRelay)) {
+    findings.push(finding(
+      "critical",
+      "astro-config-require-loader",
+      filePath,
+      "Astro config reconstructs require and also contains executable loader behavior. Astro evaluates this file during dev/build/preview."
+    ));
+  }
+
+  if (hasNetworkLoader && hasEvalSink) {
+    findings.push(finding(
+      "critical",
+      "astro-config-network-eval-loader",
+      filePath,
+      "Astro config combines network retrieval with eval/function execution behavior."
+    ));
+  }
+
+  if (hasBlockchainRelay) {
+    findings.push(finding(
+      "high",
+      "astro-config-blockchain-c2-marker",
+      filePath,
+      "Astro config references blockchain/C2 relay markers reported in config-as-code supply-chain attacks."
+    ));
+  }
+
+  if (hasHiddenExecutableLine) {
+    findings.push(finding(
+      "high",
+      "astro-config-hidden-payload-line",
+      filePath,
+      "Astro config contains a long horizontally hidden executable-looking payload line."
+    ));
+  }
+}
+
+function astroConfigLineHasLoaderSignal(line) {
+  return /createRequire|eval\s*\(|Function\s*\(|global\s*(?:\.|\[)|Buffer\.from|https?\.|\.request\s*\(|\.get\s*\(|fetch\s*\(|trongrid|aptoslabs|bsc-dataseed|publicnode/i.test(line);
 }
 
 function scanMiasmaMarkerFile(filePath, findings) {
@@ -826,6 +970,91 @@ function scanLiteLlmDependencySpec(filePath, section, name, spec, findings) {
   }
 }
 
+function scanOpenClawDependencySpec(filePath, section, name, spec, findings) {
+  if (normalizePythonPackageName(name) !== "openclaw") return;
+
+  const versions = versionsInSpec(spec);
+  for (const version of versions) {
+    if (compareDottedVersion(version, OPENCLAW_FIXED) < 0) {
+      findings.push(finding("high", "openclaw-vulnerable-version", filePath, `${section}.${name} references OpenClaw ${version}. Upgrade to openclaw>=${OPENCLAW_FIXED} for the message-object prompt-boundary fix.`));
+    }
+  }
+}
+
+function scanNpmV12Manifest(filePath, rawText, manifest, findings, trustSignals) {
+  const npmVersions = [];
+  if (typeof manifest.packageManager === "string" && /^npm@/i.test(manifest.packageManager)) {
+    npmVersions.push(...versionsInSpec(manifest.packageManager));
+  }
+  if (manifest.engines && typeof manifest.engines.npm === "string") {
+    npmVersions.push(...versionsInSpec(manifest.engines.npm));
+  }
+
+  for (const version of npmVersions) {
+    if (compareDottedVersion(version, NPM_V12_PREPARE_MIN) < 0) {
+      findings.push(finding("medium", "npm-v12-prep-old-npm-pin", filePath, `Project pins npm ${version}; npm ${NPM_V12_PREPARE_MIN}+ shows install-script and non-registry-source migration warnings before npm v12.`));
+    }
+  }
+
+  if (/"allowScripts"\s*:/i.test(rawText) || /"allow-scripts"\s*:/i.test(rawText)) {
+    trustSignals.push(trustSignal(
+      "npm-v12-install-script-allowlist",
+      filePath,
+      "package.json contains npm install-script approval metadata for npm v12 readiness."
+    ));
+  }
+}
+
+function scanNpmV12DependencySpec(filePath, section, name, spec, findings) {
+  if (/^(?:git\+|git:\/\/|github:|gitlab:|bitbucket:)|github\.com[:/]/i.test(spec)) {
+    findings.push(finding("medium", "npm-v12-git-dependency-review", filePath, `${section}.${name} resolves from a Git source. npm v12 requires explicit --allow-git approval for Git dependencies.`));
+  }
+
+  if (/^https?:\/\/.+\.(?:tgz|tar\.gz)(?:[?#].*)?$/i.test(spec)) {
+    findings.push(finding("medium", "npm-v12-remote-tarball-review", filePath, `${section}.${name} resolves from a remote tarball URL. npm v12 requires explicit --allow-remote approval for remote URL dependencies.`));
+  }
+}
+
+function scanNpmV12LockfileText(filePath, text, findings) {
+  if (/"hasInstallScript"\s*:\s*true/i.test(text) && !/"allowScripts"\s*:/i.test(text)) {
+    findings.push(finding("medium", "npm-v12-install-script-approval-review", filePath, "Lockfile records dependency install scripts. Run npm 11.16+ and review npm approve-scripts output before npm v12."));
+  }
+
+  if (/"resolved"\s*:\s*"https?:\/\/[^"]+\.(?:tgz|tar\.gz)(?:[?#][^"]*)?"/i.test(text)) {
+    findings.push(finding("medium", "npm-v12-remote-tarball-review", filePath, "Lockfile references a remote tarball URL. npm v12 requires explicit --allow-remote approval for remote URL dependencies."));
+  }
+
+  if (/github\.com[:/][^\s"']+|(?:git\+https?|git):\/\/[^\s"']+/i.test(text)) {
+    findings.push(finding("medium", "npm-v12-git-dependency-review", filePath, "Lockfile references a Git dependency source. npm v12 requires explicit --allow-git approval for Git dependencies."));
+  }
+}
+
+function scanNpmV12ConfigText(filePath, text, findings, trustSignals) {
+  if (/^\s*strict-allow-scripts\s*=\s*true\s*$/im.test(text)) {
+    trustSignals.push(trustSignal(
+      "npm-v12-strict-allow-scripts",
+      filePath,
+      ".npmrc opts into strict install-script approval behavior."
+    ));
+  }
+
+  if (/^\s*ignore-scripts\s*=\s*true\s*$/im.test(text)) {
+    findings.push(finding("low", "npm-v12-ignore-scripts-migration-note", filePath, ".npmrc uses ignore-scripts=true. npm approve-scripts can still list pending approvals, but ignore-scripts takes precedence until removed."));
+  }
+
+  if (/^\s*allow-git\s*=\s*(?:true|all|\*)\s*$/im.test(text)) {
+    findings.push(finding("medium", "npm-v12-broad-allow-git", filePath, ".npmrc broadly allows Git dependency resolution. npm v12 defaults --allow-git to none; keep approvals narrow and intentional."));
+  }
+
+  if (/^\s*allow-remote\s*=\s*(?:true|all|\*)\s*$/im.test(text)) {
+    findings.push(finding("medium", "npm-v12-broad-allow-remote", filePath, ".npmrc broadly allows remote URL dependency resolution. npm v12 defaults --allow-remote to none; keep approvals narrow and intentional."));
+  }
+
+  if (/^\s*allow-scripts\s*=\s*(?:true|all|\*)\s*$/im.test(text)) {
+    findings.push(finding("medium", "npm-v12-broad-allow-scripts", filePath, ".npmrc broadly allows install scripts. npm v12 moves install-script execution to explicit package approvals."));
+  }
+}
+
 function scanLiteLlmText(filePath, text, findings, sourceLabel) {
   const hasLiteLlm = /\blitellm\b|LiteLLM|LITELLM|mcp-rest/.test(text);
   const liteLlmVersions = packageVersionsInText(text, "litellm");
@@ -860,6 +1089,34 @@ function scanLiteLlmText(filePath, text, findings, sourceLabel) {
     if (keyTerms.length > 0) {
       findings.push(finding("medium", "litellm-provider-key-blast-radius", filePath, `${sourceLabel} references LiteLLM with provider credential environment names: ${keyTerms.join(", ")}. Do not expose proxy/admin/MCP routes publicly.`));
     }
+  }
+}
+
+function scanOpenClawText(filePath, text, findings, sourceLabel) {
+  const maybeOpenClaw =
+    /\bopenclaw\b/i.test(text) ||
+    isOpenClawConfigFile(filePath, path.basename(filePath)) ||
+    isOpenClawContextPath(filePath) ||
+    /\bdmPolicy\b|\ballowFrom\b|agents\.defaults\.sandbox/i.test(text);
+  if (!maybeOpenClaw) return;
+
+  const openClawVersions = packageVersionsInText(text, "openclaw");
+  for (const version of openClawVersions) {
+    if (compareDottedVersion(version, OPENCLAW_FIXED) < 0) {
+      findings.push(finding("high", "openclaw-vulnerable-version", filePath, `${sourceLabel} references OpenClaw ${version}. Upgrade to openclaw>=${OPENCLAW_FIXED} for the message-object prompt-boundary fix.`));
+    }
+  }
+
+  const hasOpenDmPolicy = /\bdmPolicy["']?\s*[:=]\s*["']open["']/i.test(text);
+  const hasWildcardAllowFrom = /\ballowFrom["']?\s*[:=][\s\S]{0,160}["']\*["']/i.test(text);
+  const hasDisabledSandbox = /(?:agents\.defaults\.sandbox\.mode|sandbox[\s\S]{0,80}\bmode)["']?\s*[:=]\s*["'](?:none|off|host|main|disabled)["']/i.test(text);
+
+  if (hasOpenDmPolicy && hasWildcardAllowFrom) {
+    findings.push(finding("high", "openclaw-open-dm-wildcard", filePath, `${sourceLabel} appears to allow public inbound DMs with a wildcard allowlist. Require pairing or a stable sender allowlist before enabling agent actions.`));
+  }
+
+  if (hasOpenDmPolicy && hasDisabledSandbox) {
+    findings.push(finding("high", "openclaw-open-dm-unsandboxed", filePath, `${sourceLabel} appears to combine open inbound DMs with host/main/disabled sandbox mode. Route untrusted channels to a sandboxed non-main agent.`));
   }
 }
 
@@ -1038,6 +1295,18 @@ function scanNpmStagedPublishSignals(filePath, text, trustSignals) {
 
 function isJavaScriptSourceFile(filePath) {
   return JAVASCRIPT_SOURCE_EXTENSIONS.has(path.extname(filePath));
+}
+
+function isAstroConfigFile(_filePath, base) {
+  return /^astro\.config\.(js|cjs|mjs|ts|mts|cts)$/i.test(base);
+}
+
+function isOpenClawConfigFile(filePath, base) {
+  return OPENCLAW_CONFIG_FILES.has(base.toLowerCase()) || /^openclaw\.(json|jsonc|yaml|yml|toml)$/i.test(base);
+}
+
+function isOpenClawContextPath(filePath) {
+  return filePath.replace(/\\/g, "/").toLowerCase().includes("/openclaw/");
 }
 
 function normalizePythonPackageName(name) {
