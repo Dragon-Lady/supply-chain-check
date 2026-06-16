@@ -22,6 +22,8 @@ const DEPLOYMENT_CONFIG_FILES = new Set(["Dockerfile", "docker-compose.yml", "do
 const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
 const PYTHON_STARTUP_HOOK_EXTENSIONS = new Set([".pth"]);
 const NATIVE_EXTENSION_EXTENSIONS = new Set([".so"]);
+const WASM_EXTENSIONS = new Set([".wasm"]);
+const VSIX_EXTENSIONS = new Set([".vsix"]);
 const MIASMA_MARKER_FILES = new Set(["ARCHITECTURE.MD", "INTEGRATION_TESTING.md", "README.md", "bunfig.toml", "binding.gyp"]);
 const HADES_NATIVE_EXTENSION_FILES = new Set(["ensmallen_haswell.abi3.so", "ensmallen_core2.abi3.so"]);
 const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
@@ -46,6 +48,29 @@ const PROVIDER_KEY_ENV_TERMS = [
   "GEMINI_API_KEY",
   "MISTRAL_API_KEY",
   "COHERE_API_KEY"
+];
+
+const GLASSWASM_OPENVSX_PACKAGES = [
+  "exargd/vsblack@0.0.1",
+  "vscode/exargd/vsblack@0.0.1",
+  "exargd.vsblack-0.0.1.vsix",
+  "noellee-doc/flint-debug@0.1.1",
+  "vscode/noellee-doc/flint-debug@0.1.1",
+  "noellee-doc.flint-debug-0.1.1.vsix"
+];
+
+const GLASSWASM_TEXT_INDICATORS = [
+  "snqpkebiwrxmoivl.wasm",
+  "orybbbdsuqmaapel.wasm",
+  "558b4f1d9a263c13756ab0126c09dd080c85ba405b29488e1c4e6aa68b554f1f",
+  "3aa31999398e7f80231c03d7137ffdb554a84b83dbcffc59ce16c9a65f9e5d58",
+  "1e283327ad048bea39f4a8501770858a20f3555e87fe3e202274f2e87f8a3c25",
+  "dodod.lat",
+  "6ExrZayPZzMMSnszc42cH81DpuKT8FhCX9H6Sesn6rpz",
+  "getSignaturesForAddress",
+  "getTransaction",
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+  "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFM"
 ];
 
 const DEFAULT_ADVISORY = {
@@ -113,6 +138,7 @@ function scanTarget(targetPath, options = {}) {
 
     scanMiasmaPath(filePath, findings);
     scanHadesPath(filePath, findings);
+    scanGlassWasmPath(filePath, findings);
 
     if (payloadFiles.has(base)) {
       findings.push(finding("critical", "payload-file", filePath, `Known incident payload filename present: ${base}`));
@@ -168,6 +194,16 @@ function scanTarget(targetPath, options = {}) {
 
     if (isNativePythonExtensionFile(filePath)) {
       scanNativePythonExtensionFile(filePath, findings);
+      return;
+    }
+
+    if (isWasmFile(filePath)) {
+      scanWasmFile(filePath, findings);
+      return;
+    }
+
+    if (isVsixFile(filePath)) {
+      scanVsixFile(filePath, findings);
       return;
     }
 
@@ -294,6 +330,7 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
   scanManifestText(filePath, rawText, advisory, findings);
   scanMiasmaText(filePath, rawText, findings, "Manifest");
   scanHadesText(filePath, rawText, findings, "Manifest");
+  scanGlassWasmText(filePath, rawText, findings, "Manifest");
   scanOpenClawText(filePath, rawText, findings, "Manifest");
   scanNpmV12Manifest(filePath, rawText, manifest, findings, trustSignals);
   scanNpmStagedPublishSignals(filePath, rawText, trustSignals);
@@ -468,6 +505,7 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
   scanIndicatorStrings(filePath, text, advisory, findings, "Lockfile");
   scanMiasmaText(filePath, text, findings, "Lockfile");
   scanHadesText(filePath, text, findings, "Lockfile");
+  scanGlassWasmText(filePath, text, findings, "Lockfile");
   scanLiteLlmText(filePath, text, findings, "Lockfile");
   scanOpenClawText(filePath, text, findings, "Lockfile");
   scanNpmV12LockfileText(filePath, text, findings);
@@ -528,6 +566,7 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, text, advisory, findings, "Python dependency file");
   scanMiasmaText(filePath, text, findings, "Python dependency file");
   scanHadesText(filePath, text, findings, "Python dependency file");
+  scanGlassWasmText(filePath, text, findings, "Python dependency file");
   scanLiteLlmText(filePath, text, findings, "Python dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
@@ -555,6 +594,7 @@ function scanPythonStartupHookFile(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, text, advisory, findings, "Python startup hook");
   scanMiasmaText(filePath, text, findings, "Python startup hook");
   scanHadesText(filePath, text, findings, "Python startup hook");
+  scanGlassWasmText(filePath, text, findings, "Python startup hook");
 }
 
 function scanPythonSourceFile(filePath, advisory, findings) {
@@ -569,6 +609,7 @@ function scanPythonSourceFile(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, text, advisory, findings, "Python source file");
   scanMiasmaText(filePath, text, findings, "Python source file");
   scanHadesText(filePath, text, findings, "Python source file");
+  scanGlassWasmText(filePath, text, findings, "Python source file");
 }
 
 function scanNativePythonExtensionFile(filePath, findings) {
@@ -584,6 +625,34 @@ function scanNativePythonExtensionFile(filePath, findings) {
   }
 }
 
+function scanWasmFile(filePath, findings) {
+  const base = path.basename(filePath);
+  const normalized = filePath.replace(/\\/g, "/");
+  if (base === "snqpkebiwrxmoivl.wasm" || base === "orybbbdsuqmaapel.wasm") {
+    findings.push(finding("critical", "glasswasm-openvsx-wasm-payload-file", filePath, `GlassWASM Open VSX WASM payload filename is present: ${base}`));
+  }
+
+  const hash = hashFileSha256(filePath);
+  if (hash === "558b4f1d9a263c13756ab0126c09dd080c85ba405b29488e1c4e6aa68b554f1f") {
+    findings.push(finding("critical", "glasswasm-openvsx-wasm-payload-hash", filePath, `WASM file matches Socket GlassWASM payload SHA-256 ${hash}.`));
+  } else if (/\/(?:\.vscode|\.vscode-oss|\.cursor|\.windsurf)\/extensions\//i.test(normalized)) {
+    findings.push(finding("medium", "editor-extension-wasm-review", filePath, "WASM file appears inside an editor extension path; review provenance and loader behavior."));
+  }
+}
+
+function scanVsixFile(filePath, findings) {
+  const base = path.basename(filePath);
+  if (/^(?:exargd\.vsblack-0\.0\.1|noellee-doc\.flint-debug-0\.1\.1)\.vsix$/i.test(base)) {
+    findings.push(finding("critical", "glasswasm-openvsx-vsix-file", filePath, `Known GlassWASM Open VSX trojanized VSIX filename is present: ${base}`));
+  }
+
+  const hash = hashFileSha256(filePath);
+  if (hash === "3aa31999398e7f80231c03d7137ffdb554a84b83dbcffc59ce16c9a65f9e5d58"
+    || hash === "1e283327ad048bea39f4a8501770858a20f3555e87fe3e202274f2e87f8a3c25") {
+    findings.push(finding("critical", "glasswasm-openvsx-vsix-hash", filePath, `VSIX file matches Socket GlassWASM affected package SHA-256 ${hash}.`));
+  }
+}
+
 function scanComposerDependencyFile(filePath, advisory, findings) {
   let text;
   try {
@@ -594,6 +663,7 @@ function scanComposerDependencyFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Composer dependency file");
+  scanGlassWasmText(filePath, text, findings, "Composer dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.composerPackages || {})) {
     for (const version of versions) {
@@ -614,6 +684,7 @@ function scanRubyDependencyFile(filePath, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Ruby dependency file");
+  scanGlassWasmText(filePath, text, findings, "Ruby dependency file");
   scanRubyTextIndicators(filePath, text, advisory, findings, "Ruby dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.gemPackages || {})) {
@@ -641,6 +712,7 @@ function scanRubySourceFile(filePath, base, advisory, findings) {
   }
 
   scanIndicatorStrings(filePath, text, advisory, findings, "Ruby source file");
+  scanGlassWasmText(filePath, text, findings, "Ruby source file");
   scanRubyTextIndicators(filePath, text, advisory, findings, "Ruby source file");
 }
 
@@ -694,6 +766,7 @@ function scanToolConfigFile(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, text, advisory, findings, "Tool config");
   scanMiasmaText(filePath, text, findings, "Tool config");
   scanHadesText(filePath, text, findings, "Tool config");
+  scanGlassWasmText(filePath, text, findings, "Tool config");
   scanLiteLlmText(filePath, text, findings, "Tool config");
   scanOpenClawText(filePath, text, findings, "Tool config");
 }
@@ -710,6 +783,7 @@ function scanDeploymentConfigFile(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, text, advisory, findings, "Deployment config");
   scanMiasmaText(filePath, text, findings, "Deployment config");
   scanHadesText(filePath, text, findings, "Deployment config");
+  scanGlassWasmText(filePath, text, findings, "Deployment config");
   scanLiteLlmText(filePath, text, findings, "Deployment config");
   scanOpenClawText(filePath, text, findings, "Deployment config");
 }
@@ -726,6 +800,7 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, text, advisory, findings, "JavaScript source file");
   scanMiasmaText(filePath, text, findings, "JavaScript source file");
   scanHadesText(filePath, text, findings, "JavaScript source file");
+  scanGlassWasmText(filePath, text, findings, "JavaScript source file");
   scanLiteLlmText(filePath, text, findings, "JavaScript source file");
   scanOpenClawText(filePath, text, findings, "JavaScript source file");
 }
@@ -752,6 +827,7 @@ function scanAstroConfigFile(filePath, findings) {
   }
 
   scanAstroConfigText(filePath, text, findings);
+  scanGlassWasmText(filePath, text, findings, "Astro config");
 }
 
 function scanOpenClawConfigFile(filePath, findings) {
@@ -764,6 +840,7 @@ function scanOpenClawConfigFile(filePath, findings) {
   }
 
   scanOpenClawText(filePath, text, findings, "OpenClaw config");
+  scanGlassWasmText(filePath, text, findings, "OpenClaw config");
 }
 
 function scanNpmConfigFile(filePath, findings, trustSignals) {
@@ -776,6 +853,7 @@ function scanNpmConfigFile(filePath, findings, trustSignals) {
   }
 
   scanNpmV12ConfigText(filePath, text, findings, trustSignals);
+  scanGlassWasmText(filePath, text, findings, ".npmrc");
 }
 
 function scanMiasmaPath(filePath, findings) {
@@ -802,6 +880,21 @@ function scanHadesPath(filePath, findings) {
   }
 }
 
+function scanGlassWasmPath(filePath, findings) {
+  const normalized = filePath.replace(/\\/g, "/");
+  const base = path.basename(filePath);
+  if (base === "snqpkebiwrxmoivl.wasm" || base === "orybbbdsuqmaapel.wasm") {
+    findings.push(finding("critical", "glasswasm-openvsx-wasm-payload-file", filePath, `GlassWASM Open VSX WASM payload filename is present: ${base}`));
+  }
+  if (/^(?:exargd\.vsblack-0\.0\.1|noellee-doc\.flint-debug-0\.1\.1)\.vsix$/i.test(base)) {
+    findings.push(finding("critical", "glasswasm-openvsx-vsix-file", filePath, `Known GlassWASM Open VSX trojanized VSIX filename is present: ${base}`));
+  }
+  if (/\/(?:\.vscode|\.vscode-oss|\.cursor|\.windsurf)\/extensions\//i.test(normalized)
+    && /(?:exargd\.vsblack|noellee-doc\.flint-debug)/i.test(normalized)) {
+    findings.push(finding("critical", "glasswasm-openvsx-extension-path", filePath, "Known GlassWASM affected extension ID appears in an editor extension path."));
+  }
+}
+
 function scanGitignoreText(filePath, text, findings) {
   if (/\b(branch_structure\.json|temp_auto_push\.bat|temp_interactive_push\.bat)\b/i.test(text)) {
     findings.push(finding(
@@ -810,6 +903,24 @@ function scanGitignoreText(filePath, text, findings) {
       filePath,
       ".gitignore hides PR automation/helper artifact names reported with Astro config C2 injection."
     ));
+  }
+}
+
+function scanGlassWasmText(filePath, text, findings, sourceLabel) {
+  for (const packageName of GLASSWASM_OPENVSX_PACKAGES) {
+    if (text.includes(packageName)) {
+      findings.push(finding("critical", "glasswasm-openvsx-package-reference", filePath, `${sourceLabel} references Socket GlassWASM affected Open VSX extension ${packageName}.`));
+    }
+  }
+  for (const indicator of GLASSWASM_TEXT_INDICATORS) {
+    if (text.includes(indicator)) {
+      findings.push(finding("high", "glasswasm-openvsx-indicator", filePath, `${sourceLabel} contains GlassWASM IOC or C2 dead-drop marker ${indicator}.`));
+    }
+  }
+  if (hasGlassWasmLoaderShape(text)) {
+    findings.push(finding("critical", "glasswasm-openvsx-loader-shape", filePath, `${sourceLabel} combines WASM loading with GlassWASM-style Solana C2 or child-process execution behavior.`));
+  } else if (hasTinyGoWasmHostShape(text)) {
+    findings.push(finding("medium", "tinygo-wasm-js-host-review", filePath, `${sourceLabel} contains TinyGo/WebAssembly JavaScript host fingerprints; review whether the WASM can reach Node APIs.`));
   }
 }
 
@@ -1248,6 +1359,14 @@ function isNativePythonExtensionFile(filePath) {
   return NATIVE_EXTENSION_EXTENSIONS.has(path.extname(filePath));
 }
 
+function isWasmFile(filePath) {
+  return WASM_EXTENSIONS.has(path.extname(filePath).toLowerCase());
+}
+
+function isVsixFile(filePath) {
+  return VSIX_EXTENSIONS.has(path.extname(filePath).toLowerCase());
+}
+
 function isRubyDependencyFile(filePath, base) {
   return RUBY_DEPENDENCY_FILES.has(base) || path.extname(filePath) === ".gemspec";
 }
@@ -1295,6 +1414,25 @@ function scanNpmStagedPublishSignals(filePath, text, trustSignals) {
 
 function isJavaScriptSourceFile(filePath) {
   return JAVASCRIPT_SOURCE_EXTENSIONS.has(path.extname(filePath));
+}
+
+function hashFileSha256(filePath) {
+  try {
+    return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+  } catch (_error) {
+    return "";
+  }
+}
+
+function hasTinyGoWasmHostShape(text) {
+  return /wasm_exec\.js|gojs\.syscall\/js|asyncify_(?:start|stop)_(?:unwind|rewind)|new\s+WebAssembly\.(?:Instance|Module)|WebAssembly\.instantiate/i.test(text);
+}
+
+function hasGlassWasmLoaderShape(text) {
+  const hasWasm = /\.wasm|wasm_exec\.js|WebAssembly\.instantiate|gojs\.syscall\/js|asyncify_(?:start|stop)_(?:unwind|rewind)/i.test(text);
+  const hasSolanaDeadDrop = /api\.mainnet\.solana\.com|getSignaturesForAddress|getTransaction|MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr|Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFM|6ExrZayPZzMMSnszc42cH81DpuKT8FhCX9H6Sesn6rpz/i.test(text);
+  const hasDownloadExecute = /child_process|execSync|curl\s+-fsSL[\s\S]{0,120}\|\s*bash|powershell[\s\S]{0,80}\b(?:irm|Invoke-RestMethod)\b[\s\S]{0,80}\b(?:iex|Invoke-Expression)\b|windowsHide/i.test(text);
+  return hasWasm && (hasSolanaDeadDrop || hasDownloadExecute);
 }
 
 function isAstroConfigFile(_filePath, base) {

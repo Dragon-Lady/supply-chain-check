@@ -52,6 +52,16 @@ report:
 - Deno `run -A`, hidden PowerShell/Windows loader, Registry Run key, mutex, and
   EXE-dropper indicators
 
+The checker also covers Socket's June 2026 GlassWASM / Open VSX report:
+
+- affected Open VSX extension references `vscode/exargd/vsblack@0.0.1` and
+  `vscode/noellee-doc/flint-debug@0.1.1`
+- affected VSIX filenames and SHA-256 hashes
+- suspicious WASM payload filenames `snqpkebiwrxmoivl.wasm` and
+  `orybbbdsuqmaapel.wasm`
+- TinyGo/WebAssembly host fingerprints paired with Solana memo dead-drop
+  markers, `dodod.lat`, or Node child-process download/execute behavior
+
 GitHub Advisory `GHSA-g6v5-9xpp-6hpx` also marks the npm package
 `google-cloud-secret-manager-config-poc` as malware with all versions affected.
 
@@ -123,6 +133,8 @@ machine.
   https://www.securityweek.com/over-100-npm-pypi-packages-hit-in-new-shai-hulud-supply-chain-attacks/
 - JFrog Solana FakeFix / CMS Windows loader report:
   https://research.jfrog.com/post/solana-fakefix/
+- Socket GlassWASM Open VSX extension report:
+  https://socket.dev/blog/glasswasm-malware-open-vsx-extensions
 - GitHub Advisory for `google-cloud-secret-manager-config-poc`:
   https://github.com/advisories/GHSA-g6v5-9xpp-6hpx
 - Panther OtterCookie npm campaign:

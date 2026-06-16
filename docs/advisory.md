@@ -26,6 +26,18 @@ The generic pattern matters more than one exact Bun version: executable `.pth`
 plus network retrieval plus subprocess execution plus staged JavaScript payload
 is a high-risk install/startup execution chain.
 
+## GlassWASM / Open VSX Extensions
+
+Socket's June 2026 GlassWASM report is included for editor-extension and
+pre-execution review because the affected Open VSX packages used WASM payloads
+and JavaScript host code to retrieve C2 instructions through Solana transaction
+memos before spawning platform-specific download/execute commands.
+
+The checker flags affected Open VSX extension references, the reported VSIX and
+WASM filenames, published SHA-256 values, `dodod.lat`, Solana memo dead-drop
+markers, and loader code that combines TinyGo/WebAssembly fingerprints with
+Node `child_process`, `curl | bash`, PowerShell `irm | iex`, or `windowsHide`.
+
 This checker does not perform cleanup and does not claim a host is clean. If
 anything may have executed, move from project review to host incident response.
 
