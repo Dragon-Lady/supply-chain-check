@@ -329,6 +329,98 @@ try {
   fs.rmSync(otterCookieRoot, { recursive: true, force: true });
 }
 
+const easyDayJsRoot = makeFixture("scc-easy-day-js-");
+try {
+  write(
+    path.join(easyDayJsRoot, "package.json"),
+    JSON.stringify({
+      dependencies: {
+        "@mastra/core": "1.42.1",
+        "easy-day-js": "1.11.22"
+      },
+      scripts: {
+        postinstall: "node setup.cjs --no-warnings"
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(easyDayJsRoot, "package-lock.json"),
+    JSON.stringify({
+      packages: {
+        "node_modules/@mastra/core": { version: "1.42.1" },
+        "node_modules/easy-day-js": { version: "1.11.22" }
+      }
+    })
+  );
+  write(
+    path.join(easyDayJsRoot, "setup.cjs"),
+    [
+      "process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';",
+      "const payload = '23.254[.]164.92:8000';",
+      "const c2 = '23.254[.]164.123:443';",
+      "const stage2 = 'protocal.cjs nvmconf.service NodePackages /update/49890878';"
+    ].join("\n")
+  );
+
+  const report = scanTarget(easyDayJsRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("@mastra/core")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-version" && finding.message.includes("easy-day-js@1.11.22")));
+  assert(report.findings.some((finding) => finding.type === "network-indicator" && finding.message.includes("23.254[.]164.92:8000")));
+  assert(report.findings.some((finding) => finding.type === "campaign-indicator" && finding.message.includes("setup.cjs")));
+  assert(report.findings.some((finding) => finding.type === "campaign-indicator" && finding.message.includes("protocal.cjs")));
+  assert(report.findings.some((finding) => finding.type === "campaign-indicator" && finding.message.includes("nvmconf.service")));
+} finally {
+  fs.rmSync(easyDayJsRoot, { recursive: true, force: true });
+}
+
+const procwireRoot = makeFixture("scc-procwire-");
+try {
+  write(
+    path.join(procwireRoot, "package.json"),
+    JSON.stringify({
+      dependencies: {
+        procwire: "1.3.0",
+        routecraft: "4.2.0"
+      },
+      scripts: {
+        preinstall: "node lib/setup.js"
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(procwireRoot, "package-lock.json"),
+    JSON.stringify({
+      packages: {
+        "node_modules/procwire": { version: "1.3.0" },
+        "node_modules/routecraft": { version: "4.2.0" },
+        "node_modules/endpointmap": { version: "2.1.0" },
+        "node_modules/bytecraft": { version: "1.5.0" },
+        "node_modules/staticlayer": { version: "1.1.0" }
+      }
+    })
+  );
+  write(
+    path.join(procwireRoot, "worker.js"),
+    [
+      "const ua = 'Microsoft-Delivery-Optimization/10.0';",
+      "const url = 'files[.]catbox[.]moe/j4loim[.]chk';",
+      "const motw = 'Zone.Identifier [ZoneTransfer] ZoneId=0';",
+      "const names = 'msedge_update chrome_installer dotnet_host onedrive_setup teams_update';"
+    ].join("\n")
+  );
+
+  const report = scanTarget(procwireRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("procwire")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-version" && finding.message.includes("endpointmap@2.1.0")));
+  assert(report.findings.some((finding) => finding.type === "network-indicator" && finding.message.includes("files[.]catbox[.]moe/j4loim[.]chk")));
+  assert(report.findings.some((finding) => finding.type === "network-indicator" && finding.message.includes("Microsoft-Delivery-Optimization/10.0")));
+  assert(report.findings.some((finding) => finding.type === "campaign-indicator" && finding.message.includes("Zone.Identifier")));
+} finally {
+  fs.rmSync(procwireRoot, { recursive: true, force: true });
+}
+
 const solanaFakeFixRoot = makeFixture("scc-solana-fakefix-");
 try {
   write(
@@ -547,6 +639,26 @@ try {
   assert(types.has("glasswasm-openvsx-indicator"));
 } finally {
   fs.rmSync(glassWasmRoot, { recursive: true, force: true });
+}
+
+const jetBrainsRoot = fs.mkdtempSync(path.join(__dirname, "tmp-jetbrains-"));
+try {
+  fs.mkdirSync(path.join(jetBrainsRoot, ".local", "share", "JetBrains", "plugins", "org.sm.yms.toolkit"), { recursive: true });
+  write(
+    path.join(jetBrainsRoot, ".local", "share", "JetBrains", "plugins", "org.sm.yms.toolkit", "extensions.json"),
+    JSON.stringify({
+      id: "org.sm.yms.toolkit",
+      endpoint: "39.107.60[.]51/api/software/key"
+    }, null, 2)
+  );
+
+  const report = scanTarget(jetBrainsRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  const types = new Set(report.findings.map((finding) => finding.type));
+  assert(types.has("jetbrains-ai-key-stealer-plugin-path"));
+  assert(types.has("jetbrains-ai-key-stealer-indicator"));
+} finally {
+  fs.rmSync(jetBrainsRoot, { recursive: true, force: true });
 }
 
 console.log("smoke tests passed");

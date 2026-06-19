@@ -10,6 +10,18 @@ that has not executed.
 - Regenerate lockfiles in a clean/quarantined environment.
 - Scan again before resuming normal work.
 
+## npm v12 Readiness
+
+Use this lane when findings mention install-script approval, Git dependencies,
+remote tarballs, or broad `.npmrc` allow rules.
+
+- Keep `allowScripts`, `allow-git`, and `allow-remote` approvals narrow.
+- Pair script approvals with exact dependency versions instead of trusting a
+  package name across future releases.
+- Treat approval as temporary trust and re-review on every upgrade.
+- Remember npm v12 reduces silent install-time execution, but it does not stop
+  runtime/import-time malicious behavior after a package is used.
+
 ## Execution Possible
 
 Use this lane when an install hook, binary, editor task, agent hook, or

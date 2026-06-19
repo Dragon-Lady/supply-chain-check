@@ -17,7 +17,7 @@ const RUBY_SOURCE_EXTENSIONS = new Set([".rb"]);
 const PACKAGE_MANIFEST = "package.json";
 const GITIGNORE_FILE = ".gitignore";
 const NPM_CONFIG_FILE = ".npmrc";
-const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json"]);
+const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json", "extensions.json"]);
 const DEPLOYMENT_CONFIG_FILES = new Set(["Dockerfile", "docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
 const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
 const PYTHON_STARTUP_HOOK_EXTENSIONS = new Set([".pth"]);
@@ -71,6 +71,32 @@ const GLASSWASM_TEXT_INDICATORS = [
   "getTransaction",
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
   "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFM"
+];
+
+const JETBRAINS_AI_KEY_PLUGIN_IDS = [
+  "org.sm.yms.toolkit",
+  "com.json.simple.kit",
+  "org.bug.find.tools",
+  "org.translate.ai.simple",
+  "com.yy.test.ai.simple",
+  "com.dev.ai.toolkit",
+  "com.json.view.simple",
+  "com.my.git.ai.kit",
+  "org.check.ai.ds",
+  "com.review.tool.code",
+  "org.code.assist.dev.tool",
+  "com.coder.ai.dpt",
+  "com.my.code.tools",
+  "ord.cp.code.ai.kit",
+  "com.dp.git.ai.tool"
+];
+
+const JETBRAINS_AI_KEY_ENDPOINT_INDICATORS = [
+  "39.107.60.51",
+  "39.107.60[.]51",
+  "39.107.60.51/api/software/key",
+  "39.107.60[.]51/api/software/key",
+  "/api/software/key"
 ];
 
 const DEFAULT_ADVISORY = {
@@ -139,6 +165,7 @@ function scanTarget(targetPath, options = {}) {
     scanMiasmaPath(filePath, findings);
     scanHadesPath(filePath, findings);
     scanGlassWasmPath(filePath, findings);
+    scanJetBrainsAiKeyStealerPath(filePath, findings);
 
     if (payloadFiles.has(base)) {
       findings.push(finding("critical", "payload-file", filePath, `Known incident payload filename present: ${base}`));
@@ -895,6 +922,37 @@ function scanGlassWasmPath(filePath, findings) {
   }
 }
 
+function scanJetBrainsAiKeyStealerPath(filePath, findings) {
+  const normalized = filePath.replace(/\\/g, "/").toLowerCase();
+  let matchedPluginPath = false;
+  for (const pluginId of JETBRAINS_AI_KEY_PLUGIN_IDS) {
+    if (normalized.includes(pluginId)) {
+      matchedPluginPath = true;
+      findings.push(finding("critical", "jetbrains-ai-key-stealer-plugin-path", filePath, `Aikido-reported malicious JetBrains Marketplace plugin ID appears in path: ${pluginId}`));
+    }
+  }
+  if (!matchedPluginPath) return;
+
+  let text;
+  try {
+    const stat = fs.statSync(filePath);
+    if (!stat.isFile() || stat.size > DEFAULT_MAX_FILE_BYTES) return;
+    text = fs.readFileSync(filePath, "utf8");
+  } catch {
+    return;
+  }
+
+  scanJetBrainsAiKeyStealerText(filePath, text, findings, "JetBrains plugin file");
+}
+
+function scanJetBrainsAiKeyStealerText(filePath, text, findings, sourceLabel) {
+  for (const indicator of JETBRAINS_AI_KEY_ENDPOINT_INDICATORS) {
+    if (text.includes(indicator)) {
+      findings.push(finding("high", "jetbrains-ai-key-stealer-indicator", filePath, `${sourceLabel} references reported JetBrains Marketplace AI-key stealer endpoint: ${indicator}`));
+    }
+  }
+}
+
 function scanGitignoreText(filePath, text, findings) {
   if (/\b(branch_structure\.json|temp_auto_push\.bat|temp_interactive_push\.bat)\b/i.test(text)) {
     findings.push(finding(
@@ -1240,7 +1298,8 @@ function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
     ["dprk-npm-rat-indicator", indicators.dprkNpmRatIndicators],
     ["hades-indicator", indicators.hadesIndicators],
     ["ottercookie-indicator", indicators.otterCookieIndicators],
-    ["solana-fakefix-indicator", indicators.solanaFakeFixIndicators]
+    ["solana-fakefix-indicator", indicators.solanaFakeFixIndicators],
+    ["jetbrains-ai-key-stealer-indicator", indicators.jetBrainsAiKeyStealerIndicators]
   ];
 
   if (typeof indicators.tokenDescriptionIndicator === "string") {

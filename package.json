@@ -10,7 +10,7 @@
   "scripts": {
     "scan": "node bin/supply-chain-check.js",
     "smoke": "node bin/supply-chain-check.js --help",
-    "test": "node --check bin/supply-chain-check.js && node --check src/scanner.js && node test/smoke.js"
+    "test": "node --check bin/supply-chain-check.js && node --check src/scanner.js && node --check src/response-plan.js && node test/smoke.js && node test/response-plan.js"
   },
   "engines": {
     "node": ">=18"
