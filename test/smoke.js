@@ -221,7 +221,7 @@ try {
       "    resolution:",
       "      integrity: sha512-test",
       "    registryMeta:",
-      "      approver: tanya",
+      "      approver: operator",
       ""
     ].join("\n")
   );
