@@ -50,6 +50,19 @@ const PROVIDER_KEY_ENV_TERMS = [
   "COHERE_API_KEY"
 ];
 
+const AUTOJACK_TEXT_INDICATORS = [
+  "AutoJack",
+  "StdioServerParams",
+  "server_params",
+  "/api/mcp/ws",
+  "/api/mcp",
+  "autogenstudio",
+  "AutoGen Studio",
+  "localhost:8081",
+  "127.0.0.1:8081",
+  "b047730"
+];
+
 const GLASSWASM_OPENVSX_PACKAGES = [
   "exargd/vsblack@0.0.1",
   "vscode/exargd/vsblack@0.0.1",
@@ -595,6 +608,7 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
   scanHadesText(filePath, text, findings, "Python dependency file");
   scanGlassWasmText(filePath, text, findings, "Python dependency file");
   scanLiteLlmText(filePath, text, findings, "Python dependency file");
+  scanAutoJackText(filePath, text, findings, "Python dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
     if (packageIsListedAllVersions(versions) && pythonFileMentionsPackage(text, pkg)) {
@@ -637,6 +651,7 @@ function scanPythonSourceFile(filePath, advisory, findings) {
   scanMiasmaText(filePath, text, findings, "Python source file");
   scanHadesText(filePath, text, findings, "Python source file");
   scanGlassWasmText(filePath, text, findings, "Python source file");
+  scanAutoJackText(filePath, text, findings, "Python source file");
 }
 
 function scanNativePythonExtensionFile(filePath, findings) {
@@ -796,6 +811,7 @@ function scanToolConfigFile(filePath, advisory, findings) {
   scanGlassWasmText(filePath, text, findings, "Tool config");
   scanLiteLlmText(filePath, text, findings, "Tool config");
   scanOpenClawText(filePath, text, findings, "Tool config");
+  scanAutoJackText(filePath, text, findings, "Tool config");
 }
 
 function scanDeploymentConfigFile(filePath, advisory, findings) {
@@ -813,6 +829,7 @@ function scanDeploymentConfigFile(filePath, advisory, findings) {
   scanGlassWasmText(filePath, text, findings, "Deployment config");
   scanLiteLlmText(filePath, text, findings, "Deployment config");
   scanOpenClawText(filePath, text, findings, "Deployment config");
+  scanAutoJackText(filePath, text, findings, "Deployment config");
 }
 
 function scanJavaScriptSourceFile(filePath, advisory, findings) {
@@ -830,6 +847,7 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
   scanGlassWasmText(filePath, text, findings, "JavaScript source file");
   scanLiteLlmText(filePath, text, findings, "JavaScript source file");
   scanOpenClawText(filePath, text, findings, "JavaScript source file");
+  scanAutoJackText(filePath, text, findings, "JavaScript source file");
 }
 
 function scanGitignoreFile(filePath, findings) {
@@ -1258,6 +1276,24 @@ function scanLiteLlmText(filePath, text, findings, sourceLabel) {
     if (keyTerms.length > 0) {
       findings.push(finding("medium", "litellm-provider-key-blast-radius", filePath, `${sourceLabel} references LiteLLM with provider credential environment names: ${keyTerms.join(", ")}. Do not expose proxy/admin/MCP routes publicly.`));
     }
+  }
+}
+
+function scanAutoJackText(filePath, text, findings, sourceLabel) {
+  const hasAutoGen = /autogenstudio|AutoGen Studio|autogen/i.test(text);
+  const hasMcpWebSocket =
+    /\/api\/mcp\/ws|StdioServerParams|server_params|localhost:8081|127\.0\.0\.1:8081|b047730/i.test(text);
+
+  if (!hasAutoGen && !hasMcpWebSocket) return;
+
+  for (const indicator of AUTOJACK_TEXT_INDICATORS) {
+    if (text.includes(indicator)) {
+      findings.push(finding("high", "autojack-autogen-mcp-indicator", filePath, `${sourceLabel} references AutoJack/AutoGen local MCP control-plane indicator: ${indicator}`));
+    }
+  }
+
+  if (hasAutoGen && hasMcpWebSocket) {
+    findings.push(finding("high", "autojack-localhost-mcp-control-plane-review", filePath, `${sourceLabel} combines AutoGen/AutoGen Studio with local MCP WebSocket or command-parameter terms. Review whether browsing agents share a host with privileged localhost services.`));
   }
 }
 

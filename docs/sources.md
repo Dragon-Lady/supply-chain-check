@@ -18,6 +18,8 @@
 - Panther OtterCookie npm campaign: https://panther.com/blog/tracking-an-ottercookie-infostealer-campaign-across-npm
 - SafeDep Astro config blockchain C2 supply-chain report: https://safedep.io/astro-config-blockchain-c2-supply-chain/
 - The Hacker News OpenClaw prompt-injection and agent-phishing report: https://thehackernews.com/2026/06/new-attacks-trick-openclaw-ai-agent.html
+- Microsoft Security AutoJack research: https://www.microsoft.com/en-us/security/blog/2026/06/18/autojack-single-page-rce-host-running-ai-agent/
+- The Hacker News AutoJack / AutoGen Studio package analysis: https://thehackernews.com/2026/06/autojack-attack-lets-one-web-page.html
 - GitHub npm v12 breaking changes notice: https://github.blog/changelog/2026-06-09-upcoming-breaking-changes-for-npm-v12/
 - The Hacker News npm v12 install-script default change summary: https://thehackernews.com/2026/06/github-to-disable-npm-install-scripts.html
 - JFrog npm v12 explicit trust analysis: https://jfrog.com/blog/npm-v12-from-implicit-to-explicit-trust/

@@ -25,6 +25,11 @@ const RULE_REFERENCES = [
     sourceHint: "docs/sources.md#glasswasm"
   },
   {
+    pattern: /autojack|autogen|server_params|StdioServerParams|\/api\/mcp\/ws|localhost:8081|127\.0\.0\.1:8081/i,
+    label: "Microsoft / The Hacker News AutoJack local MCP control-plane research",
+    sourceHint: "docs/sources.md#autojack"
+  },
+  {
     pattern: /hades|pypi|pth|bun|_index|abi3/i,
     label: "Socket Hades / Miasma PyPI reporting",
     sourceHint: "docs/sources.md#hades"

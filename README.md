@@ -53,6 +53,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - OtterCookie npm packages and Vercel-hosted C2 strings
 - Astro config-as-code loader traps
 - OpenClaw risky versions/configs
+- AutoJack / AutoGen Studio local MCP WebSocket control-plane indicators and
+  reported vulnerable `autogenstudio` pre-release builds
 - npm v12 install-script, Git dependency, and remote tarball readiness checks
 
 For npm v12 readiness findings, treat script/source approval as temporary,

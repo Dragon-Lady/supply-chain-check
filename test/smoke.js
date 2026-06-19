@@ -133,6 +133,32 @@ try {
   fs.rmSync(npmV12Root, { recursive: true, force: true });
 }
 
+const autoJackRoot = makeFixture("scc-autojack-");
+try {
+  write(
+    path.join(autoJackRoot, "requirements.txt"),
+    "autogenstudio==0.4.3.dev1\n"
+  );
+  write(
+    path.join(autoJackRoot, "autogen_mcp_note.py"),
+    [
+      "service = 'AutoGen Studio localhost:8081'",
+      "route = '/api/mcp/ws'",
+      "param = 'server_params'",
+      "cls = 'StdioServerParams'",
+      "fixed = 'b047730'",
+    ].join("\n")
+  );
+
+  const report = scanTarget(autoJackRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-pypi-version"));
+  assert(report.findings.some((finding) => finding.type === "autojack-autogen-mcp-indicator"));
+  assert(report.findings.some((finding) => finding.type === "autojack-localhost-mcp-control-plane-review"));
+} finally {
+  fs.rmSync(autoJackRoot, { recursive: true, force: true });
+}
+
 const dprkRoot = makeFixture("scc-dprk-rat-");
 try {
   write(

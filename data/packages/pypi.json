@@ -3,6 +3,7 @@
   "solana-web3": ["*"],
   "solana-web3-py": ["*"],
   "spl-token-py": ["*"],
+  "autogenstudio": ["0.4.3.dev1", "0.4.3.dev2"],
   "bramin": ["0.0.2", "0.0.3", "0.0.4"],
   "cmd2func": ["0.2.2", "0.2.3"],
   "coolbox": ["0.4.1", "0.4.2"],
