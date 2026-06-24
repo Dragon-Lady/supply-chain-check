@@ -13,6 +13,8 @@
     "https://supplychainattack.org/incident/malware-in-validate-sdk-v2-12i0so",
     "https://github.com/advisories/GHSA-g6v5-9xpp-6hpx",
     "https://supplychainattack.org/incident/malware-in-google-cloud-secret-manager-config-poc-1fs99l",
+    "https://github.com/advisories/GHSA-fgqv-2jmm-2p39",
+    "https://supplychainattack.org/incident/malware-in-search-from-search-1jc4kr",
     "https://panther.com/blog/tracking-an-ottercookie-infostealer-campaign-across-npm",
     "https://research.jfrog.com/post/solana-fakefix/",
     "https://socket.dev/blog/glasswasm-malware-open-vsx-extensions",
