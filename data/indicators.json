@@ -64,7 +64,11 @@
     "nvidiadriver[.]net",
     "nvidiadriver.net/verv1432/winpatch-xd7d.win",
     "95.216.92.207:8080",
-    "95.216.92[.]207:8080"
+    "95.216.92[.]207:8080",
+    "r.keepex.xyz",
+    "r[.]keepex[.]xyz",
+    "https://r.keepex.xyz/api/report/admin",
+    "hxxps://r[.]keepex[.]xyz/api/report/admin"
   ],
   "workflowIndicators": [
     "MicrosoftSystem64",

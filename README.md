@@ -58,6 +58,9 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   cluster
 - Checkmarx ChainVeil npm package indicators, including `tailwindcss-merge`,
   `sass-format`, `sass-formats`, and `rate-limit-flexible`
+- Nextron Research Packagist indicator for malicious
+  `dcat-auth-google-2fa@1.0.2.0`, including `r[.]keepex[.]xyz` exfil strings
+  and the reported hardcoded 2FA bypass marker
 - Browser-extension all-sites permission drift paired with commerce/affiliate
   telemetry SDK signals, including the Volume Booster / Give Freely OSINT watch
 - OtterCookie npm packages and Vercel-hosted C2 strings

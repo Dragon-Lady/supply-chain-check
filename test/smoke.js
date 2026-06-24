@@ -35,6 +35,25 @@ try {
   fs.rmSync(cleanRoot, { recursive: true, force: true });
 }
 
+const composerPackagistRoot = makeFixture("scc-composer-packagist-");
+try {
+  write(
+    path.join(composerPackagistRoot, "composer.lock"),
+    JSON.stringify({
+      packages: [{
+        name: "dcat-auth-google-2fa",
+        version: "1.0.2.0",
+        dist: { url: "https://example.invalid/dcat-auth-google-2fa.zip" }
+      }]
+    }, null, 2)
+  );
+  const report = scanTarget(composerPackagistRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-composer-version" && finding.message.includes("dcat-auth-google-2fa@1.0.2.0")));
+} finally {
+  fs.rmSync(composerPackagistRoot, { recursive: true, force: true });
+}
+
 const extensionPermissionDriftRoot = makeFixture("scc-extension-permission-drift-");
 try {
   write(
