@@ -687,4 +687,33 @@ try {
   fs.rmSync(jetBrainsRoot, { recursive: true, force: true });
 }
 
+const recentSafeDepRoot = makeFixture("scc-recent-safedep-");
+try {
+  write(
+    path.join(recentSafeDepRoot, "package.json"),
+    JSON.stringify({
+      dependencies: {
+        "@petitcode/eb-retry": "1.3.5",
+        "@withgoogle/stitch-sdk": "0.1.2",
+        apintergrationpost: "4.0.6",
+        "postcss-minify-selector-parser": "1.0.0"
+      },
+      scripts: {
+        postinstall: "node scripts/postinstall-run.js"
+      },
+      notes: "wshu[.]net github[.]com/angelmaybeth21-oss/test stitch-production[.]org /api/v1?src= myra-lab-shared-key nvidiadriver[.]net"
+    }, null, 2)
+  );
+
+  const report = scanTarget(recentSafeDepRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  const types = new Set(report.findings.map((finding) => finding.type));
+  assert(types.has("known-bad-requested-version"));
+  assert(types.has("known-bad-lockfile-package") || types.has("active-campaign-package"));
+  assert(types.has("network-indicator"));
+  assert(types.has("campaign-indicator"));
+} finally {
+  fs.rmSync(recentSafeDepRoot, { recursive: true, force: true });
+}
+
 console.log("smoke tests passed");
