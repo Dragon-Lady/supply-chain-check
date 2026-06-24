@@ -50,6 +50,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
 - JetBrains Marketplace AI-key stealer plugin IDs and endpoint indicators
+- Browser-extension all-sites permission drift paired with commerce/affiliate
+  telemetry SDK signals, including the Volume Booster / Give Freely OSINT watch
 - OtterCookie npm packages and Vercel-hosted C2 strings
 - Astro config-as-code loader traps
 - OpenClaw risky versions/configs

@@ -41,6 +41,20 @@ Node `child_process`, `curl | bash`, PowerShell `irm | iex`, or `windowsHide`.
 This checker does not perform cleanup and does not claim a host is clean. If
 anything may have executed, move from project review to host incident response.
 
+## Browser Extension Permission Drift
+
+An operator-provided June 22, 2026 International Cyber Digest OSINT note
+described a Chrome extension named Volume Booster activating the Give Freely
+commerce/affiliate SDK after broad all-sites permission had already been granted
+in an earlier version. The checker treats this as a watch-only extension
+supply-chain signal: `manifest.json` files with broad host permissions are
+flagged for review, and Give Freely / commerce telemetry SDK terms are flagged
+when they appear alongside extension permission or runtime/network behavior.
+
+This is not a confirmed malware IOC in this rule set. It is meant to catch the
+permission-drift pattern before an extension update turns dormant access into
+active telemetry.
+
 ## npm Staged Publish Trust Signal
 
 As of pnpm 11.5, package registry metadata carrying an `approver` field is

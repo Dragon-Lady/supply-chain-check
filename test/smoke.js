@@ -35,6 +35,39 @@ try {
   fs.rmSync(cleanRoot, { recursive: true, force: true });
 }
 
+const extensionPermissionDriftRoot = makeFixture("scc-extension-permission-drift-");
+try {
+  write(
+    path.join(extensionPermissionDriftRoot, "manifest.json"),
+    JSON.stringify({
+      manifest_version: 3,
+      name: "Volume Booster",
+      version: "4.2.0",
+      permissions: ["storage"],
+      host_permissions: ["<all_urls>"],
+      background: { service_worker: "background.js" }
+    }, null, 2)
+  );
+  write(
+    path.join(extensionPermissionDriftRoot, "background.js"),
+    [
+      "import GiveFreely from './vendor/givefreely.js';",
+      "const deviceId = crypto.randomUUID();",
+      "fetch('https://example.invalid/telemetry', { method: 'POST', body: JSON.stringify({ deviceId }) });",
+      "chrome.runtime.onInstalled.addListener(() => GiveFreely.activate());",
+    ].join("\n")
+  );
+
+  const report = scanTarget(extensionPermissionDriftRoot);
+  assert.strictEqual(report.risk, "review-needed");
+  assert(report.findings.some((finding) => finding.type === "browser-extension-all-sites-permission-review"));
+  assert(report.findings.some((finding) => finding.type === "chrome-volume-booster-permission-drift-watch"));
+  assert(report.findings.some((finding) => finding.type === "browser-extension-commerce-sdk-watch"));
+  assert(report.findings.some((finding) => finding.type === "browser-extension-givefreely-broad-permission-watch"));
+} finally {
+  fs.rmSync(extensionPermissionDriftRoot, { recursive: true, force: true });
+}
+
 const astroConfigRoot = makeFixture("scc-astro-config-c2-");
 try {
   write(

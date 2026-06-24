@@ -15,6 +15,7 @@ const COMPOSER_DEPENDENCY_FILES = new Set(["composer.json", "composer.lock"]);
 const RUBY_DEPENDENCY_FILES = new Set(["Gemfile", "Gemfile.lock"]);
 const RUBY_SOURCE_EXTENSIONS = new Set([".rb"]);
 const PACKAGE_MANIFEST = "package.json";
+const BROWSER_EXTENSION_MANIFEST = "manifest.json";
 const GITIGNORE_FILE = ".gitignore";
 const NPM_CONFIG_FILE = ".npmrc";
 const TOOL_CONFIG_FILES = new Set(["settings.json", "settings.local.json", "tasks.json", "extensions.json"]);
@@ -112,6 +113,22 @@ const JETBRAINS_AI_KEY_ENDPOINT_INDICATORS = [
   "/api/software/key"
 ];
 
+const EXTENSION_COMMERCE_SDK_TEXT_INDICATORS = [
+  "Give Freely",
+  "GiveFreely",
+  "givefreely",
+  "givefreely.com",
+  "commerce-tracking SDK",
+  "affiliate SDK",
+  "affiliate tracking",
+  "persistent device ID",
+  "deviceId",
+  "geolocate",
+  "geolocation by IP",
+  "all-sites permission",
+  "all sites permission"
+];
+
 const DEFAULT_ADVISORY = {
   indicators: {
     maliciousOptionalDependencyName: "terminal-logger-utils",
@@ -188,6 +205,11 @@ function scanTarget(targetPath, options = {}) {
     if (base === PACKAGE_MANIFEST) {
       seen.manifests += 1;
       scanPackageJson(filePath, advisory, findings, trustSignals);
+      return;
+    }
+
+    if (base === BROWSER_EXTENSION_MANIFEST) {
+      scanBrowserExtensionManifest(filePath, advisory, findings);
       return;
     }
 
@@ -371,6 +393,7 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
   scanMiasmaText(filePath, rawText, findings, "Manifest");
   scanHadesText(filePath, rawText, findings, "Manifest");
   scanGlassWasmText(filePath, rawText, findings, "Manifest");
+  scanExtensionCommerceSdkText(filePath, rawText, findings, "Manifest");
   scanOpenClawText(filePath, rawText, findings, "Manifest");
   scanNpmV12Manifest(filePath, rawText, manifest, findings, trustSignals);
   scanNpmStagedPublishSignals(filePath, rawText, trustSignals);
@@ -546,6 +569,7 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
   scanMiasmaText(filePath, text, findings, "Lockfile");
   scanHadesText(filePath, text, findings, "Lockfile");
   scanGlassWasmText(filePath, text, findings, "Lockfile");
+  scanExtensionCommerceSdkText(filePath, text, findings, "Lockfile");
   scanLiteLlmText(filePath, text, findings, "Lockfile");
   scanOpenClawText(filePath, text, findings, "Lockfile");
   scanNpmV12LockfileText(filePath, text, findings);
@@ -809,6 +833,7 @@ function scanToolConfigFile(filePath, advisory, findings) {
   scanMiasmaText(filePath, text, findings, "Tool config");
   scanHadesText(filePath, text, findings, "Tool config");
   scanGlassWasmText(filePath, text, findings, "Tool config");
+  scanExtensionCommerceSdkText(filePath, text, findings, "Tool config");
   scanLiteLlmText(filePath, text, findings, "Tool config");
   scanOpenClawText(filePath, text, findings, "Tool config");
   scanAutoJackText(filePath, text, findings, "Tool config");
@@ -827,6 +852,7 @@ function scanDeploymentConfigFile(filePath, advisory, findings) {
   scanMiasmaText(filePath, text, findings, "Deployment config");
   scanHadesText(filePath, text, findings, "Deployment config");
   scanGlassWasmText(filePath, text, findings, "Deployment config");
+  scanExtensionCommerceSdkText(filePath, text, findings, "Deployment config");
   scanLiteLlmText(filePath, text, findings, "Deployment config");
   scanOpenClawText(filePath, text, findings, "Deployment config");
   scanAutoJackText(filePath, text, findings, "Deployment config");
@@ -845,9 +871,44 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
   scanMiasmaText(filePath, text, findings, "JavaScript source file");
   scanHadesText(filePath, text, findings, "JavaScript source file");
   scanGlassWasmText(filePath, text, findings, "JavaScript source file");
+  scanExtensionCommerceSdkText(filePath, text, findings, "JavaScript source file");
   scanLiteLlmText(filePath, text, findings, "JavaScript source file");
   scanOpenClawText(filePath, text, findings, "JavaScript source file");
   scanAutoJackText(filePath, text, findings, "JavaScript source file");
+}
+
+function scanBrowserExtensionManifest(filePath, advisory, findings) {
+  let rawText;
+  let manifest;
+  try {
+    rawText = fs.readFileSync(filePath, "utf8");
+    manifest = JSON.parse(rawText);
+  } catch (error) {
+    findings.push(finding("low", "parse-error", filePath, `Could not parse manifest.json: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, rawText, advisory, findings, "Browser extension manifest");
+  scanGlassWasmText(filePath, rawText, findings, "Browser extension manifest");
+  scanExtensionCommerceSdkText(filePath, rawText, findings, "Browser extension manifest");
+
+  if (!manifest || !manifest.manifest_version) return;
+
+  const name = String(manifest.name || "");
+  const permissions = [
+    ...arrayValues(manifest.permissions),
+    ...arrayValues(manifest.host_permissions),
+    ...contentScriptMatches(manifest.content_scripts)
+  ];
+  const broadPermissions = permissions.filter(isAllSitesPermission);
+
+  if (broadPermissions.length > 0) {
+    findings.push(finding("medium", "browser-extension-all-sites-permission-review", filePath, `Browser extension manifest grants broad all-sites host permissions: ${broadPermissions.join(", ")}`));
+  }
+
+  if (/volume\s*booster/i.test(name) && broadPermissions.length > 0) {
+    findings.push(finding("medium", "chrome-volume-booster-permission-drift-watch", filePath, "Volume Booster-style extension has broad all-sites host permissions; review update history for prompt-free activation of telemetry or affiliate SDK code."));
+  }
 }
 
 function scanGitignoreFile(filePath, findings) {
@@ -998,6 +1059,31 @@ function scanGlassWasmText(filePath, text, findings, sourceLabel) {
   } else if (hasTinyGoWasmHostShape(text)) {
     findings.push(finding("medium", "tinygo-wasm-js-host-review", filePath, `${sourceLabel} contains TinyGo/WebAssembly JavaScript host fingerprints; review whether the WASM can reach Node APIs.`));
   }
+}
+
+function scanExtensionCommerceSdkText(filePath, text, findings, sourceLabel) {
+  const matched = EXTENSION_COMMERCE_SDK_TEXT_INDICATORS.filter((indicator) => text.includes(indicator));
+  if (matched.length > 0) {
+    findings.push(finding("medium", "browser-extension-commerce-sdk-watch", filePath, `${sourceLabel} references browser-extension commerce/affiliate telemetry SDK terms: ${matched.slice(0, 4).join(", ")}`));
+  }
+
+  if (/Give\s*Freely|GiveFreely|givefreely/i.test(text)
+    && /<all_urls>|\*:\/\/\*\/\*|host_permissions|permissions|chrome\.runtime|chrome\.tabs|fetch\s*\(/i.test(text)) {
+    findings.push(finding("medium", "browser-extension-givefreely-broad-permission-watch", filePath, `${sourceLabel} combines Give Freely-style SDK terms with broad extension permission or runtime/network behavior.`));
+  }
+}
+
+function arrayValues(value) {
+  return Array.isArray(value) ? value.map(String) : [];
+}
+
+function contentScriptMatches(contentScripts) {
+  if (!Array.isArray(contentScripts)) return [];
+  return contentScripts.flatMap((script) => arrayValues(script?.matches));
+}
+
+function isAllSitesPermission(value) {
+  return value === "<all_urls>" || value === "*://*/*" || value === "http://*/*" || value === "https://*/*";
 }
 
 function scanAstroConfigText(filePath, text, findings) {
