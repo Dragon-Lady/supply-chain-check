@@ -345,6 +345,31 @@ try {
   fs.rmSync(googleSecretManagerPocRoot, { recursive: true, force: true });
 }
 
+const supplyChainAttackCatalogRoot = makeFixture("scc-supplychainattack-catalog-");
+try {
+  write(
+    path.join(supplyChainAttackCatalogRoot, "package.json"),
+    JSON.stringify({
+      name: "supplychainattack-catalog-fixture",
+      version: "1.0.0",
+      dependencies: {
+        "free-claude": "^1.0.0",
+        "free-anthropic-claude": "^1.0.0",
+        "node-fetch-utils": "^1.0.0"
+      }
+    }, null, 2)
+  );
+  write(path.join(supplyChainAttackCatalogRoot, "package-lock.json"), "node_modules/free-claude\nnode_modules/node-fetch-utils\n");
+
+  const report = scanTarget(supplyChainAttackCatalogRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("free-claude")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("free-anthropic-claude")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("node-fetch-utils")));
+} finally {
+  fs.rmSync(supplyChainAttackCatalogRoot, { recursive: true, force: true });
+}
+
 const otterCookieRoot = makeFixture("scc-ottercookie-");
 try {
   write(

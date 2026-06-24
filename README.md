@@ -52,6 +52,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
 - JetBrains Marketplace AI-key stealer plugin IDs and endpoint indicators
+- Supply Chain Attack catalog npm malware packages, including `free-claude`,
+  `free-anthropic-claude`, and the June 23 package cluster
 - Browser-extension all-sites permission drift paired with commerce/affiliate
   telemetry SDK signals, including the Volume Booster / Give Freely OSINT watch
 - OtterCookie npm packages and Vercel-hosted C2 strings

@@ -630,6 +630,150 @@
   "staticlayer": [
     "1.1.0"
   ],
+  "node-fetch-utils": [
+    "*"
+  ],
+  "calculate-helper": [
+    "*"
+  ],
+  "web3-token-helper": [
+    "*"
+  ],
+  "mjs-eslint-service": [
+    "*"
+  ],
+  "server-parket": [
+    "*"
+  ],
+  "parket-flow": [
+    "*"
+  ],
+  "ts-arithmetic-helper": [
+    "*"
+  ],
+  "chai-as-attested": [
+    "*"
+  ],
+  "aillmgen": [
+    "*"
+  ],
+  "search-from-search": [
+    "*"
+  ],
+  "@ravespaceio/browser-input": [
+    "*"
+  ],
+  "node-core-libs": [
+    "*"
+  ],
+  "ts-wross": [
+    "*"
+  ],
+  "@muaththir/api": [
+    "*"
+  ],
+  "onboarding-respects-modal": [
+    "*"
+  ],
+  "backoffice-charges-module": [
+    "*"
+  ],
+  "node-slot": [
+    "*"
+  ],
+  "cursorai-agent": [
+    "*"
+  ],
+  "@ravespaceio/rave-engine": [
+    "*"
+  ],
+  "poly-utils": [
+    "*"
+  ],
+  "eslint-helper-1": [
+    "*"
+  ],
+  "new-solt-1": [
+    "*"
+  ],
+  "new-ts-helper": [
+    "*"
+  ],
+  "new-ecro-helper": [
+    "*"
+  ],
+  "new-eslint-1": [
+    "*"
+  ],
+  "new-helper": [
+    "*"
+  ],
+  "new-mjs-eslint": [
+    "*"
+  ],
+  "new-solt": [
+    "*"
+  ],
+  "new-ecro-1": [
+    "*"
+  ],
+  "respects-switch": [
+    "*"
+  ],
+  "local-ip-helper": [
+    "*"
+  ],
+  "mjs-eslint-helper": [
+    "*"
+  ],
+  "ts-predict-helper": [
+    "*"
+  ],
+  "carousel-controller-mixin": [
+    "*"
+  ],
+  "chalk-ultra": [
+    "*"
+  ],
+  "sync-external": [
+    "*"
+  ],
+  "setka-editor": [
+    "*"
+  ],
+  "chai-as-uphelded": [
+    "*"
+  ],
+  "datacamp-light": [
+    "*"
+  ],
+  "crud-respect": [
+    "*"
+  ],
+  "libsignal-node-travatiger": [
+    "*"
+  ],
+  "ts-numbering": [
+    "*"
+  ],
+  "ts-sudo": [
+    "*"
+  ],
+  "vitest-cli": [
+    "*"
+  ],
+  "free-claude": [
+    "*"
+  ],
+  "node-path-utils": [
+    "*"
+  ],
+  "free-anthropic-claude": [
+    "*"
+  ],
+  "mddriver": [
+    "*"
+  ],
   "terminal-logger-utils": [
     "*"
   ],
