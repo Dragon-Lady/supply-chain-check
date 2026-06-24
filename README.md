@@ -46,6 +46,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - DPRK npm RAT packages and `utils.cjs` postinstall behavior
 - Easy-day-js / Mastra npm package takeover indicators
 - SafeDep procwire / routecraft Windows npm dropper indicators
+- JFrog / The Hacker News PostCSS-lookalike Windows RAT package and payload
+  indicators
 - Mini Shai-Hulud / Miasma / Hades npm and PyPI waves
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators

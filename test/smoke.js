@@ -734,7 +734,7 @@ try {
       scripts: {
         postinstall: "node scripts/postinstall-run.js"
       },
-      notes: "wshu[.]net github[.]com/angelmaybeth21-oss/test stitch-production[.]org /api/v1?src= myra-lab-shared-key nvidiadriver[.]net"
+      notes: "wshu[.]net github[.]com/angelmaybeth21-oss/test stitch-production[.]org /api/v1?src= myra-lab-shared-key nvidiadriver[.]net settings.ps1 update.vbs loader.py config.pyd audiodriver.pyd Nuitka app-bound encryption"
     }, null, 2)
   );
 

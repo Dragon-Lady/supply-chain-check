@@ -4,6 +4,7 @@
 - OX Security easy-day-js / Mastra npm supply-chain report: https://www.ox.security/blog/easy-day-js-supply-chain-attack-hits-mastra-ai-in-npm/
 - Socket Mastra npm package compromise analysis: https://socket.dev/blog/mastra-npm-packages-compromised
 - SafeDep procwire / routecraft Windows npm dropper campaign: https://safedep.io/procwire-npm-windows-dropper-campaign/
+- The Hacker News / JFrog PostCSS-lookalike Windows RAT summary: https://thehackernews.com/2026/06/malicious-npm-packages-pose-as-postcss.html
 - GitHub Advisory Database, GHSA-m3gw-x6rc-fp3r / csc154-internall-depend npm malware: https://github.com/advisories/GHSA-m3gw-x6rc-fp3r
 - supplychainattack.org incident catalog, csc154-internall-depend npm malware: https://supplychainattack.org/incident/malware-in-csc154-internall-depend-dytyon
 - GitHub Advisory Database, GHSA-vqg9-785x-8j39 / @validate-sdk/v2 npm malware: https://github.com/advisories/GHSA-vqg9-785x-8j39
