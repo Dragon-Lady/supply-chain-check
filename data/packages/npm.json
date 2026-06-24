@@ -630,6 +630,39 @@
   "staticlayer": [
     "1.1.0"
   ],
+  "tailwindcss-merge": [
+    "1.0.1",
+    "1.0.2",
+    "1.0.3",
+    "1.0.4"
+  ],
+  "sass-format": [
+    "*"
+  ],
+  "tailwindcss-animates-kit": [
+    "*"
+  ],
+  "sass-formats": [
+    "1.0.2",
+    "1.0.3",
+    "1.0.4",
+    "1.0.5"
+  ],
+  "clsx-tailwind": [
+    "1.0.1"
+  ],
+  "tailwindcss-animatics": [
+    "*"
+  ],
+  "typeorm-encrypt": [
+    "1.0.1"
+  ],
+  "rate-limits-flexible": [
+    "1.0.1"
+  ],
+  "rate-limit-flexible": [
+    "*"
+  ],
   "node-fetch-utils": [
     "*"
   ],

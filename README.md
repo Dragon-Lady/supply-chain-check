@@ -54,6 +54,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - JetBrains Marketplace AI-key stealer plugin IDs and endpoint indicators
 - Supply Chain Attack catalog npm malware packages, including `free-claude`,
   `free-anthropic-claude`, and the June 23 package cluster
+- Checkmarx ChainVeil npm package indicators, including `tailwindcss-merge`,
+  `sass-format`, `sass-formats`, and `rate-limit-flexible`
 - Browser-extension all-sites permission drift paired with commerce/affiliate
   telemetry SDK signals, including the Volume Booster / Give Freely OSINT watch
 - OtterCookie npm packages and Vercel-hosted C2 strings

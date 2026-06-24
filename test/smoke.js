@@ -370,6 +370,31 @@ try {
   fs.rmSync(supplyChainAttackCatalogRoot, { recursive: true, force: true });
 }
 
+const chainVeilRoot = makeFixture("scc-chainveil-");
+try {
+  write(
+    path.join(chainVeilRoot, "package.json"),
+    JSON.stringify({
+      name: "chainveil-fixture",
+      version: "1.0.0",
+      dependencies: {
+        "rate-limit-flexible": "^1.0.2",
+        "tailwindcss-merge": "1.0.4",
+        "sass-format": "^1.0.1"
+      }
+    }, null, 2)
+  );
+  write(path.join(chainVeilRoot, "package-lock.json"), "node_modules/rate-limit-flexible\nnode_modules/tailwindcss-merge\n");
+
+  const report = scanTarget(chainVeilRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("rate-limit-flexible")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("tailwindcss-merge")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("rate-limit-flexible")));
+} finally {
+  fs.rmSync(chainVeilRoot, { recursive: true, force: true });
+}
+
 const otterCookieRoot = makeFixture("scc-ottercookie-");
 try {
   write(
