@@ -21,6 +21,7 @@
 - Supply Chain Attack incident catalog, free-claude npm malware: https://supplychainattack.org/incident/malware-in-free-claude-7fjbqi
 - GitHub Advisory Database, GHSA-fgqv-2jmm-2p39 / search-from-search npm malware: https://github.com/advisories/GHSA-fgqv-2jmm-2p39
 - Supply Chain Attack incident catalog, search-from-search npm malware: https://supplychainattack.org/incident/malware-in-search-from-search-1jc4kr
+- Supply Chain Attack incident catalog, node-fetch-utils npm malware: https://supplychainattack.org/incident/malware-in-node-fetch-utils-wwuwix
 - Checkmarx ChainVeil / successkey npm supply-chain report: https://checkmarx.com/zero-post/chainveil-a-malicious-npm-supply-chain-attack-by-successkey/
 - Panther OtterCookie npm campaign: https://panther.com/blog/tracking-an-ottercookie-infostealer-campaign-across-npm
 - SafeDep Astro config blockchain C2 supply-chain report: https://safedep.io/astro-config-blockchain-c2-supply-chain/
