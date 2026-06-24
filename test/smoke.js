@@ -617,6 +617,26 @@ try {
   fs.rmSync(liteLlmRoot, { recursive: true, force: true });
 }
 
+const langflowRoot = makeFixture("scc-langflow-");
+try {
+  write(path.join(langflowRoot, "requirements.txt"), "langflow==1.9.0\n");
+  write(
+    path.join(langflowRoot, "pyproject.toml"),
+    [
+      "[project]",
+      "dependencies = [",
+      '  "langflow==1.9.0",',
+      "]",
+    ].join("\n")
+  );
+
+  const report = scanTarget(langflowRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "langflow-cve-2026-55450-vulnerable-version"));
+} finally {
+  fs.rmSync(langflowRoot, { recursive: true, force: true });
+}
+
 const miasmaRoot = makeFixture("scc-miasma-");
 try {
   write(path.join(miasmaRoot, ".github", "setup.js"), "console.log('setup');\n");

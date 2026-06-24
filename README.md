@@ -49,6 +49,7 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - JFrog / The Hacker News PostCSS-lookalike Windows RAT package and payload
   indicators
 - Mini Shai-Hulud / Miasma / Hades npm and PyPI waves
+- Langflow `CVE-2026-55450` vulnerable Python dependency pins before `1.9.1`
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
 - JetBrains Marketplace AI-key stealer plugin IDs and endpoint indicators

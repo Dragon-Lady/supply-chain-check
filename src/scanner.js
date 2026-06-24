@@ -32,6 +32,7 @@ const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "cov
 const LITELLM_AFFECTED_MIN = "1.74.2";
 const LITELLM_FIXED = "1.83.7";
 const STARLETTE_FIXED = "1.0.1";
+const LANGFLOW_FIXED = "1.9.1";
 const OPENCLAW_FIXED = "2026.4.23";
 const OPENCLAW_CONFIG_FILES = new Set([".crabbox.yaml", ".crabbox.yml"]);
 const NPM_V12_PREPARE_MIN = "11.16.0";
@@ -534,6 +535,7 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
   }
 
   scanLiteLlmDependencySpec(filePath, section, name, spec, findings);
+  scanLangflowDependencySpec(filePath, section, name, spec, findings);
   scanOpenClawDependencySpec(filePath, section, name, spec, findings);
   scanNpmV12DependencySpec(filePath, section, name, spec, findings);
 }
@@ -633,6 +635,7 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
   scanGlassWasmText(filePath, text, findings, "Python dependency file");
   scanLiteLlmText(filePath, text, findings, "Python dependency file");
   scanAutoJackText(filePath, text, findings, "Python dependency file");
+  scanLangflowDependencyText(filePath, text, findings, "Python dependency file");
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
     if (packageIsListedAllVersions(versions) && pythonFileMentionsPackage(text, pkg)) {
@@ -643,6 +646,14 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
       if (pythonFileMentionsPackageVersion(text, pkg, version)) {
         findings.push(finding("critical", "known-bad-pypi-version", filePath, `Python dependency file references ${pkg}==${version}.`));
       }
+    }
+  }
+}
+
+function scanLangflowDependencyText(filePath, text, findings, sourceLabel) {
+  for (const version of packageVersionsInText(text, "langflow")) {
+    if (compareDottedVersion(version, LANGFLOW_FIXED) < 0) {
+      findings.push(finding("critical", "langflow-cve-2026-55450-vulnerable-version", filePath, `${sourceLabel} references Langflow ${version}, affected by CVE-2026-55450. Upgrade to langflow>=${LANGFLOW_FIXED}.`));
     }
   }
 }
@@ -1239,6 +1250,17 @@ function scanLiteLlmDependencySpec(filePath, section, name, spec, findings) {
     }
     if (normalizedName === "starlette" && compareDottedVersion(version, STARLETTE_FIXED) < 0) {
       findings.push(finding("medium", "starlette-host-header-review", filePath, `${section}.${name} references Starlette ${version}. If deployed with LiteLLM, upgrade to starlette>=${STARLETTE_FIXED}.`));
+    }
+  }
+}
+
+function scanLangflowDependencySpec(filePath, section, name, spec, findings) {
+  if (normalizePythonPackageName(name) !== "langflow") return;
+
+  const versions = versionsInSpec(spec);
+  for (const version of versions) {
+    if (compareDottedVersion(version, LANGFLOW_FIXED) < 0) {
+      findings.push(finding("critical", "langflow-cve-2026-55450-vulnerable-version", filePath, `${section}.${name} references Langflow ${version}, affected by CVE-2026-55450. Upgrade to langflow>=${LANGFLOW_FIXED}.`));
     }
   }
 }
