@@ -13,6 +13,24 @@ a second-stage bundled Node executable, and targets developer workstation data
 such as Telegram data, SSH keys, cloud configuration, crypto wallets, browser
 data, environment variables, clipboard data, and typed password fields.
 
+## OX Miasma / Hades npm Variant
+
+OX Security's June 25, 2026 report describes another Shai-Hulud / Miasma /
+Hades npm variant tied to a compromised maintainer account and 23 affected
+package versions across the `leo-*`, `serverless-*`, `solo-nav`, and
+`rstreams-*` package set.
+
+The checker flags those exact npm package versions in manifests and lockfiles.
+It also flags copied incident notes or source artifacts containing the reported
+GitHub exfil repository string `Alright Lets See If This Works`, the
+`RevokeAndItGoesKaboom` revocation marker, the `TheBeautifulSandsOfTime` /
+`thebeautifulmarchoftime` strings, the reported GitHub raw payload paths, and
+the public-key fragments OX published as malware indicators.
+
+If these package versions or strings are found, stop installs and builds in the
+affected tree. If install-time code may have run, move from package review to
+host incident response and rotate credentials only from a clean environment.
+
 ## Mini Shai-Hulud / Miasma / Hades PyPI Waves
 
 The June 2026 Socket and SecurityWeek reporting is included for pre-execution

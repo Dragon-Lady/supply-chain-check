@@ -7,6 +7,7 @@
   },
   "sources": [
     "https://www.ox.security/blog/north-korean-npm-infostealer-rat/",
+    "https://www.ox.security/blog/alright-lets-see-if-this-works-shai-hulud-miasma-hades-variant-spreads-on-npm/",
     "https://github.com/advisories/GHSA-m3gw-x6rc-fp3r",
     "https://supplychainattack.org/incident/malware-in-csc154-internall-depend-dytyon",
     "https://github.com/advisories/GHSA-vqg9-785x-8j39",

@@ -1,6 +1,7 @@
 # Sources
 
 - OX Security DPRK npm RAT writeup: https://www.ox.security/blog/north-korean-npm-infostealer-rat/
+- OX Security Shai-Hulud / Miasma / Hades npm variant report: https://www.ox.security/blog/alright-lets-see-if-this-works-shai-hulud-miasma-hades-variant-spreads-on-npm/
 - OX Security easy-day-js / Mastra npm supply-chain report: https://www.ox.security/blog/easy-day-js-supply-chain-attack-hits-mastra-ai-in-npm/
 - Socket Mastra npm package compromise analysis: https://socket.dev/blog/mastra-npm-packages-compromised
 - SafeDep procwire / routecraft Windows npm dropper campaign: https://safedep.io/procwire-npm-windows-dropper-campaign/

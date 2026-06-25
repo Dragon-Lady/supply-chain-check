@@ -535,6 +535,63 @@ try {
   fs.rmSync(easyDayJsRoot, { recursive: true, force: true });
 }
 
+const oxMiasmaHadesRoot = makeFixture("scc-ox-miasma-hades-");
+try {
+  write(
+    path.join(oxMiasmaHadesRoot, "package.json"),
+    JSON.stringify({
+      name: "ox-miasma-hades-fixture",
+      version: "1.0.0",
+      dependencies: {
+        "leo-sdk": "6.0.19",
+        "serverless-leo": "3.0.14"
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(oxMiasmaHadesRoot, "package-lock.json"),
+    JSON.stringify({
+      packages: {
+        "node_modules/rstreams-shard-util": { version: "1.0.1" },
+        "node_modules/leo-connector-postgres": { version: "4.0.19-beta" }
+      }
+    })
+  );
+  write(
+    path.join(oxMiasmaHadesRoot, "incident-note.js"),
+    [
+      "const repo = 'Alright Lets See If This Works';",
+      "const marker = 'RevokeAndItGoesKaboom';",
+      "const payload = 'raw[.]githubusercontent[.]com/l3v1cs/Html-Bootstrap-TinDog/cb6699faacade9775d3d83059d6ba6a756755193/index.js';"
+    ].join("\n")
+  );
+
+  const report = scanTarget(oxMiasmaHadesRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) =>
+    finding.type === "known-bad-requested-version"
+    && finding.message.includes("leo-sdk")
+    && finding.path.endsWith("package.json")
+  ));
+  assert(report.findings.some((finding) =>
+    finding.type === "known-bad-lockfile-version"
+    && finding.message.includes("rstreams-shard-util@1.0.1")
+    && finding.path.endsWith("package-lock.json")
+  ));
+  assert(report.findings.some((finding) =>
+    finding.type === "campaign-indicator"
+    && finding.message.includes("Alright Lets See If This Works")
+    && finding.path.endsWith("incident-note.js")
+  ));
+  assert(report.findings.some((finding) =>
+    finding.type === "network-indicator"
+    && finding.message.includes("raw[.]githubusercontent[.]com/l3v1cs/Html-Bootstrap-TinDog")
+    && finding.path.endsWith("incident-note.js")
+  ));
+} finally {
+  fs.rmSync(oxMiasmaHadesRoot, { recursive: true, force: true });
+}
+
 const procwireRoot = makeFixture("scc-procwire-");
 try {
   write(

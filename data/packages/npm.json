@@ -559,6 +559,60 @@
   "hjs-lint-builders": [
     "1.0.4"
   ],
+  "leo-auth": [
+    "4.0.6"
+  ],
+  "leo-aws": [
+    "2.0.4"
+  ],
+  "leo-cache": [
+    "1.0.2"
+  ],
+  "leo-cdk-lib": [
+    "0.0.2"
+  ],
+  "leo-cli": [
+    "3.0.3"
+  ],
+  "leo-config": [
+    "1.1.1"
+  ],
+  "leo-connector-common": [
+    "4.0.11-rc"
+  ],
+  "leo-connector-elasticsearch": [
+    "2.0.6"
+  ],
+  "leo-connector-entity-table": [
+    "3.0.22-rc"
+  ],
+  "leo-connector-mongo": [
+    "3.0.8"
+  ],
+  "leo-connector-mysql": [
+    "3.0.3"
+  ],
+  "leo-connector-oracle": [
+    "2.0.1"
+  ],
+  "leo-connector-postgres": [
+    "4.0.19-beta"
+  ],
+  "leo-connector-redshift": [
+    "3.0.6"
+  ],
+  "leo-cron": [
+    "2.0.2"
+  ],
+  "leo-logger": [
+    "1.0.8"
+  ],
+  "leo-sdk": [
+    "6.0.19"
+  ],
+  "leo-streams": [
+    "2.0.1"
+  ],
   "mastra": [
     "1.13.1"
   ],
@@ -587,6 +641,12 @@
   ],
   "routecraft": [
     "4.2.0"
+  ],
+  "rstreams-metrics": [
+    "2.0.2"
+  ],
+  "rstreams-shard-util": [
+    "1.0.1"
   ],
   "shopifyto-cms": [
     "*"
@@ -629,6 +689,15 @@
   ],
   "staticlayer": [
     "1.1.0"
+  ],
+  "serverless-convention": [
+    "2.0.4"
+  ],
+  "serverless-leo": [
+    "3.0.14"
+  ],
+  "solo-nav": [
+    "1.0.1"
   ],
   "tailwindcss-merge": [
     "1.0.1",
