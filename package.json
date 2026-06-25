@@ -5,8 +5,18 @@
   "license": "MIT",
   "type": "commonjs",
   "bin": {
-    "supply-chain-check": "./bin/supply-chain-check.js"
+    "supply-chain-check": "bin/supply-chain-check.js"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "data/",
+    "docs/advisory.md",
+    "docs/response-guide.md",
+    "docs/sources.md",
+    "LICENSE",
+    "NOTICE.md"
+  ],
   "scripts": {
     "scan": "node bin/supply-chain-check.js",
     "smoke": "node bin/supply-chain-check.js --help",
