@@ -15,8 +15,15 @@
       "source": "OX Security DPRK npm RAT report, 2026-05-20"
     }
   ],
-  "payloadFiles": [],
-  "payloadFileHashes": {},
+  "payloadFiles": [
+    "fa-solid-400.woff2"
+  ],
+  "payloadFileHashes": {
+    "fa-solid-400.woff2": [
+      "53abf37710d6f2e35694fbe7cfaf1108127cbc001ce3e6bf994d0486cae5a0e8",
+      "13e9a3c41e038bf9d8fcb0831305819819e4f7f4452bc20a04b9bf2756ee22e8"
+    ]
+  },
   "networkIndicators": [
     "/api/validate/keyboard-events",
     "23.254.164.92",
@@ -68,7 +75,30 @@
     "r.keepex.xyz",
     "r[.]keepex[.]xyz",
     "https://r.keepex.xyz/api/report/admin",
-    "hxxps://r[.]keepex[.]xyz/api/report/admin"
+    "hxxps://r[.]keepex[.]xyz/api/report/admin",
+    "166.88.134.62",
+    "166[.]88[.]134[.]62",
+    "198.105.127.210",
+    "198[.]105[.]127[.]210",
+    "23.27.202.27",
+    "23[.]27[.]202[.]27",
+    "/$/boot",
+    "/verify-human/",
+    "/snv",
+    "/u/e",
+    "/u/f",
+    "/d/python.zip",
+    "/d/python.7z",
+    "/d/7zr.exe",
+    "api.trongrid.io",
+    "api[.]trongrid[.]io",
+    "fullnode.mainnet.aptoslabs.com",
+    "fullnode[.]mainnet[.]aptoslabs[.]com",
+    "bsc-dataseed.binance.org",
+    "bsc-dataseed[.]binance[.]org",
+    "bsc-rpc.publicnode.com",
+    "bsc-rpc[.]publicnode[.]com",
+    "eth_getTransactionByHash"
   ],
   "workflowIndicators": [
     "MicrosoftSystem64",
@@ -138,6 +168,19 @@
     "wshu.net",
     "wshu[.]net",
     "angelmaybeth21-oss",
+    "fa-solid-400.woff2",
+    ".vscode/tasks.json",
+    "\"runOn\": \"folderOpen\"",
+    "eslint-check",
+    "Sec-V",
+    "TMfKQEd7TJJa5xNZJZ2Lep838vrzrs7mAP",
+    "TXfxHUet9pJVU1BgVkBAbrES4YUc1nGzcG",
+    "TA48dct6rFW8BXsiLAtjFaVFoSuryMjD3v",
+    "0xbe037400670fbf1c32364f762975908dc43eeb38759263e7dfcdabc76380811e",
+    "0x3f0e5781d0855fb460661ac63257376db1941b2bb522499e4757ecb3ebd5dce3",
+    "0x533b2dbcaeff19cd1f799234a27b578d713d8fcaa341b7501e4526106483e0b1",
+    "github.com/lambda-platform/lambda",
+    "lambda-platform/lambda",
     "smilingdusty233",
     "/tmp/_installer-0/",
     "~/.local/bin/colord",

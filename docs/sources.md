@@ -23,6 +23,7 @@
 - Supply Chain Attack incident catalog, search-from-search npm malware: https://supplychainattack.org/incident/malware-in-search-from-search-1jc4kr
 - Supply Chain Attack incident catalog, node-fetch-utils npm malware: https://supplychainattack.org/incident/malware-in-node-fetch-utils-wwuwix
 - Checkmarx ChainVeil / successkey npm supply-chain report: https://checkmarx.com/zero-post/chainveil-a-malicious-npm-supply-chain-attack-by-successkey/
+- JFrog VS Code autorun / blockchain dead-drop npm hijack report: https://research.jfrog.com/post/hijacked-npm-vscode-tasks-blockchain/
 - Panther OtterCookie npm campaign: https://panther.com/blog/tracking-an-ottercookie-infostealer-campaign-across-npm
 - SafeDep Astro config blockchain C2 supply-chain report: https://safedep.io/astro-config-blockchain-c2-supply-chain/
 - The Hacker News OpenClaw prompt-injection and agent-phishing report: https://thehackernews.com/2026/06/new-attacks-trick-openclaw-ai-agent.html
@@ -35,6 +36,7 @@
 - npm staged publishing command docs: https://docs.npmjs.com/cli/v11/commands/npm-stage/
 - GitHub changelog: staged publishing and npm install-time controls: https://github.blog/changelog/2026-05-22-staged-publishing-and-new-install-time-controls-for-npm/
 - Nextron Research X post on malicious Packagist `dcat-auth-google-2fa@1.0.2.0`: https://x.com/nextronresearch
+- Nextron Research X post on Go packages reusing the JFrog fake-font payload: https://x.com/nextronresearch
 
 This project intentionally avoids exploit reproduction steps, malware execution
 guidance, cleanup automation, token handling, and secret disclosure.

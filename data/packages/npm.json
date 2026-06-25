@@ -666,6 +666,12 @@
   "node-fetch-utils": [
     "*"
   ],
+  "html-to-gutenberg": [
+    "4.2.11"
+  ],
+  "fetch-page-assets": [
+    "1.2.9"
+  ],
   "calculate-helper": [
     "*"
   ],

@@ -54,6 +54,37 @@ try {
   fs.rmSync(composerPackagistRoot, { recursive: true, force: true });
 }
 
+const vscodeAutorunBlockchainRoot = makeFixture("scc-vscode-autorun-blockchain-");
+try {
+  write(
+    path.join(vscodeAutorunBlockchainRoot, "package.json"),
+    JSON.stringify({
+      name: "vscode-autorun-blockchain-fixture",
+      version: "1.0.0",
+      dependencies: {
+        "html-to-gutenberg": "4.2.11",
+        "fetch-page-assets": "1.2.9"
+      }
+    }, null, 2)
+  );
+  write(
+    path.join(vscodeAutorunBlockchainRoot, ".vscode", "tasks.json"),
+    JSON.stringify({
+      label: "eslint-check",
+      command: "node ./public/fonts/fa-solid-400.woff2",
+      runOptions: { runOn: "folderOpen" }
+    }, null, 2)
+  );
+
+  const report = scanTarget(vscodeAutorunBlockchainRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("html-to-gutenberg")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("fetch-page-assets")));
+  assert(report.findings.some((finding) => finding.type === "tool-config-payload-reference" && finding.message.includes("fa-solid-400.woff2")));
+} finally {
+  fs.rmSync(vscodeAutorunBlockchainRoot, { recursive: true, force: true });
+}
+
 const extensionPermissionDriftRoot = makeFixture("scc-extension-permission-drift-");
 try {
   write(

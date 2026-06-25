@@ -58,6 +58,9 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   cluster
 - Checkmarx ChainVeil npm package indicators, including `tailwindcss-merge`,
   `sass-format`, `sass-formats`, and `rate-limit-flexible`
+- JFrog VS Code folder-open autorun / blockchain dead-drop npm indicators for
+  `html-to-gutenberg@4.2.11` and `fetch-page-assets@1.2.9`, including the
+  fake `fa-solid-400.woff2` payload filename and reported hashes
 - Nextron Research Packagist indicator for malicious
   `dcat-auth-google-2fa@1.0.2.0`, including `r[.]keepex[.]xyz` exfil strings
   and the reported hardcoded 2FA bypass marker
