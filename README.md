@@ -71,6 +71,10 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   and the reported hardcoded 2FA bypass marker
 - Browser-extension all-sites permission drift paired with commerce/affiliate
   telemetry SDK signals, including the Volume Booster / Give Freely OSINT watch
+- Island/THN Adblock for YouTube extension indicators, including
+  `cmedhionkhpnakcndndgjdbohmhepckk`, related removed extension IDs,
+  `api.adblock-for-youtube.com`, Unistream infrastructure, and dormant
+  `trusted-create-element` / MAIN-world scriptlet injection shape
 - OtterCookie npm packages and Vercel-hosted C2 strings
 - Astro config-as-code loader traps
 - OpenClaw risky versions/configs

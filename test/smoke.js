@@ -118,6 +118,47 @@ try {
   fs.rmSync(extensionPermissionDriftRoot, { recursive: true, force: true });
 }
 
+const adblockYoutubeRoot = makeFixture("scc-adblock-youtube-");
+try {
+  write(
+    path.join(adblockYoutubeRoot, "cmedhionkhpnakcndndgjdbohmhepckk", "manifest.json"),
+    JSON.stringify({
+      manifest_version: 3,
+      key: "cmedhionkhpnakcndndgjdbohmhepckk",
+      name: "Adblock for YouTube",
+      version: "6.8.0",
+      permissions: ["scripting", "storage"],
+      host_permissions: ["<all_urls>"],
+      background: { service_worker: "background.js" }
+    }, null, 2)
+  );
+  write(
+    path.join(adblockYoutubeRoot, "cmedhionkhpnakcndndgjdbohmhepckk", "background.js"),
+    [
+      "const configUrl = 'https://api.adblock-for-youtube.com/v1/config';",
+      "const fallback = 'https://get.adblock-for-youtube.com/rules';",
+      "const oldSdk = 'cdn.unistream.io api.unistream.io api.extensionplay.com';",
+      "const related = 'onomjaelhagjjojbkcafidnepbfkpnee ogcaehilgakehloljjmajoempaflmdci gekoepiplklhniacchbbgbhilidiojmb';",
+      "const scripletsRules = [{ name: 'trusted-create-element', args: ['script'] }];",
+      "chrome.scripting.executeScript({ target: { tabId }, world: 'MAIN', func: () => document.createElement('script') });",
+      "if (/youtube\\.com/.test(location.href)) runRules(scripletsRules);"
+    ].join("\n")
+  );
+
+  const report = scanTarget(adblockYoutubeRoot);
+  const types = new Set(report.findings.map((finding) => finding.type));
+  assert.strictEqual(report.risk, "possible-exposure");
+  assert(types.has("adblock-youtube-extension-id-path"));
+  assert(types.has("adblock-youtube-extension-id-reference"));
+  assert(types.has("adblock-youtube-network-indicator"));
+  assert(types.has("adblock-youtube-text-indicator"));
+  assert(types.has("adblock-youtube-remote-scriptlet-injection-shape"));
+  assert(types.has("adblock-youtube-url-gate-review"));
+  assert(types.has("adblock-youtube-broad-permission-review"));
+} finally {
+  fs.rmSync(adblockYoutubeRoot, { recursive: true, force: true });
+}
+
 const astroConfigRoot = makeFixture("scc-astro-config-c2-");
 try {
   write(

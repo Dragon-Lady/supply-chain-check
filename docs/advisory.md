@@ -88,6 +88,16 @@ This is not a confirmed malware IOC in this rule set. It is meant to catch the
 permission-drift pattern before an extension update turns dormant access into
 active telemetry.
 
+Island's June 2026 Adblock for YouTube report, covered by The Hacker News,
+adds a stronger browser-extension review lane. The checker flags the live
+extension ID `cmedhionkhpnakcndndgjdbohmhepckk`, related removed extension IDs
+`onomjaelhagjjojbkcafidnepbfkpnee`, `ogcaehilgakehloljjmajoempaflmdci`, and
+`gekoepiplklhniacchbbgbhilidiojmb`, Adblock/Unistream infrastructure strings,
+and source shapes where server-selected scriptlets such as
+`trusted-create-element` can reach `chrome.scripting.executeScript` /
+MAIN-world script creation. These are review findings, not proof that a
+malicious payload ran.
+
 ## npm Staged Publish Trust Signal
 
 As of pnpm 11.5, package registry metadata carrying an `approver` field is

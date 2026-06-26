@@ -18,6 +18,8 @@
 - JFrog Solana FakeFix / CMS Windows loader report: https://research.jfrog.com/post/solana-fakefix/
 - Socket GlassWASM Open VSX extension report: https://socket.dev/blog/glasswasm-malware-open-vsx-extensions
 - BleepingComputer / Aikido JetBrains Marketplace AI-key stealer report: https://www.bleepingcomputer.com/news/security/malicious-jetbrains-marketplace-plugins-steal-ai-api-keys-from-developers/
+- Island, BadBlocker / Adblock for YouTube extension analysis: https://www.island.io/blog/badblocker-11-million-users-one-server-call-away-from-compromise
+- The Hacker News, Chrome Ad Blocker with 10M+ installs and dormant script injection capability: https://thehackernews.com/2026/06/chrome-ad-blocker-with-10m-installs.html
 - GitHub Advisory Database, GHSA-g6v5-9xpp-6hpx / google-cloud-secret-manager-config-poc npm malware: https://github.com/advisories/GHSA-g6v5-9xpp-6hpx
 - Supply Chain Attack incident catalog, latest npm malware batch: https://supplychainattack.org/
 - Supply Chain Attack incident catalog, free-claude npm malware: https://supplychainattack.org/incident/malware-in-free-claude-7fjbqi

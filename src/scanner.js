@@ -136,6 +136,43 @@ const EXTENSION_COMMERCE_SDK_TEXT_INDICATORS = [
   "all sites permission"
 ];
 
+const ADBLOCK_YOUTUBE_EXTENSION_IDS = [
+  "cmedhionkhpnakcndndgjdbohmhepckk",
+  "onomjaelhagjjojbkcafidnepbfkpnee",
+  "ogcaehilgakehloljjmajoempaflmdci",
+  "gekoepiplklhniacchbbgbhilidiojmb"
+];
+
+const ADBLOCK_YOUTUBE_NETWORK_INDICATORS = [
+  "api.adblock-for-youtube.com",
+  "get.adblock-for-youtube.com",
+  "api.extensionplay.com",
+  "extensionplay.com",
+  "unistream.io",
+  "cdn.unistream.io",
+  "api.unistream.io",
+  "api.ad-block-for-chrome.com",
+  "get.ad-block-for-chrome.com"
+];
+
+const ADBLOCK_YOUTUBE_TEXT_INDICATORS = [
+  "Adblock for YouTube",
+  "Adblock for Chrome",
+  "Adblock for You",
+  "AdBlock Suite",
+  "BadBlocker",
+  "Unistream SDK",
+  "scripletsRules",
+  "trusted-create-element",
+  "MAIN-world",
+  "remote-controlled injection path",
+  "chrome.scripting.executeScript",
+  "world: 'MAIN'",
+  "world:\"MAIN\"",
+  "/youtube\\.com/",
+  "youtube.com anywhere in the URL"
+];
+
 const DEFAULT_ADVISORY = {
   indicators: {
     maliciousOptionalDependencyName: "terminal-logger-utils",
@@ -203,6 +240,7 @@ function scanTarget(targetPath, options = {}) {
     scanHadesPath(filePath, findings);
     scanGlassWasmPath(filePath, findings);
     scanJetBrainsAiKeyStealerPath(filePath, findings);
+    scanAdblockForYoutubePath(filePath, findings);
 
     if (payloadFiles.has(base)) {
       findings.push(finding("critical", "payload-file", filePath, `Known incident payload filename present: ${base}`));
@@ -889,6 +927,7 @@ function scanJavaScriptSourceFile(filePath, advisory, findings) {
   scanHadesText(filePath, text, findings, "JavaScript source file");
   scanGlassWasmText(filePath, text, findings, "JavaScript source file");
   scanExtensionCommerceSdkText(filePath, text, findings, "JavaScript source file");
+  scanAdblockForYoutubeText(filePath, text, findings, "JavaScript source file");
   scanLiteLlmText(filePath, text, findings, "JavaScript source file");
   scanOpenClawText(filePath, text, findings, "JavaScript source file");
   scanAutoJackText(filePath, text, findings, "JavaScript source file");
@@ -908,6 +947,7 @@ function scanBrowserExtensionManifest(filePath, advisory, findings) {
   scanIndicatorStrings(filePath, rawText, advisory, findings, "Browser extension manifest");
   scanGlassWasmText(filePath, rawText, findings, "Browser extension manifest");
   scanExtensionCommerceSdkText(filePath, rawText, findings, "Browser extension manifest");
+  scanAdblockForYoutubeText(filePath, rawText, findings, "Browser extension manifest");
 
   if (!manifest || !manifest.manifest_version) return;
 
@@ -925,6 +965,10 @@ function scanBrowserExtensionManifest(filePath, advisory, findings) {
 
   if (/volume\s*booster/i.test(name) && broadPermissions.length > 0) {
     findings.push(finding("medium", "chrome-volume-booster-permission-drift-watch", filePath, "Volume Booster-style extension has broad all-sites host permissions; review update history for prompt-free activation of telemetry or affiliate SDK code."));
+  }
+
+  if (/ad\s*block|adblock|youtube/i.test(name) && broadPermissions.length > 0 && rawText.includes("cmedhionkhpnakcndndgjdbohmhepckk")) {
+    findings.push(finding("high", "adblock-youtube-broad-permission-review", filePath, "Adblock for YouTube manifest carries broad all-sites permissions; review update provenance and remote scriptlet configuration."));
   }
 }
 
@@ -1049,6 +1093,15 @@ function scanJetBrainsAiKeyStealerText(filePath, text, findings, sourceLabel) {
   }
 }
 
+function scanAdblockForYoutubePath(filePath, findings) {
+  const normalized = filePath.replace(/\\/g, "/").toLowerCase();
+  for (const extensionId of ADBLOCK_YOUTUBE_EXTENSION_IDS) {
+    if (normalized.includes(extensionId)) {
+      findings.push(finding("high", "adblock-youtube-extension-id-path", filePath, `Island-reported Adblock-family Chrome extension ID appears in path: ${extensionId}`));
+    }
+  }
+}
+
 function scanGitignoreText(filePath, text, findings) {
   if (/\b(branch_structure\.json|temp_auto_push\.bat|temp_interactive_push\.bat)\b/i.test(text)) {
     findings.push(finding(
@@ -1087,6 +1140,35 @@ function scanExtensionCommerceSdkText(filePath, text, findings, sourceLabel) {
   if (/Give\s*Freely|GiveFreely|givefreely/i.test(text)
     && /<all_urls>|\*:\/\/\*\/\*|host_permissions|permissions|chrome\.runtime|chrome\.tabs|fetch\s*\(/i.test(text)) {
     findings.push(finding("medium", "browser-extension-givefreely-broad-permission-watch", filePath, `${sourceLabel} combines Give Freely-style SDK terms with broad extension permission or runtime/network behavior.`));
+  }
+}
+
+function scanAdblockForYoutubeText(filePath, text, findings, sourceLabel) {
+  for (const extensionId of ADBLOCK_YOUTUBE_EXTENSION_IDS) {
+    if (text.includes(extensionId)) {
+      findings.push(finding("high", "adblock-youtube-extension-id-reference", filePath, `${sourceLabel} references Island-reported Adblock-family Chrome extension ID ${extensionId}.`));
+    }
+  }
+
+  for (const indicator of ADBLOCK_YOUTUBE_NETWORK_INDICATORS) {
+    if (text.includes(indicator)) {
+      findings.push(finding("high", "adblock-youtube-network-indicator", filePath, `${sourceLabel} references Adblock for YouTube / related extension infrastructure ${indicator}.`));
+    }
+  }
+
+  const matched = ADBLOCK_YOUTUBE_TEXT_INDICATORS.filter((indicator) => text.includes(indicator));
+  if (matched.length > 0) {
+    findings.push(finding("medium", "adblock-youtube-text-indicator", filePath, `${sourceLabel} references Adblock for YouTube script-injection or related-extension terms: ${matched.slice(0, 4).join(", ")}`));
+  }
+
+  if (/scripletsRules|trusted-create-element/i.test(text)
+    && /chrome\.scripting\.executeScript|world\s*:\s*['"]MAIN['"]|MAIN-world|createElement|scriptlet|server-side configuration|remote-controlled/i.test(text)) {
+    findings.push(finding("high", "adblock-youtube-remote-scriptlet-injection-shape", filePath, `${sourceLabel} combines remote scriptlet selection with MAIN-world/script element injection terms reported by Island.`));
+  }
+
+  if (/\/youtube\\\.com\/|youtube\.com anywhere in the URL|current URL contains ["']?youtube\.com|includes\s*\(\s*['"]youtube\.com['"]\s*\)/i.test(text)
+    && /<all_urls>|\*:\/\/\*\/\*|host_permissions|chrome\.scripting|executeScript|trusted-create-element|scripletsRules/i.test(text)) {
+    findings.push(finding("medium", "adblock-youtube-url-gate-review", filePath, `${sourceLabel} matches the weak full-URL youtube.com gate and broad extension execution context described by Island.`));
   }
 }
 
