@@ -835,9 +835,12 @@ try {
       "]",
     ].join("\n")
   );
+  write(path.join(langflowRoot, "uv.lock"), 'name = "langflow"\nversion = "1.8.4"\n');
 
   const report = scanTarget(langflowRoot);
   assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "langflow-cve-2026-10561-vulnerable-version"));
+  assert(report.findings.some((finding) => finding.type === "langflow-cve-2026-7664-vulnerable-version"));
   assert(report.findings.some((finding) => finding.type === "langflow-cve-2026-55450-vulnerable-version"));
 } finally {
   fs.rmSync(langflowRoot, { recursive: true, force: true });

@@ -54,7 +54,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   `@immobiliarelabs/backstage-*` package versions plus reported GitHub exfil,
   raw payload-path, `SEED_PAT`/`Seeder` markers, and SafeDep-reported
   `snapshot-*` / fake `Dependabot Updates` workflow poisoning terms
-- Langflow `CVE-2026-55450` vulnerable Python dependency pins before `1.9.1`
+- Langflow `CVE-2026-10561`, `CVE-2026-7664`, and `CVE-2026-55450`
+  vulnerable Python dependency pins before their fixed releases
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
 - JetBrains Marketplace AI-key stealer plugin IDs, endpoint, static auth token,

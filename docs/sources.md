@@ -16,6 +16,9 @@
 - Socket newer Miasma/Hades PyPI wave analysis: https://socket.dev/blog/mini-shai-hulud-miasma-and-hades-worms-target-bioinformatics-and-mcp-developers-via-malicious
 - SecurityWeek Shai-Hulud Miasma/Hades summary: https://www.securityweek.com/over-100-npm-pypi-packages-hit-in-new-shai-hulud-supply-chain-attacks/
 - GitHub Security Advisory GHSA-x223-p2gf-v735 / Langflow CVE-2026-55450: https://github.com/langflow-ai/langflow/security/advisories/GHSA-x223-p2gf-v735
+- IBM Security Bulletin / Langflow CVE-2026-10561 PythonREPL RCE: https://www.ibm.com/support/pages/node/7277242
+- IBM Security Bulletin / Langflow CVE-2026-7664 webhook/MCP authorization bypass: https://www.ibm.com/support/pages/node/7277243
+- SecurityOnline Langflow RCE summary: https://securityonline.info/langflow-rce-vulnerability/
 - JFrog Solana FakeFix / CMS Windows loader report: https://research.jfrog.com/post/solana-fakefix/
 - Socket GlassWASM Open VSX extension report: https://socket.dev/blog/glasswasm-malware-open-vsx-extensions
 - BleepingComputer / Aikido JetBrains Marketplace AI-key stealer report: https://www.bleepingcomputer.com/news/security/malicious-jetbrains-marketplace-plugins-steal-ai-api-keys-from-developers/

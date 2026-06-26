@@ -32,7 +32,10 @@ const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "cov
 const LITELLM_AFFECTED_MIN = "1.74.2";
 const LITELLM_FIXED = "1.83.7";
 const STARLETTE_FIXED = "1.0.1";
-const LANGFLOW_FIXED = "1.9.1";
+const LANGFLOW_UPLOAD_FIXED = "1.9.1";
+const LANGFLOW_WEBHOOK_AFFECTED_MAX = "1.8.4";
+const LANGFLOW_WEBHOOK_FIXED = "1.9.1";
+const LANGFLOW_PYTHON_REPL_FIXED = "1.9.4";
 const OPENCLAW_FIXED = "2026.4.23";
 const OPENCLAW_CONFIG_FILES = new Set([".crabbox.yaml", ".crabbox.yml"]);
 const NPM_V12_PREPARE_MIN = "11.16.0";
@@ -701,8 +704,14 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
 
 function scanLangflowDependencyText(filePath, text, findings, sourceLabel) {
   for (const version of packageVersionsInText(text, "langflow")) {
-    if (compareDottedVersion(version, LANGFLOW_FIXED) < 0) {
-      findings.push(finding("critical", "langflow-cve-2026-55450-vulnerable-version", filePath, `${sourceLabel} references Langflow ${version}, affected by CVE-2026-55450. Upgrade to langflow>=${LANGFLOW_FIXED}.`));
+    if (compareDottedVersion(version, LANGFLOW_PYTHON_REPL_FIXED) < 0) {
+      findings.push(finding("critical", "langflow-cve-2026-10561-vulnerable-version", filePath, `${sourceLabel} references Langflow ${version}, affected by CVE-2026-10561 PythonREPL unauthenticated RCE. Upgrade to langflow>=${LANGFLOW_PYTHON_REPL_FIXED}.`));
+    }
+    if (compareDottedVersion(version, LANGFLOW_WEBHOOK_AFFECTED_MAX) <= 0) {
+      findings.push(finding("critical", "langflow-cve-2026-7664-vulnerable-version", filePath, `${sourceLabel} references Langflow ${version}, affected by CVE-2026-7664 unauthenticated webhook/MCP flow execution. Upgrade to langflow>=${LANGFLOW_WEBHOOK_FIXED}.`));
+    }
+    if (compareDottedVersion(version, LANGFLOW_UPLOAD_FIXED) < 0) {
+      findings.push(finding("critical", "langflow-cve-2026-55450-vulnerable-version", filePath, `${sourceLabel} references Langflow ${version}, affected by CVE-2026-55450. Upgrade to langflow>=${LANGFLOW_UPLOAD_FIXED}.`));
     }
   }
 }
@@ -1369,8 +1378,14 @@ function scanLangflowDependencySpec(filePath, section, name, spec, findings) {
 
   const versions = versionsInSpec(spec);
   for (const version of versions) {
-    if (compareDottedVersion(version, LANGFLOW_FIXED) < 0) {
-      findings.push(finding("critical", "langflow-cve-2026-55450-vulnerable-version", filePath, `${section}.${name} references Langflow ${version}, affected by CVE-2026-55450. Upgrade to langflow>=${LANGFLOW_FIXED}.`));
+    if (compareDottedVersion(version, LANGFLOW_PYTHON_REPL_FIXED) < 0) {
+      findings.push(finding("critical", "langflow-cve-2026-10561-vulnerable-version", filePath, `${section}.${name} references Langflow ${version}, affected by CVE-2026-10561 PythonREPL unauthenticated RCE. Upgrade to langflow>=${LANGFLOW_PYTHON_REPL_FIXED}.`));
+    }
+    if (compareDottedVersion(version, LANGFLOW_WEBHOOK_AFFECTED_MAX) <= 0) {
+      findings.push(finding("critical", "langflow-cve-2026-7664-vulnerable-version", filePath, `${section}.${name} references Langflow ${version}, affected by CVE-2026-7664 unauthenticated webhook/MCP flow execution. Upgrade to langflow>=${LANGFLOW_WEBHOOK_FIXED}.`));
+    }
+    if (compareDottedVersion(version, LANGFLOW_UPLOAD_FIXED) < 0) {
+      findings.push(finding("critical", "langflow-cve-2026-55450-vulnerable-version", filePath, `${section}.${name} references Langflow ${version}, affected by CVE-2026-55450. Upgrade to langflow>=${LANGFLOW_UPLOAD_FIXED}.`));
     }
   }
 }

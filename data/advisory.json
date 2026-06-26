@@ -38,6 +38,9 @@
     "https://jfrog.com/blog/npm-v12-from-implicit-to-explicit-trust/",
     "https://www.microsoft.com/en-us/security/blog/2026/06/18/autojack-single-page-rce-host-running-ai-agent/",
     "https://thehackernews.com/2026/06/autojack-attack-lets-one-web-page.html",
+    "https://www.ibm.com/support/pages/node/7277242",
+    "https://www.ibm.com/support/pages/node/7277243",
+    "https://securityonline.info/langflow-rce-vulnerability/",
     "https://x.com/nextronresearch"
   ]
 }
