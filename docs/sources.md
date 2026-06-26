@@ -26,6 +26,8 @@
 - Supply Chain Attack incident catalog, node-fetch-utils npm malware: https://supplychainattack.org/incident/malware-in-node-fetch-utils-wwuwix
 - Supply Chain Attack incident catalog, node-core-libs npm malware: https://supplychainattack.org/incident/malware-in-node-core-libs-wh4g1s
 - GitHub Advisory Database, GHSA-6vr2-5hpq-589c / node-core-libs npm malware: https://github.com/advisories/GHSA-6vr2-5hpq-589c
+- Supply Chain Attack incident catalog, ts-grok npm malware: https://supplychainattack.org/incident/malware-in-ts-grok-jjsh0j
+- GitHub Advisory Database, GHSA-qp73-r9hh-6vq9 / ts-grok npm malware: https://github.com/advisories/GHSA-qp73-r9hh-6vq9
 - Checkmarx ChainVeil / successkey npm supply-chain report: https://checkmarx.com/zero-post/chainveil-a-malicious-npm-supply-chain-attack-by-successkey/
 - JFrog VS Code autorun / blockchain dead-drop npm hijack report: https://research.jfrog.com/post/hijacked-npm-vscode-tasks-blockchain/
 - Panther OtterCookie npm campaign: https://panther.com/blog/tracking-an-ottercookie-infostealer-campaign-across-npm

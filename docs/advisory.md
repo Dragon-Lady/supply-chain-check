@@ -13,6 +13,12 @@ a second-stage bundled Node executable, and targets developer workstation data
 such as Telegram data, SSH keys, cloud configuration, crypto wallets, browser
 data, environment variables, clipboard data, and typed password fields.
 
+SupplyChainAttack and GitHub Advisory Database full-compromise npm malware
+entries are also included for package-name detection. The checker treats
+`ts-grok` as affected for all versions (`>= 0`) with no patched version,
+matching GHSA-qp73-r9hh-6vq9, and asks operators to move to credential rotation
+and host compromise response if the package was installed or run.
+
 ## OX / JFrog Miasma / Hades npm Variant
 
 OX Security's June 25, 2026 report describes another Shai-Hulud / Miasma /

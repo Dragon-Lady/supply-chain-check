@@ -804,6 +804,9 @@
   "node-core-libs": [
     "*"
   ],
+  "ts-grok": [
+    "*"
+  ],
   "ts-wross": [
     "*"
   ],

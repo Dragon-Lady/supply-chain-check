@@ -324,6 +324,7 @@
     "csc154-internall-depend",
     "@validate-sdk/v2",
     "google-cloud-secret-manager-config-poc",
+    "ts-grok",
     "bjs-lint-builders",
     "bjs-lint-builder",
     "bjs-biginteger",
