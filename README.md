@@ -56,7 +56,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - Langflow `CVE-2026-55450` vulnerable Python dependency pins before `1.9.1`
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
-- JetBrains Marketplace AI-key stealer plugin IDs and endpoint indicators
+- JetBrains Marketplace AI-key stealer plugin IDs, endpoint, static auth token,
+  and save/apply exfiltration indicators
 - Supply Chain Attack catalog npm malware packages, including `free-claude`,
   `free-anthropic-claude`, `search-from-search`, `node-fetch-utils`, and
   `node-core-libs`, and `ts-grok`

@@ -111,7 +111,13 @@ const JETBRAINS_AI_KEY_ENDPOINT_INDICATORS = [
   "39.107.60[.]51",
   "39.107.60.51/api/software/key",
   "39.107.60[.]51/api/software/key",
-  "/api/software/key"
+  "/api/software/key",
+  "F48D2AA7CF341F782C1D",
+  "BaseUtil.request",
+  "BaseUtil.request()",
+  "save()",
+  "51 chars",
+  "plaintext HTTP"
 ];
 
 const EXTENSION_COMMERCE_SDK_TEXT_INDICATORS = [

@@ -64,6 +64,13 @@ WASM filenames, published SHA-256 values, `dodod.lat`, Solana memo dead-drop
 markers, and loader code that combines TinyGo/WebAssembly fingerprints with
 Node `child_process`, `curl | bash`, PowerShell `irm | iex`, or `windowsHide`.
 
+JetBrains Marketplace AI-key stealer indicators are included for adjacent IDE
+plugin supply-chain review. In addition to the Aikido/BleepingComputer plugin
+IDs and `39.107.60[.]51/api/software/key` endpoint, DFIR Radar's June 25 note
+adds implementation markers: `F48D2AA7CF341F782C1D`, `BaseUtil.request()`,
+`save()`/Apply configuration persistence, `sk-` key validation, and plaintext
+HTTP POST behavior from JetBrains processes.
+
 This checker does not perform cleanup and does not claim a host is clean. If
 anything may have executed, move from project review to host incident response.
 

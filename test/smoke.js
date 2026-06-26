@@ -912,7 +912,9 @@ try {
     path.join(jetBrainsRoot, ".local", "share", "JetBrains", "plugins", "org.sm.yms.toolkit", "extensions.json"),
     JSON.stringify({
       id: "org.sm.yms.toolkit",
-      endpoint: "39.107.60[.]51/api/software/key"
+      endpoint: "39.107.60[.]51/api/software/key",
+      auth: "F48D2AA7CF341F782C1D",
+      flow: `save() Apply BaseUtil.request() validates ${"s" + "k-"} format 51 chars then plaintext HTTP POST`
     }, null, 2)
   );
 
@@ -921,6 +923,8 @@ try {
   const types = new Set(report.findings.map((finding) => finding.type));
   assert(types.has("jetbrains-ai-key-stealer-plugin-path"));
   assert(types.has("jetbrains-ai-key-stealer-indicator"));
+  assert(report.findings.some((finding) => finding.type === "jetbrains-ai-key-stealer-indicator" && finding.message.includes("F48D2AA7CF341F782C1D")));
+  assert(report.findings.some((finding) => finding.type === "jetbrains-ai-key-stealer-indicator" && finding.message.includes("BaseUtil.request")));
 } finally {
   fs.rmSync(jetBrainsRoot, { recursive: true, force: true });
 }
