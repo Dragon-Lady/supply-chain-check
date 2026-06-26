@@ -35,6 +35,11 @@ GitHub exfil repository string `Alright Lets See If This Works`, the
 markers, the reported GitHub raw payload paths, and the public-key fragments
 published as malware indicators.
 
+SafeDep's LeoPlatform follow-up confirms the 20 LeoPlatform npm rows and adds
+repo-poisoning context around orphan `snapshot-*` branches, fake `Dependabot
+Updates` GitHub Actions workflows, `_index.js`, `OIDC_PACKAGES`, `WORKFLOW_ID`,
+`REPO_ID_SUFFIX`, and direct `NPM_TOKEN` publication surfaces.
+
 If these package versions or strings are found, stop installs and builds in the
 affected tree. If install-time code may have run, move from package review to
 host incident response and rotate credentials only from a clean environment.

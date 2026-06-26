@@ -617,6 +617,27 @@ try {
       "const payload = 'raw[.]githubusercontent[.]com/l3v1cs/Html-Bootstrap-TinDog/cb6699faacade9775d3d83059d6ba6a756755193/index.js';"
     ].join("\n")
   );
+  write(
+    path.join(oxMiasmaHadesRoot, ".github", "workflows", "dependabot.yml"),
+    [
+      "name: Dependabot Updates",
+      "on:",
+      "  push:",
+      "    branches: [snapshot-leoplatform]",
+      "jobs:",
+      "  publish:",
+      "    permissions:",
+      "      id-token: write",
+      "    steps:",
+      "      - run: bun run _index.js",
+      "        env:",
+      "          OIDC_PACKAGES: 'leo-sdk,serverless-leo,rstreams-shard-util'",
+      "          WORKFLOW_ID: 'snapshot-leoplatform'",
+      "          REPO_ID_SUFFIX: 'LeoPlatform/Nodejs'",
+      "          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}",
+      "          GITHUB_REPOSITORY: 'LeoPlatform/Nodejs'"
+    ].join("\n")
+  );
 
   const report = scanTarget(oxMiasmaHadesRoot);
   assert.strictEqual(report.risk, "likely-exposed");
@@ -654,6 +675,14 @@ try {
     finding.type === "network-indicator"
     && finding.message.includes("raw[.]githubusercontent[.]com/l3v1cs/Html-Bootstrap-TinDog")
     && finding.path.endsWith("incident-note.js")
+  ));
+  assert(report.findings.some((finding) =>
+    finding.type === "miasma-github-oidc-targeting-marker"
+    && finding.path.endsWith("dependabot.yml")
+  ));
+  assert(report.findings.some((finding) =>
+    finding.type === "miasma-repo-poisoning-workflow-marker"
+    && finding.path.endsWith("dependabot.yml")
   ));
 } finally {
   fs.rmSync(oxMiasmaHadesRoot, { recursive: true, force: true });

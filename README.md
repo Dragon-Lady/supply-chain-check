@@ -52,7 +52,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - OX/JFrog June 25 Miasma/Hades npm variant indicators, including affected
   `leo-*`, `serverless-*`, `solo-nav`, `rstreams-*`, and
   `@immobiliarelabs/backstage-*` package versions plus reported GitHub exfil,
-  raw payload-path, and `SEED_PAT`/`Seeder` markers
+  raw payload-path, `SEED_PAT`/`Seeder` markers, and SafeDep-reported
+  `snapshot-*` / fake `Dependabot Updates` workflow poisoning terms
 - Langflow `CVE-2026-55450` vulnerable Python dependency pins before `1.9.1`
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators

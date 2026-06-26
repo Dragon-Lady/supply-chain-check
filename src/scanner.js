@@ -334,6 +334,11 @@ function scanTarget(targetPath, options = {}) {
       return;
     }
 
+    if (isGitHubActionsWorkflowFile(filePath, base)) {
+      scanGitHubActionsWorkflowFile(filePath, advisory, findings);
+      return;
+    }
+
     if (isMiasmaMarkerFile(base)) {
       scanMiasmaMarkerFile(filePath, findings);
       return;
@@ -894,6 +899,20 @@ function scanToolConfigFile(filePath, advisory, findings) {
   scanAutoJackText(filePath, text, findings, "Tool config");
 }
 
+function scanGitHubActionsWorkflowFile(filePath, advisory, findings) {
+  let text;
+  try {
+    text = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    findings.push(finding("low", "read-error", filePath, `Could not read GitHub Actions workflow file: ${error.message}`));
+    return;
+  }
+
+  scanIndicatorStrings(filePath, text, advisory, findings, "GitHub Actions workflow");
+  scanMiasmaText(filePath, text, findings, "GitHub Actions workflow");
+  scanHadesText(filePath, text, findings, "GitHub Actions workflow");
+}
+
 function scanDeploymentConfigFile(filePath, advisory, findings) {
   let text;
   try {
@@ -1266,8 +1285,11 @@ function scanMiasmaText(filePath, text, findings, sourceLabel) {
   if (/MCP_SUFFIXES|['"]-mcp['"]|['"]-mpc['"]|TYPO_MODE|TARGET_PACKAGES/i.test(text)) {
     findings.push(finding("medium", "miasma-mcp-typosquat-marker", filePath, `${sourceLabel} references MCP-suffixed typosquat or Miasma typo-mutator controls.`));
   }
-  if (/WORKFLOW_ID|REPO_ID_SUFFIX/i.test(text) && /GITHUB_WORKFLOW_REF|GITHUB_REPOSITORY/i.test(text)) {
+  if (/WORKFLOW_ID|REPO_ID_SUFFIX|OIDC_PACKAGES/i.test(text) && /GITHUB_WORKFLOW_REF|GITHUB_REPOSITORY|NPM_TOKEN|NODE_AUTH_TOKEN|id-token\s*:\s*write/i.test(text)) {
     findings.push(finding("high", "miasma-github-oidc-targeting-marker", filePath, `${sourceLabel} references targeted GitHub Actions OIDC propagation controls.`));
+  }
+  if (/snapshot-[a-z0-9_-]+|Dependabot Updates/i.test(text) && /_index\.js|bun run|OIDC_PACKAGES|NPM_TOKEN|WORKFLOW_ID|REPO_ID_SUFFIX/i.test(text)) {
+    findings.push(finding("high", "miasma-repo-poisoning-workflow-marker", filePath, `${sourceLabel} references Miasma-style repository poisoning through snapshot branches or fake Dependabot workflows.`));
   }
   if (/\/etc\/sudoers\.d/i.test(text) && /NOPASSWD:ALL|Privileged|\/etc\/resolv\.conf/i.test(text)) {
     findings.push(finding("high", "miasma-runner-evasion-marker", filePath, `${sourceLabel} references Miasma-style runner sudo/DNS evasion behavior.`));
@@ -1673,6 +1695,11 @@ function isToolConfigFile(filePath, base) {
     || normalized.includes("/.gemini/")
     || normalized.includes("/.cursor/")
     || normalized.includes("/.vscode/");
+}
+
+function isGitHubActionsWorkflowFile(filePath, base) {
+  if (!/\.(?:ya?ml)$/i.test(base)) return false;
+  return filePath.replace(/\\/g, "/").includes("/.github/workflows/");
 }
 
 function isDeploymentConfigFile(base) {
