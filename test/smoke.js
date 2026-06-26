@@ -448,12 +448,13 @@ try {
         "free-anthropic-claude": "^1.0.0",
         "search-from-search": "^1.0.0",
         "node-fetch-utils": "^1.0.0",
+        "signup-embedder": "^1.0.0",
         "node-core-libs": "^1.0.0",
         "ts-grok": "^1.0.0"
       }
     }, null, 2)
   );
-  write(path.join(supplyChainAttackCatalogRoot, "package-lock.json"), "node_modules/free-claude\nnode_modules/node-fetch-utils\nnode_modules/node-core-libs\nnode_modules/ts-grok\n");
+  write(path.join(supplyChainAttackCatalogRoot, "package-lock.json"), "node_modules/free-claude\nnode_modules/node-fetch-utils\nnode_modules/signup-embedder\nnode_modules/node-core-libs\nnode_modules/ts-grok\n");
 
   const report = scanTarget(supplyChainAttackCatalogRoot);
   assert.strictEqual(report.risk, "likely-exposed");
@@ -461,6 +462,8 @@ try {
   assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("free-anthropic-claude")));
   assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("search-from-search")));
   assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("node-fetch-utils")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("signup-embedder")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("signup-embedder")));
   assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("node-core-libs")));
   assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("node-core-libs")));
   assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("ts-grok")));

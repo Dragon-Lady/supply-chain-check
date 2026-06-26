@@ -15,9 +15,10 @@ data, environment variables, clipboard data, and typed password fields.
 
 SupplyChainAttack and GitHub Advisory Database full-compromise npm malware
 entries are also included for package-name detection. The checker treats
-`ts-grok` as affected for all versions (`>= 0`) with no patched version,
-matching GHSA-qp73-r9hh-6vq9, and asks operators to move to credential rotation
-and host compromise response if the package was installed or run.
+`ts-grok` and `signup-embedder` as affected for all versions (`>= 0`) with no
+patched version, matching GHSA-qp73-r9hh-6vq9 and GHSA-8j4q-hx83-pfq9, and asks
+operators to move to credential rotation and host compromise response if either
+package was installed or run.
 
 ## OX / JFrog Miasma / Hades npm Variant
 

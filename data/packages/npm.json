@@ -801,6 +801,9 @@
   "@ravespaceio/browser-input": [
     "*"
   ],
+  "signup-embedder": [
+    "*"
+  ],
   "node-core-libs": [
     "*"
   ],
