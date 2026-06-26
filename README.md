@@ -49,10 +49,10 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - JFrog / The Hacker News PostCSS-lookalike Windows RAT package and payload
   indicators
 - Mini Shai-Hulud / Miasma / Hades npm and PyPI waves
-- OX Security June 25 Miasma/Hades npm variant indicators for the compromised
-  `czirker` package set, including the affected `leo-*`, `serverless-*`,
-  `solo-nav`, and `rstreams-*` package versions and reported GitHub exfil
-  strings
+- OX/JFrog June 25 Miasma/Hades npm variant indicators, including affected
+  `leo-*`, `serverless-*`, `solo-nav`, `rstreams-*`, and
+  `@immobiliarelabs/backstage-*` package versions plus reported GitHub exfil,
+  raw payload-path, and `SEED_PAT`/`Seeder` markers
 - Langflow `CVE-2026-55450` vulnerable Python dependency pins before `1.9.1`
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
