@@ -58,8 +58,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - GlassWASM Open VSX extension indicators
 - JetBrains Marketplace AI-key stealer plugin IDs and endpoint indicators
 - Supply Chain Attack catalog npm malware packages, including `free-claude`,
-  `free-anthropic-claude`, `search-from-search`, and the June 23 package
-  cluster
+  `free-anthropic-claude`, `search-from-search`, `node-fetch-utils`, and
+  `node-core-libs`
 - Checkmarx ChainVeil npm package indicators, including `tailwindcss-merge`,
   `sass-format`, `sass-formats`, and `rate-limit-flexible`
 - JFrog VS Code folder-open autorun / blockchain dead-drop npm indicators for
