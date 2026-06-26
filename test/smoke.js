@@ -54,6 +54,49 @@ try {
   fs.rmSync(composerPackagistRoot, { recursive: true, force: true });
 }
 
+const livewireComposerRoot = makeFixture("scc-livewire-composer-");
+try {
+  write(
+    path.join(livewireComposerRoot, "composer.lock"),
+    JSON.stringify({
+      packages: [{
+        name: "livewire/livewire",
+        version: "v3.6.3"
+      }]
+    }, null, 2)
+  );
+  write(
+    path.join(livewireComposerRoot, "composer.json"),
+    JSON.stringify({
+      require: {
+        "livewire/livewire": "^3.6"
+      }
+    }, null, 2)
+  );
+  const report = scanTarget(livewireComposerRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "livewire-cve-2025-54068-vulnerable-version"));
+} finally {
+  fs.rmSync(livewireComposerRoot, { recursive: true, force: true });
+}
+
+const livewireComposerReviewRoot = makeFixture("scc-livewire-composer-review-");
+try {
+  write(
+    path.join(livewireComposerReviewRoot, "composer.json"),
+    JSON.stringify({
+      require: {
+        "livewire/livewire": "^3"
+      }
+    }, null, 2)
+  );
+  const report = scanTarget(livewireComposerReviewRoot);
+  assert.strictEqual(report.risk, "review-needed");
+  assert(report.findings.some((finding) => finding.type === "livewire-cve-2025-54068-version-range-review"));
+} finally {
+  fs.rmSync(livewireComposerReviewRoot, { recursive: true, force: true });
+}
+
 const vscodeAutorunBlockchainRoot = makeFixture("scc-vscode-autorun-blockchain-");
 try {
   write(

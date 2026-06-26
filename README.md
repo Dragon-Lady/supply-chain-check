@@ -56,6 +56,8 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   `snapshot-*` / fake `Dependabot Updates` workflow poisoning terms
 - Langflow `CVE-2026-10561`, `CVE-2026-7664`, and `CVE-2026-55450`
   vulnerable Python dependency pins before their fixed releases
+- Laravel Livewire `CVE-2025-54068` vulnerable Composer pins before `3.6.4`
+  and broad v3 Composer constraints requiring lockfile verification
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
 - JetBrains Marketplace AI-key stealer plugin IDs, endpoint, static auth token,

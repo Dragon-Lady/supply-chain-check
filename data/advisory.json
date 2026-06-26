@@ -41,6 +41,10 @@
     "https://www.ibm.com/support/pages/node/7277242",
     "https://www.ibm.com/support/pages/node/7277243",
     "https://securityonline.info/langflow-rce-vulnerability/",
+    "https://www.imperva.com/blog/cve-2025-54068-laravel-livewire-credential-theft-campaign-6000-applications-compromised/",
+    "https://www.synacktiv.com/en/publications/livewire-remote-command-execution-through-unmarshaling",
+    "https://nvd.nist.gov/vuln/detail/CVE-2025-54068",
+    "https://helgesver.re/articles/livewire-honeypot-first-60-hours",
     "https://x.com/nextronresearch"
   ]
 }

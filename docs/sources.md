@@ -19,6 +19,10 @@
 - IBM Security Bulletin / Langflow CVE-2026-10561 PythonREPL RCE: https://www.ibm.com/support/pages/node/7277242
 - IBM Security Bulletin / Langflow CVE-2026-7664 webhook/MCP authorization bypass: https://www.ibm.com/support/pages/node/7277243
 - SecurityOnline Langflow RCE summary: https://securityonline.info/langflow-rce-vulnerability/
+- Imperva Laravel Livewire CVE-2025-54068 credential-theft campaign report: https://www.imperva.com/blog/cve-2025-54068-laravel-livewire-credential-theft-campaign-6000-applications-compromised/
+- Synacktiv Livewire RCE through unmarshaling technical disclosure: https://www.synacktiv.com/en/publications/livewire-remote-command-execution-through-unmarshaling
+- NVD CVE-2025-54068: https://nvd.nist.gov/vuln/detail/CVE-2025-54068
+- Helge Sverre Livewire honeypot first-60-hours writeup: https://helgesver.re/articles/livewire-honeypot-first-60-hours
 - JFrog Solana FakeFix / CMS Windows loader report: https://research.jfrog.com/post/solana-fakefix/
 - Socket GlassWASM Open VSX extension report: https://socket.dev/blog/glasswasm-malware-open-vsx-extensions
 - BleepingComputer / Aikido JetBrains Marketplace AI-key stealer report: https://www.bleepingcomputer.com/news/security/malicious-jetbrains-marketplace-plugins-steal-ai-api-keys-from-developers/
