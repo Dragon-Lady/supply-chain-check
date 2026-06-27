@@ -493,11 +493,13 @@ try {
         "node-fetch-utils": "^1.0.0",
         "signup-embedder": "^1.0.0",
         "node-core-libs": "^1.0.0",
+        "normalize-plus": "^1.0.0",
+        "nabisco": "^1.0.0",
         "ts-grok": "^1.0.0"
       }
     }, null, 2)
   );
-  write(path.join(supplyChainAttackCatalogRoot, "package-lock.json"), "node_modules/free-claude\nnode_modules/node-fetch-utils\nnode_modules/signup-embedder\nnode_modules/node-core-libs\nnode_modules/ts-grok\n");
+  write(path.join(supplyChainAttackCatalogRoot, "package-lock.json"), "node_modules/free-claude\nnode_modules/node-fetch-utils\nnode_modules/signup-embedder\nnode_modules/node-core-libs\nnode_modules/normalize-plus\nnode_modules/nabisco\nnode_modules/ts-grok\n");
 
   const report = scanTarget(supplyChainAttackCatalogRoot);
   assert.strictEqual(report.risk, "likely-exposed");
@@ -509,6 +511,10 @@ try {
   assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("signup-embedder")));
   assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("node-core-libs")));
   assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("node-core-libs")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("normalize-plus")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("normalize-plus")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("nabisco")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("nabisco")));
   assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("ts-grok")));
   assert(report.findings.some((finding) => finding.type === "known-bad-lockfile-package" && finding.message.includes("ts-grok")));
 } finally {

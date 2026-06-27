@@ -807,6 +807,9 @@
   "node-core-libs": [
     "*"
   ],
+  "normalize-plus": [
+    "*"
+  ],
   "ts-grok": [
     "*"
   ],
@@ -925,6 +928,9 @@
     "*"
   ],
   "ts-logger-pack": [
+    "*"
+  ],
+  "nabisco": [
     "*"
   ]
 }

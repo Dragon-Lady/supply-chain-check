@@ -36,6 +36,10 @@
 - Supply Chain Attack incident catalog, node-fetch-utils npm malware: https://supplychainattack.org/incident/malware-in-node-fetch-utils-wwuwix
 - Supply Chain Attack incident catalog, node-core-libs npm malware: https://supplychainattack.org/incident/malware-in-node-core-libs-wh4g1s
 - GitHub Advisory Database, GHSA-6vr2-5hpq-589c / node-core-libs npm malware: https://github.com/advisories/GHSA-6vr2-5hpq-589c
+- Supply Chain Attack incident catalog, normalize-plus npm malware: https://supplychainattack.org/incident/malware-in-normalize-plus-11ckw9
+- GitHub Advisory Database, GHSA-fr34-v6cp-fc49 / normalize-plus npm malware: https://github.com/advisories/GHSA-fr34-v6cp-fc49
+- Supply Chain Attack incident catalog, nabisco npm malware: https://supplychainattack.org/incident/malware-in-nabisco-1m2jqo
+- GitHub Advisory Database, GHSA-m97m-v5gv-jm47 / nabisco npm malware: https://github.com/advisories/GHSA-m97m-v5gv-jm47
 - Supply Chain Attack incident catalog, ts-grok npm malware: https://supplychainattack.org/incident/malware-in-ts-grok-jjsh0j
 - GitHub Advisory Database, GHSA-qp73-r9hh-6vq9 / ts-grok npm malware: https://github.com/advisories/GHSA-qp73-r9hh-6vq9
 - Supply Chain Attack incident catalog, signup-embedder npm malware: https://supplychainattack.org/incident/malware-in-signup-embedder-1pgybu

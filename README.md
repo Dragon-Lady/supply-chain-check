@@ -51,8 +51,9 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - Mini Shai-Hulud / Miasma / Hades npm and PyPI waves
 - OX/JFrog June 25 Miasma/Hades npm variant indicators, including affected
   `leo-*`, `serverless-*`, `solo-nav`, `rstreams-*`, and
-  `@immobiliarelabs/backstage-*` package versions plus reported GitHub exfil,
-  raw payload-path, `SEED_PAT`/`Seeder` markers, and SafeDep-reported
+  `@immobiliarelabs/backstage-*` GitLab and LDAP auth package versions plus
+  reported GitHub exfil, raw payload-path, `SEED_PAT`/`Seeder` markers,
+  credential-stealing auth-plugin rotation guidance, and SafeDep-reported
   `snapshot-*` / fake `Dependabot Updates` workflow poisoning terms
 - Langflow `CVE-2026-10561`, `CVE-2026-7664`, and `CVE-2026-55450`
   vulnerable Python dependency pins before their fixed releases

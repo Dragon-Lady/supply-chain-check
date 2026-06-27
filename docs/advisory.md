@@ -26,7 +26,11 @@ OX Security's June 25, 2026 report describes another Shai-Hulud / Miasma /
 Hades npm variant tied to a compromised maintainer account and 23 affected
 package versions across the `leo-*`, `serverless-*`, `solo-nav`, and
 `rstreams-*` package set. JFrog's companion analysis confirms the Leo/RStreams
-rows and adds affected `@immobiliarelabs/backstage-*` package versions.
+rows and adds affected `@immobiliarelabs/backstage-*` package versions. Aikido
+also called out the ImmobiliareLabs Backstage LDAP auth and GitLab plugins as
+credential-stealing worm targets, so any hit on these packages should move
+directly to clean-device rotation for GitHub, npm, LDAP, Backstage, CI, and
+cloud credentials after persistence/exfiltration paths are contained.
 
 The checker flags those exact npm package versions in manifests and lockfiles.
 It also flags copied incident notes or source artifacts containing the reported
