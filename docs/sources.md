@@ -59,6 +59,15 @@
 - GitHub changelog: staged publishing and npm install-time controls: https://github.blog/changelog/2026-05-22-staged-publishing-and-new-install-time-controls-for-npm/
 - Nextron Research X post on malicious Packagist `dcat-auth-google-2fa@1.0.2.0`: https://x.com/nextronresearch
 - Nextron Research X post on Go packages reusing the JFrog fake-font payload: https://x.com/nextronresearch
+- JFrog IronWorm `jscrambler` compromise: https://research.jfrog.com/post/ironworm-returns-rustier-than-ever/
+- JFrog Lazarus-linked Rollup polyfill lookalikes: https://research.jfrog.com/post/rollup-polyfill-masquerading/
+- OX `polymarket-kit` malware analysis: https://www.ox.security/blog/malware-slop-crypto-stealer-impersonating-polymarket-exposes-its-own-credentials/
+- OX Injective SDK compromise: https://www.ox.security/blog/injectivelabs-npm-package-hijacked-impacting-87-dependent-packages/
+- OX Paperclip2 manifest-only reverse shell: https://www.ox.security/blog/malware-detected-reverse-shell-without-javascript-files-in-npm/
+- Socket payment-SDK npm/PyPI typosquat campaign: https://socket.dev/blog/npm-pypi-campaign-typosquats-popular-secure-payment-apps
+- Socket PolinRider cross-ecosystem update: https://socket.dev/blog/polinrider-north-korea-linked-supply-chain-campaign-expands
+- Socket Operation Muck and Load Go/GitHub campaign: https://socket.dev/blog/malicious-go-module-exposes-github-malware-lure-network
+- Socket Braintree NuGet typosquat campaign: https://socket.dev/blog/braintree-nuget-typosquat-skims-credit-cards
 
 This project intentionally avoids exploit reproduction steps, malware execution
 guidance, cleanup automation, token handling, and secret disclosure.

@@ -1083,4 +1083,31 @@ try {
   fs.rmSync(recentSafeDepRoot, { recursive: true, force: true });
 }
 
+const julyCampaignRoot = makeFixture("scc-july-campaigns-");
+try {
+  write(
+    path.join(julyCampaignRoot, "package.json"),
+    JSON.stringify({
+      dependencies: {
+        jscrambler: "8.20.0",
+        "@injectivelabs/sdk-ts": "1.20.21",
+        paperclip2: "1.0.0",
+        "paysafe-node": "1.0.3"
+      },
+      notes: "svganchordev[.]net 185[.]112[.]147[.]174:7007"
+    }, null, 2)
+  );
+  write(path.join(julyCampaignRoot, "requirements.txt"), "paysafe-sdk==1.0.0\n");
+
+  const report = scanTarget(julyCampaignRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("dependencies.jscrambler") && finding.message.includes("8.20.0")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("dependencies.@injectivelabs/sdk-ts") && finding.message.includes("1.20.21")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-requested-version" && finding.message.includes("dependencies.paperclip2")));
+  assert(report.findings.some((finding) => finding.type === "known-bad-pypi-version" && finding.message.includes("paysafe-sdk==1.0.0")));
+  assert(report.findings.some((finding) => finding.type === "network-indicator" && finding.message.includes("185[.]112[.]147[.]174:7007")));
+} finally {
+  fs.rmSync(julyCampaignRoot, { recursive: true, force: true });
+}
+
 console.log("smoke tests passed");
