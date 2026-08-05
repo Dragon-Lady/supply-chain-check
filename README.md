@@ -48,6 +48,11 @@ Coverage includes current supply-chain and developer-tooling indicators from:
 - July 2026 npm/PyPI campaigns: compromised `jscrambler` and Injective
   versions, Paperclip2 manifest-only reverse shells, `polymarket-kit`, Rollup
   lookalikes, and Paysafe/Skrill/Neteller payment-SDK typosquats
+- August 4, 2026 keyv / cacheable (ChainDrop / Shai-Hulud "Here We Go Again")
+  exact-version carriers (`keyv@6.0.0` and ten related packages), campaign
+  network markers, and package-lock v2/v3 path/tarball matching — credited to
+  Snyk, StepSecurity, Aikido, Wiz, and JFrog. **Cross-platform npm ecosystem
+  risk** (any OS/lane that installs these versions), not Linux-only.
 - SafeDep procwire / routecraft Windows npm dropper indicators
 - JFrog / The Hacker News PostCSS-lookalike Windows RAT package and payload
   indicators

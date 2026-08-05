@@ -19,6 +19,18 @@
     "1.4.1",
     "1.4.2"
   ],
+  "@cacheable/memory": [
+    "2.2.1"
+  ],
+  "@cacheable/net": [
+    "2.1.1"
+  ],
+  "@cacheable/node-cache": [
+    "3.1.2"
+  ],
+  "@cacheable/utils": [
+    "2.5.1"
+  ],
   "@chunklab/hexparse": [
     "1.0.7",
     "1.1.4",
@@ -66,6 +78,60 @@
     "3.0.2",
     "4.3.2",
     "5.2.1"
+  ],
+  "@injectivelabs/exceptions": [
+    "1.20.21"
+  ],
+  "@injectivelabs/networks": [
+    "1.20.21"
+  ],
+  "@injectivelabs/sdk-ts": [
+    "1.20.21"
+  ],
+  "@injectivelabs/ts-types": [
+    "1.20.21"
+  ],
+  "@injectivelabs/utils": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-base": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-core": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-cosmos": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-cosmos-strategy": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-cosmostation": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-evm": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-ledger": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-magic": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-private-key": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-strategy": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-trezor": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-turnkey": [
+    "1.20.21"
+  ],
+  "@injectivelabs/wallet-wallet-connect": [
+    "1.20.21"
   ],
   "@lazyutil/dater": [
     "0.8.1",
@@ -490,10 +556,19 @@
   "@mastra/voice-xai-realtime": [
     "0.1.2"
   ],
+  "@muaththir/api": [
+    "*"
+  ],
   "@petitcode/eb-retry": [
     "1.3.3",
     "1.3.4",
     "1.3.5"
+  ],
+  "@ravespaceio/browser-input": [
+    "*"
+  ],
+  "@ravespaceio/rave-engine": [
+    "*"
   ],
   "@solana-labs/ancor": [
     "*"
@@ -513,9 +588,6 @@
   "@solana-labs/web3js": [
     "*"
   ],
-  "@validate-sdk/v2": [
-    "*"
-  ],
   "@thymelab/logfx": [
     "2.15.3",
     "2.15.4",
@@ -526,6 +598,9 @@
     "0.8.5",
     "0.8.6",
     "0.8.7"
+  ],
+  "@validate-sdk/v2": [
+    "*"
   ],
   "@withgoogle/stitch-sdk": [
     "0.1.1",
@@ -540,6 +615,9 @@
   "aes-decode-runner-pro": [
     "*"
   ],
+  "aillmgen": [
+    "*"
+  ],
   "apintergrationpost": [
     "4.0.1",
     "4.0.2",
@@ -547,6 +625,9 @@
     "4.0.4",
     "4.0.5",
     "4.0.6"
+  ],
+  "backoffice-charges-module": [
+    "*"
   ],
   "bjs-biginteger": [
     "5.0.6"
@@ -562,6 +643,33 @@
   "bytecraft": [
     "1.5.0"
   ],
+  "cache-manager": [
+    "7.2.10"
+  ],
+  "cacheable": [
+    "2.5.1"
+  ],
+  "cacheable-request": [
+    "13.0.20"
+  ],
+  "calculate-helper": [
+    "*"
+  ],
+  "carousel-controller-mixin": [
+    "*"
+  ],
+  "chai-as-attested": [
+    "*"
+  ],
+  "chai-as-uphelded": [
+    "*"
+  ],
+  "chalk-ultra": [
+    "*"
+  ],
+  "clsx-tailwind": [
+    "1.0.1"
+  ],
   "cms-github": [
     "*"
   ],
@@ -574,20 +682,63 @@
   "create-mastra": [
     "1.13.1"
   ],
+  "crud-respect": [
+    "*"
+  ],
   "csc154-internall-depend": [
+    "*"
+  ],
+  "cursorai-agent": [
+    "*"
+  ],
+  "datacamp-light": [
     "*"
   ],
   "easy-day-js": [
     "1.11.22"
   ],
+  "ecto": [
+    "5.0.1"
+  ],
   "endpointmap": [
     "2.1.0"
+  ],
+  "eslint-helper-1": [
+    "*"
+  ],
+  "fetch-page-assets": [
+    "1.2.9"
+  ],
+  "file-entry-cache": [
+    "11.1.6"
+  ],
+  "flat-cache": [
+    "6.1.24"
+  ],
+  "free-anthropic-claude": [
+    "*"
+  ],
+  "free-claude": [
+    "*"
   ],
   "google-cloud-secret-manager-config-poc": [
     "*"
   ],
   "hjs-lint-builders": [
     "1.0.4"
+  ],
+  "html-to-gutenberg": [
+    "4.2.11"
+  ],
+  "jscrambler": [
+    "8.14.0",
+    "8.16.0",
+    "8.17.0",
+    "8.18.0",
+    "8.20.0"
+  ],
+  "keyv": [
+    "6.0.0"
   ],
   "leo-auth": [
     "4.0.6"
@@ -643,21 +794,150 @@
   "leo-streams": [
     "2.0.1"
   ],
+  "libsignal-node-travatiger": [
+    "*"
+  ],
+  "local-ip-helper": [
+    "*"
+  ],
   "mastra": [
     "1.13.1"
+  ],
+  "mddriver": [
+    "*"
+  ],
+  "mjs-eslint-helper": [
+    "*"
+  ],
+  "mjs-eslint-service": [
+    "*"
+  ],
+  "nabisco": [
+    "*"
+  ],
+  "neteller": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "new-ecro-1": [
+    "*"
+  ],
+  "new-ecro-helper": [
+    "*"
+  ],
+  "new-eslint-1": [
+    "*"
+  ],
+  "new-helper": [
+    "*"
+  ],
+  "new-mjs-eslint": [
+    "*"
+  ],
+  "new-solt": [
+    "*"
+  ],
+  "new-solt-1": [
+    "*"
+  ],
+  "new-ts-helper": [
+    "*"
+  ],
+  "node-core-libs": [
+    "*"
+  ],
+  "node-fetch-utils": [
+    "*"
   ],
   "node-ipc": [
     "9.1.6",
     "9.2.3",
     "12.0.1"
   ],
+  "node-path-utils": [
+    "*"
+  ],
+  "node-slot": [
+    "*"
+  ],
+  "normalize-plus": [
+    "*"
+  ],
   "npm-doc-builder": [
     "1.0.5"
+  ],
+  "onboarding-respects-modal": [
+    "*"
+  ],
+  "paperclip2": [
+    "*"
+  ],
+  "parket-flow": [
+    "*"
+  ],
+  "paysafe-api": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-cards": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-checkout": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-fraud": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-js": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-kyc": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-node": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-payments": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "paysafe-vault": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
   ],
   "pinno-loggers": [
     "*"
   ],
-  "pretty-logger-utils": [
+  "poly-utils": [
+    "*"
+  ],
+  "polymarket-kit": [
     "*"
   ],
   "postcss-minify-selector": [
@@ -666,8 +946,35 @@
   "postcss-minify-selector-parser": [
     "*"
   ],
+  "pretty-logger-utils": [
+    "*"
+  ],
   "procwire": [
     "1.3.0"
+  ],
+  "quirky-token": [
+    "*"
+  ],
+  "rate-limit-flexible": [
+    "*"
+  ],
+  "rate-limits-flexible": [
+    "1.0.1"
+  ],
+  "react-icon-svgs": [
+    "*"
+  ],
+  "respects-switch": [
+    "*"
+  ],
+  "rollup-packages-polyfill-core": [
+    "*"
+  ],
+  "rollup-plugin-polyfill-connect": [
+    "*"
+  ],
+  "rollup-runtime-polyfill-core": [
+    "*"
   ],
   "routecraft": [
     "4.2.0"
@@ -678,7 +985,34 @@
   "rstreams-shard-util": [
     "1.0.1"
   ],
+  "sass-format": [
+    "*"
+  ],
+  "sass-formats": [
+    "1.0.2",
+    "1.0.3",
+    "1.0.4",
+    "1.0.5"
+  ],
+  "search-from-search": [
+    "*"
+  ],
+  "server-parket": [
+    "*"
+  ],
+  "serverless-convention": [
+    "2.0.4"
+  ],
+  "serverless-leo": [
+    "3.0.14"
+  ],
+  "setka-editor": [
+    "*"
+  ],
   "shopifyto-cms": [
+    "*"
+  ],
+  "signup-embedder": [
     "*"
   ],
   "sjs-builder": [
@@ -686,6 +1020,24 @@
   ],
   "sjs-builders": [
     "1.0.4"
+  ],
+  "skrill": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "skrill-payments": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
+  ],
+  "skrill-sdk": [
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.0.3"
   ],
   "solana-js-client": [
     "*"
@@ -717,17 +1069,23 @@
   "solana-web3-v1": [
     "*"
   ],
+  "solo-nav": [
+    "1.0.1"
+  ],
   "staticlayer": [
     "1.1.0"
   ],
-  "serverless-convention": [
-    "2.0.4"
+  "swift-parse-stream": [
+    "*"
   ],
-  "serverless-leo": [
-    "3.0.14"
+  "sync-external": [
+    "*"
   ],
-  "solo-nav": [
-    "1.0.1"
+  "tailwindcss-animates-kit": [
+    "*"
+  ],
+  "tailwindcss-animatics": [
+    "*"
   ],
   "tailwindcss-merge": [
     "1.0.1",
@@ -735,244 +1093,46 @@
     "1.0.3",
     "1.0.4"
   ],
-  "sass-format": [
-    "*"
-  ],
-  "tailwindcss-animates-kit": [
-    "*"
-  ],
-  "sass-formats": [
-    "1.0.2",
-    "1.0.3",
-    "1.0.4",
-    "1.0.5"
-  ],
-  "clsx-tailwind": [
-    "1.0.1"
-  ],
-  "tailwindcss-animatics": [
-    "*"
-  ],
-  "typeorm-encrypt": [
-    "1.0.1"
-  ],
-  "rate-limits-flexible": [
-    "1.0.1"
-  ],
-  "rate-limit-flexible": [
-    "*"
-  ],
-  "node-fetch-utils": [
-    "*"
-  ],
-  "html-to-gutenberg": [
-    "4.2.11"
-  ],
-  "fetch-page-assets": [
-    "1.2.9"
-  ],
-  "calculate-helper": [
-    "*"
-  ],
-  "web3-token-helper": [
-    "*"
-  ],
-  "mjs-eslint-service": [
-    "*"
-  ],
-  "server-parket": [
-    "*"
-  ],
-  "parket-flow": [
-    "*"
-  ],
-  "ts-arithmetic-helper": [
-    "*"
-  ],
-  "chai-as-attested": [
-    "*"
-  ],
-  "aillmgen": [
-    "*"
-  ],
-  "search-from-search": [
-    "*"
-  ],
-  "@ravespaceio/browser-input": [
-    "*"
-  ],
-  "signup-embedder": [
-    "*"
-  ],
-  "node-core-libs": [
-    "*"
-  ],
-  "normalize-plus": [
-    "*"
-  ],
-  "ts-grok": [
-    "*"
-  ],
-  "ts-wross": [
-    "*"
-  ],
-  "@muaththir/api": [
-    "*"
-  ],
-  "onboarding-respects-modal": [
-    "*"
-  ],
-  "backoffice-charges-module": [
-    "*"
-  ],
-  "node-slot": [
-    "*"
-  ],
-  "cursorai-agent": [
-    "*"
-  ],
-  "@ravespaceio/rave-engine": [
-    "*"
-  ],
-  "poly-utils": [
-    "*"
-  ],
-  "eslint-helper-1": [
-    "*"
-  ],
-  "new-solt-1": [
-    "*"
-  ],
-  "new-ts-helper": [
-    "*"
-  ],
-  "new-ecro-helper": [
-    "*"
-  ],
-  "new-eslint-1": [
-    "*"
-  ],
-  "new-helper": [
-    "*"
-  ],
-  "new-mjs-eslint": [
-    "*"
-  ],
-  "new-solt": [
-    "*"
-  ],
-  "new-ecro-1": [
-    "*"
-  ],
-  "respects-switch": [
-    "*"
-  ],
-  "local-ip-helper": [
-    "*"
-  ],
-  "mjs-eslint-helper": [
-    "*"
-  ],
-  "ts-predict-helper": [
-    "*"
-  ],
-  "carousel-controller-mixin": [
-    "*"
-  ],
-  "chalk-ultra": [
-    "*"
-  ],
-  "sync-external": [
-    "*"
-  ],
-  "setka-editor": [
-    "*"
-  ],
-  "chai-as-uphelded": [
-    "*"
-  ],
-  "datacamp-light": [
-    "*"
-  ],
-  "crud-respect": [
-    "*"
-  ],
-  "libsignal-node-travatiger": [
-    "*"
-  ],
-  "ts-numbering": [
-    "*"
-  ],
-  "ts-sudo": [
-    "*"
-  ],
-  "vitest-cli": [
-    "*"
-  ],
-  "free-claude": [
-    "*"
-  ],
-  "node-path-utils": [
-    "*"
-  ],
-  "free-anthropic-claude": [
-    "*"
-  ],
-  "mddriver": [
-    "*"
-  ],
   "terminal-logger-utils": [
     "*"
   ],
   "to-cms": [
     "*"
   ],
+  "ts-arithmetic-helper": [
+    "*"
+  ],
+  "ts-grok": [
+    "*"
+  ],
   "ts-logger-pack": [
     "*"
   ],
-  "nabisco": [
+  "ts-numbering": [
     "*"
   ],
-  "jscrambler": ["8.14.0", "8.16.0", "8.17.0", "8.18.0", "8.20.0"],
-  "@injectivelabs/sdk-ts": ["1.20.21"],
-  "@injectivelabs/utils": ["1.20.21"],
-  "@injectivelabs/networks": ["1.20.21"],
-  "@injectivelabs/ts-types": ["1.20.21"],
-  "@injectivelabs/exceptions": ["1.20.21"],
-  "@injectivelabs/wallet-base": ["1.20.21"],
-  "@injectivelabs/wallet-core": ["1.20.21"],
-  "@injectivelabs/wallet-cosmos": ["1.20.21"],
-  "@injectivelabs/wallet-private-key": ["1.20.21"],
-  "@injectivelabs/wallet-evm": ["1.20.21"],
-  "@injectivelabs/wallet-trezor": ["1.20.21"],
-  "@injectivelabs/wallet-cosmostation": ["1.20.21"],
-  "@injectivelabs/wallet-ledger": ["1.20.21"],
-  "@injectivelabs/wallet-wallet-connect": ["1.20.21"],
-  "@injectivelabs/wallet-magic": ["1.20.21"],
-  "@injectivelabs/wallet-strategy": ["1.20.21"],
-  "@injectivelabs/wallet-turnkey": ["1.20.21"],
-  "@injectivelabs/wallet-cosmos-strategy": ["1.20.21"],
-  "paperclip2": ["*"],
-  "vps-maintenance": ["*"],
-  "vps-maintenance-paperclip-adapter": ["*"],
-  "polymarket-kit": ["*"],
-  "rollup-packages-polyfill-core": ["*"],
-  "rollup-runtime-polyfill-core": ["*"],
-  "swift-parse-stream": ["*"],
-  "quirky-token": ["*"],
-  "react-icon-svgs": ["*"],
-  "rollup-plugin-polyfill-connect": ["*"],
-  "paysafe-checkout": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-vault": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "neteller": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "skrill-payments": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-js": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-api": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-node": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-cards": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-fraud": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-kyc": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "skrill": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "skrill-sdk": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"],
-  "paysafe-payments": ["1.0.0", "1.0.1", "1.0.2", "1.0.3"]
+  "ts-predict-helper": [
+    "*"
+  ],
+  "ts-sudo": [
+    "*"
+  ],
+  "ts-wross": [
+    "*"
+  ],
+  "typeorm-encrypt": [
+    "1.0.1"
+  ],
+  "vitest-cli": [
+    "*"
+  ],
+  "vps-maintenance": [
+    "*"
+  ],
+  "vps-maintenance-paperclip-adapter": [
+    "*"
+  ],
+  "web3-token-helper": [
+    "*"
+  ]
 }

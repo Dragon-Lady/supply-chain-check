@@ -1110,4 +1110,53 @@ try {
   fs.rmSync(julyCampaignRoot, { recursive: true, force: true });
 }
 
-console.log("smoke tests passed");
+
+  // August 2026 keyv/cacheable (ChainDrop) exact versions + package-lock v3 path keys
+  const keyvRoot = fs.mkdtempSync(path.join(os.tmpdir(), "hwg-keyv-"));
+  write(
+    path.join(keyvRoot, "package.json"),
+    JSON.stringify(
+      {
+        name: "keyv-fixture",
+        dependencies: { keyv: "^5.5.0" },
+        notes: "npm-cache.com Math_Symbol.js SNYK-JS-KEYV-18515941"
+      },
+      null,
+      2
+    )
+  );
+  write(
+    path.join(keyvRoot, "package-lock.json"),
+    JSON.stringify(
+      {
+        name: "keyv-fixture",
+        lockfileVersion: 3,
+        packages: {
+          "": { name: "keyv-fixture", dependencies: { keyv: "^5.5.0" } },
+          "node_modules/keyv": {
+            version: "6.0.0",
+            resolved: "https://registry.npmjs.org/keyv/-/keyv-6.0.0.tgz"
+          },
+          "node_modules/@cacheable/memory": {
+            version: "2.2.1",
+            resolved: "https://registry.npmjs.org/@cacheable/memory/-/memory-2.2.1.tgz"
+          },
+          "node_modules/ecto": {
+            version: "5.0.1",
+            resolved: "https://registry.npmjs.org/ecto/-/ecto-5.0.1.tgz"
+          }
+        }
+      },
+      null,
+      2
+    )
+  );
+  const keyvReport = scanTarget(keyvRoot);
+  assert(keyvReport.findings.some((f) => f.type === "known-bad-lockfile-version" && f.message.includes("keyv@6.0.0")));
+  assert(keyvReport.findings.some((f) => f.type === "known-bad-lockfile-version" && f.message.includes("@cacheable/memory@2.2.1")));
+  assert(keyvReport.findings.some((f) => f.type === "known-bad-lockfile-version" && f.message.includes("ecto@5.0.1")));
+  assert(keyvReport.findings.some((f) => f.type === "network-indicator" && f.message.includes("npm-cache.com")));
+  assert(keyvReport.findings.some((f) => f.type === "campaign-indicator" && f.message.includes("Math_Symbol.js")));
+  fs.rmSync(keyvRoot, { recursive: true, force: true });
+
+  console.log("smoke tests passed");

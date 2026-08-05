@@ -71,3 +71,17 @@
 
 This project intentionally avoids exploit reproduction steps, malware execution
 guidance, cleanup automation, token handling, and secret disclosure.
+
+## August 2026 keyv / cacheable (ChainDrop)
+
+Cross-platform npm ecosystem compromise (not Linux-only). Applies to any
+npm-using OS, CI, or developer lane; these project scanners report matches in
+the scanned tree on the operator's platform.
+
+- Snyk keyv npm supply-chain compromise analysis: https://snyk.io/blog/inside-keyv-npm-compromise-preinstall-malware-trusted-provenance-ide-hooks/
+- Snyk advisory SNYK-JS-KEYV-18515941: https://security.snyk.io/vuln/SNYK-JS-KEYV-18515941
+- Wiz keyv / cacheable npm supply-chain attack: https://www.wiz.io/blog/keyv-and-cacheable-npm-supply-chain-attack
+- Wiz Research IOCs (keyv packages CSV): https://github.com/wiz-sec-public/wiz-research-iocs/blob/main/reports/keyv-packages.csv
+- Aikido keyv / friends Shai-Hulud supply-chain attack: https://www.aikido.dev/blog/keyv-and-friends-compromised-in-npm-supply-chain-attack
+- JFrog Shai-Hulud August 2026 (keyv and 400+ packages): https://research.jfrog.com/post/shai-hulud-is-back-august/
+- StepSecurity ChainDrop npm worm analysis: https://www.stepsecurity.io/blog/chaindrop-npm-worm
