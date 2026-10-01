@@ -44,5 +44,6 @@
   "paysafe-kyc": ["1.0.0"],
   "paysafe-payments": ["1.0.0"],
   "paysafe-sdk": ["1.0.0"],
-  "paysafe-api": ["1.0.0"]
+  "paysafe-api": ["1.0.0"],
+  "MemoryOS": ["2.0.34"]
 }

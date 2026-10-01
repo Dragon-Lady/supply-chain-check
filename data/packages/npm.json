@@ -1,4 +1,16 @@
 {
+  "@7nohe/openapi-react-query-codegen": [
+    "0.5.4",
+    "0.5.5",
+    "1.6.3",
+    "1.6.4",
+    "2.2.1",
+    "2.2.2",
+    "3.0.3",
+    "3.0.4",
+    "0.0.0-365d4eb738d3146583431948d3ba6e27a32556be",
+    "0.0.0-ec7876d6c917dad516ba69bbfafc948b834bf0ab"
+  ],
   "@apexcraft/nano-key": [
     "1.2.4",
     "1.2.5",
@@ -8,6 +20,30 @@
     "1.3.5",
     "1.3.6",
     "1.3.7"
+  ],
+  "@astracode/byles-new": [
+    "*"
+  ],
+  "@badzz88/baileys": [
+    "*"
+  ],
+  "@bellaxchuu/belbails": [
+    "*"
+  ],
+  "@bellaxchuu/flowblue": [
+    "*"
+  ],
+  "@bellaxchuu/privatebails": [
+    "*"
+  ],
+  "@bellaxchuu/teambails": [
+    "*"
+  ],
+  "@bellaxchuu/xtrxbails": [
+    "*"
+  ],
+  "@bottino/baileys": [
+    "*"
   ],
   "@briskforge/envcheck": [
     "0.5.2",
@@ -31,11 +67,26 @@
   "@cacheable/utils": [
     "2.5.1"
   ],
+  "@chatunity/baileys": [
+    "*"
+  ],
   "@chunklab/hexparse": [
     "1.0.7",
     "1.1.4",
     "1.1.5",
     "1.1.6"
+  ],
+  "@fazzcodestudio/wa-web": [
+    "*"
+  ],
+  "@fer2809fl/baileys": [
+    "*"
+  ],
+  "@fhkryxv/baileys": [
+    "*"
+  ],
+  "@fhkryxv/baileys-new": [
+    "*"
   ],
   "@frostnode/waitfor": [
     "0.9.0",
@@ -43,11 +94,23 @@
     "0.10.4",
     "0.10.5"
   ],
+  "@fyxzpediaa/baileys": [
+    "*"
+  ],
   "@glitchpad/throttler": [
     "2.1.1",
     "2.2.1",
     "2.2.2",
     "2.2.3"
+  ],
+  "@ikanngeming/ikannbail": [
+    "*"
+  ],
+  "@ikyyjee/ikyysinggle": [
+    "*"
+  ],
+  "@ikyyjee/ikyysingle": [
+    "*"
   ],
   "@immobiliarelabs/backstage-plugin-gitlab": [
     "1.0.1",
@@ -133,11 +196,38 @@
   "@injectivelabs/wallet-wallet-connect": [
     "1.20.21"
   ],
+  "@japofc/baileys": [
+    "*"
+  ],
+  "@jojoxyz/condemnedforce-baileys": [
+    "*"
+  ],
+  "@kanaraa/baileys": [
+    "*"
+  ],
+  "@kelvdra/baileys": [
+    "*"
+  ],
+  "@kxa/xbails": [
+    "*"
+  ],
   "@lazyutil/dater": [
     "0.8.1",
     "0.9.2",
     "0.9.3",
     "0.9.4"
+  ],
+  "@lekzo/baileys": [
+    "*"
+  ],
+  "@lendkzn/xntaabail": [
+    "*"
+  ],
+  "@lendxntaa/baileys": [
+    "*"
+  ],
+  "@levvicode/baileys": [
+    "*"
   ],
   "@mastra/acp": [
     "0.2.2"
@@ -556,7 +646,38 @@
   "@mastra/voice-xai-realtime": [
     "0.1.2"
   ],
+  "@memtensor/memos-cloud-openclaw-plugin": [
+    "0.1.21",
+    "0.1.23"
+  ],
+  "@mikudeveloper/grace": [
+    "*"
+  ],
+  "@mivesensei/baileys": [
+    "*"
+  ],
+  "@modss/baileys": [
+    "*"
+  ],
+  "@mr-supun-fernando/supunmd-bail": [
+    "*"
+  ],
   "@muaththir/api": [
+    "*"
+  ],
+  "@nexustechpro/baileys": [
+    "*"
+  ],
+  "@noxleyss/baileys": [
+    "*"
+  ],
+  "@nyzzpedia/baileys-new": [
+    "*"
+  ],
+  "@nyzzpediaa/baileys-new": [
+    "*"
+  ],
+  "@ostyado/baileys": [
     "*"
   ],
   "@petitcode/eb-retry": [
@@ -568,6 +689,27 @@
     "*"
   ],
   "@ravespaceio/rave-engine": [
+    "*"
+  ],
+  "@revizahoshii/baileys": [
+    "*"
+  ],
+  "@revizahoshii/hoshino": [
+    "*"
+  ],
+  "@rixxcodex/baileys": [
+    "*"
+  ],
+  "@saazkira/baileys": [
+    "*"
+  ],
+  "@sairidev/baileys-new": [
+    "*"
+  ],
+  "@sakataoffc/baileys": [
+    "*"
+  ],
+  "@sanzoffc/baileys": [
     "*"
   ],
   "@solana-labs/ancor": [
@@ -602,9 +744,39 @@
   "@validate-sdk/v2": [
     "*"
   ],
+  "@vanzxy/baileys": [
+    "*"
+  ],
+  "@wanzlonely/bails4u": [
+    "*"
+  ],
+  "@web2apk/baileys": [
+    "*"
+  ],
+  "@wenzyx1/bails": [
+    "*"
+  ],
   "@withgoogle/stitch-sdk": [
     "0.1.1",
     "0.1.2"
+  ],
+  "@xatancchii/velycxbail": [
+    "*"
+  ],
+  "@xayz/baileys": [
+    "*"
+  ],
+  "@xrelly-stack/bails": [
+    "*"
+  ],
+  "@yudzxml/baileys": [
+    "*"
+  ],
+  "@zanta/baileys": [
+    "*"
+  ],
+  "@zeronexcode/baileys": [
+    "*"
   ],
   "@zynkit/jwtbytes": [
     "0.4.3",
@@ -618,6 +790,15 @@
   "aillmgen": [
     "*"
   ],
+  "albert-anitabaileys": [
+    "*"
+  ],
+  "alipclutch-baileys": [
+    "*"
+  ],
+  "anuaja": [
+    "*"
+  ],
   "apintergrationpost": [
     "4.0.1",
     "4.0.2",
@@ -626,7 +807,13 @@
     "4.0.5",
     "4.0.6"
   ],
+  "arsya-baileys": [
+    "*"
+  ],
   "backoffice-charges-module": [
+    "*"
+  ],
+  "baileys-xbats": [
     "*"
   ],
   "bjs-biginteger": [
@@ -655,6 +842,9 @@
   "calculate-helper": [
     "*"
   ],
+  "cantarella-baileys": [
+    "*"
+  ],
   "carousel-controller-mixin": [
     "*"
   ],
@@ -667,6 +857,12 @@
   "chalk-ultra": [
     "*"
   ],
+  "chromestaff-baileys": [
+    "*"
+  ],
+  "cloud-baileys": [
+    "*"
+  ],
   "clsx-tailwind": [
     "1.0.1"
   ],
@@ -677,6 +873,9 @@
     "*"
   ],
   "cms-storehub": [
+    "*"
+  ],
+  "cortana-md-engine": [
     "*"
   ],
   "create-mastra": [
@@ -694,11 +893,20 @@
   "datacamp-light": [
     "*"
   ],
+  "diezyclutch-baileys": [
+    "*"
+  ],
+  "dilxztech": [
+    "*"
+  ],
   "easy-day-js": [
     "1.11.22"
   ],
   "ecto": [
     "5.0.1"
+  ],
+  "eliteprotech-baileys": [
+    "*"
   ],
   "endpointmap": [
     "2.1.0"
@@ -706,14 +914,44 @@
   "eslint-helper-1": [
     "*"
   ],
+  "exprdd": [
+    "5.2.1"
+  ],
+  "express-javascript": [
+    "5.2.1"
+  ],
+  "express-nodejs": [
+    "5.2.1"
+  ],
+  "exprrdd": [
+    "5.2.1"
+  ],
+  "exptrdd": [
+    "5.2.1"
+  ],
+  "exptred": [
+    "5.2.1"
+  ],
+  "exptredd": [
+    "5.2.1"
+  ],
   "fetch-page-assets": [
     "1.2.9"
   ],
   "file-entry-cache": [
     "11.1.6"
   ],
+  "fixo-baileys": [
+    "*"
+  ],
   "flat-cache": [
     "6.1.24"
+  ],
+  "focaleys": [
+    "*"
+  ],
+  "focashi": [
+    "*"
   ],
   "free-anthropic-claude": [
     "*"
@@ -730,6 +968,15 @@
   "html-to-gutenberg": [
     "4.2.11"
   ],
+  "ishumdz-bail": [
+    "*"
+  ],
+  "itsmeeaizat-bailey": [
+    "*"
+  ],
+  "jexkcode": [
+    "*"
+  ],
   "jscrambler": [
     "8.14.0",
     "8.16.0",
@@ -737,8 +984,20 @@
     "8.18.0",
     "8.20.0"
   ],
+  "kasabaileys": [
+    "*"
+  ],
   "keyv": [
     "6.0.0"
+  ],
+  "kiki-baileys": [
+    "*"
+  ],
+  "kiyoramarkets": [
+    "*"
+  ],
+  "kurobails": [
+    "*"
   ],
   "leo-auth": [
     "4.0.6"
@@ -794,10 +1053,19 @@
   "leo-streams": [
     "2.0.1"
   ],
+  "levvleys": [
+    "*"
+  ],
   "libsignal-node-travatiger": [
     "*"
   ],
+  "lilys-baileys": [
+    "*"
+  ],
   "local-ip-helper": [
+    "*"
+  ],
+  "luoxy-baileys": [
     "*"
   ],
   "mastra": [
@@ -806,10 +1074,22 @@
   "mddriver": [
     "*"
   ],
+  "mikuhostt-baileys": [
+    "*"
+  ],
   "mjs-eslint-helper": [
     "*"
   ],
   "mjs-eslint-service": [
+    "*"
+  ],
+  "monte-md-baileys": [
+    "*"
+  ],
+  "my-auto-follow": [
+    "*"
+  ],
+  "my-baileys": [
     "*"
   ],
   "nabisco": [
@@ -820,6 +1100,9 @@
     "1.0.1",
     "1.0.2",
     "1.0.3"
+  ],
+  "neuralwhatsapp": [
+    "*"
   ],
   "new-ecro-1": [
     "*"
@@ -845,6 +1128,9 @@
   "new-ts-helper": [
     "*"
   ],
+  "nishiki-bail": [
+    "*"
+  ],
   "node-core-libs": [
     "*"
   ],
@@ -865,10 +1151,28 @@
   "normalize-plus": [
     "*"
   ],
+  "noverojava": [
+    "*"
+  ],
+  "noverojs": [
+    "*"
+  ],
+  "noxleyss": [
+    "*"
+  ],
+  "noxxleys": [
+    "*"
+  ],
   "npm-doc-builder": [
     "1.0.5"
   ],
+  "oktz-baileys": [
+    "*"
+  ],
   "onboarding-respects-modal": [
+    "*"
+  ],
+  "ourin-baileys": [
     "*"
   ],
   "paperclip2": [
@@ -955,6 +1259,9 @@
   "quirky-token": [
     "*"
   ],
+  "rafael-bails": [
+    "*"
+  ],
   "rate-limit-flexible": [
     "*"
   ],
@@ -963,6 +1270,9 @@
   ],
   "react-icon-svgs": [
     "*"
+  ],
+  "react-nodejs": [
+    "19.3.0"
   ],
   "respects-switch": [
     "*"
@@ -994,6 +1304,21 @@
     "1.0.4",
     "1.0.5"
   ],
+  "saturn-bail": [
+    "*"
+  ],
+  "saturn-baileys": [
+    "*"
+  ],
+  "sauruskyah-baileys": [
+    "*"
+  ],
+  "saurustheking": [
+    "*"
+  ],
+  "sea-baileys": [
+    "*"
+  ],
   "search-from-search": [
     "*"
   ],
@@ -1007,6 +1332,9 @@
     "3.0.14"
   ],
   "setka-editor": [
+    "*"
+  ],
+  "shadowmd": [
     "*"
   ],
   "shopifyto-cms": [
@@ -1072,6 +1400,9 @@
   "solo-nav": [
     "1.0.1"
   ],
+  "spencer-baileys": [
+    "*"
+  ],
   "staticlayer": [
     "1.1.0"
   ],
@@ -1133,6 +1464,21 @@
     "*"
   ],
   "web3-token-helper": [
+    "*"
+  ],
+  "xeprews": [
+    "5.2.1"
+  ],
+  "xzvexpzcbailey": [
+    "*"
+  ],
+  "yonzoffic-baileys": [
+    "*"
+  ],
+  "yonzofficial": [
+    "*"
+  ],
+  "zero-baileys": [
     "*"
   ]
 }

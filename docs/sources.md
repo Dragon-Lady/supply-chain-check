@@ -69,6 +69,43 @@
 - Socket Operation Muck and Load Go/GitHub campaign: https://socket.dev/blog/malicious-go-module-exposes-github-malware-lure-network
 - Socket Braintree NuGet typosquat campaign: https://socket.dev/blog/braintree-nuget-typosquat-skims-credit-cards
 
+## PhantomSub
+
+OX Security, 2026-09-28. Nir Zadok, Moshe Siman Tov Bustan, and Vitalii Chepurko.
+101 malicious npm Baileys forks. All observed versions are in scope. Sixteen were
+already removed when OX published. Not a credential worm.
+
+- https://www.ox.security/blog/phantomsub-malicious-npm-campaign-secretly-adds-users-to-whatsapp-spam-channels/
+
+## MemTensor
+
+Aikido, Socket, and SafeDep. Compromised npm `@memtensor/memos-cloud-openclaw-plugin`
+at and after 0.1.21, and PyPI `MemoryOS` at and after 2.0.34. Benign history
+exists, so this is not an all-version pin. The reported behavior runs on
+invocation. Campaign id `cloud-openclaw-semi-nuclear`.
+
+## DirtyBlanket
+
+SafeDep, 2026-09-29. Nine exact npm versions published by dirtyblanket between
+06:05 and 06:38 UTC. Linux install-time impact. Host names and one published
+binary hash are indicators. No install script is stored here.
+
+## Trinitite
+
+JFrog, XRAY-1065308. Exact malicious versions of
+`@7nohe/openapi-react-query-codegen`. Last safe lines: 0.5.3, 1.6.2, 2.2.0, 3.0.2.
+
+- https://research.jfrog.com/post/shai-hulud-trinitite/
+
+## LiteLLM CVE-2026-93355
+
+OX Security. JWT email-fallback account takeover, including admin. Distinct from
+CVE-2026-42271. OX reported unpatched through 1.100.1. The CVE record covers
+versions through 1.102.1. No upstream fix was confirmed when this indicator was
+added. Require a verified email before the proxy trusts a JWT.
+
+- https://www.ox.security/blog/litellm-an-ordinary-login-token-can-become-someone-elses-admin-account/
+
 This project intentionally avoids exploit reproduction steps, malware execution
 guidance, cleanup automation, token handling, and secret disclosure.
 
@@ -78,6 +115,12 @@ Cross-platform npm ecosystem compromise (not Linux-only). Applies to any
 npm-using OS, CI, or developer lane; these project scanners report matches in
 the scanned tree on the operator's platform.
 
+- **Ox Security** / **Moshe Simon** (Moshe Siman Tov Bustan, @MosheTov) — Moshe posted the
+  findings on X with the Ox blog link (~444 packages / 2B+ monthly downloads; IOCs;
+  recommended actions):
+  https://www.ox.security/blog/a-new-infostealer-worm-hits-npm-affecting-keyv-and-cacheable/
+- Ox Security TeamPCP copycats / Shai-Hulud clone context:
+  https://www.ox.security/blog/new-actors-deploy-shai-hulud-clones-teampcp-copycats-are-here/
 - Snyk keyv npm supply-chain compromise analysis: https://snyk.io/blog/inside-keyv-npm-compromise-preinstall-malware-trusted-provenance-ide-hooks/
 - Snyk advisory SNYK-JS-KEYV-18515941: https://security.snyk.io/vuln/SNYK-JS-KEYV-18515941
 - Wiz keyv / cacheable npm supply-chain attack: https://www.wiz.io/blog/keyv-and-cacheable-npm-supply-chain-attack
@@ -85,3 +128,5 @@ the scanned tree on the operator's platform.
 - Aikido keyv / friends Shai-Hulud supply-chain attack: https://www.aikido.dev/blog/keyv-and-friends-compromised-in-npm-supply-chain-attack
 - JFrog Shai-Hulud August 2026 (keyv and 400+ packages): https://research.jfrog.com/post/shai-hulud-is-back-august/
 - StepSecurity ChainDrop npm worm analysis: https://www.stepsecurity.io/blog/chaindrop-npm-worm
+- actions-warden (Dragon Lady PyPI read-only GitHub Actions workflow auditor): https://github.com/Dragon-Lady/actions-warden · https://pypi.org/project/actions-warden/
+

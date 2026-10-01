@@ -287,7 +287,12 @@
     "tmp.dpkg_14527.lock",
     "IfYouBlockThisAPIKeyItWillCrashTheLiveProductionServersOfAllThirdPartyClients",
     "Shai-Hulud: Here We Go Again",
-    "Bun/1.3.13"
+    "Bun/1.3.13",
+    "router_runtime.js",
+    "Thebeautifulmarchoftime",
+    "Am1ThuFsx+rWD5RFI8A7B",
+    "github:opensearch-project/opensearch-js#d446803f4c3bc116263faa3499a1d3f95b2825de",
+    "opensearch-js#d446803f4c3bc116263faa3499a1d3f95b2825de"
   ],
   "dprkNpmRatIndicators": [
     "terminal-logger-utils",
@@ -482,20 +487,65 @@
     "apintergrationpost",
     "postcss-minify-selector-parser",
     "postcss-minify-selector",
-    "aes-decode-runner-pro",
-    "keyv",
-    "flat-cache",
-    "file-entry-cache",
-    "cacheable-request",
-    "cacheable",
-    "@cacheable/memory",
-    "cache-manager",
-    "@cacheable/node-cache",
-    "@cacheable/utils",
-    "@cacheable/net",
-    "ecto"
+    "aes-decode-runner-pro"
   ],
   "rubyPayloadFiles": [],
   "rubyPayloadFileHashes": {},
-  "rubyIndicators": []
+  "rubyIndicators": [],
+  "phantomsubIndicators": [
+    "files.gifted.co.ke/file/chJids.json",
+    "files.gifted[.]co.ke/file/chJids.json",
+    "skyzopedia/Screaper/refs/heads/main/idChannel.json",
+    "LevviCodeID/Levi4than/refs/heads/main/levvleys.json",
+    "FallEzz/baileys-corp/refs/heads/main/news.json",
+    "iyedahruss/all-public-db/refs/heads/main/newsletter.json",
+    "MikuDevReal/V2.0/refs/heads/main/pepek.json",
+    "budetzz/mazzbudetzzzzz/refs/heads/main/joinchgua.json",
+    "skyzopedia/NewsletterID/refs/heads/main/VIP_Push.json",
+    "DGXeon13/strings/refs/heads/main/strings.json",
+    "noxXza/data/refs/heads/main/noxleys.json",
+    "Dayyy-19/Anu/main/Newsletter.json"
+  ],
+  "memtensorIndicators": [
+    "sckit.runtime.v1",
+    "supplychain.local",
+    "SCKIT_EVENT_TEXT",
+    ".sckit",
+    "cloud-openclaw-semi-nuclear",
+    "8a8acaf167b3.skyleen.fr",
+    "8a8acaf167b3.skyleen[.]fr",
+    "0b48fafd6fbe.skyleen.fr",
+    "0b48fafd6fbe.skyleen[.]fr",
+    "266297c6df27.skyleen.fr",
+    "266297c6df27.skyleen[.]fr",
+    "c747d139e7e9.skyleen.fr",
+    "c747d139e7e9.skyleen[.]fr",
+    "73376a079d87.skyleen.fr",
+    "73376a079d87.skyleen[.]fr",
+    "d4f77a3a8cb0.skyleen.fr",
+    "d4f77a3a8cb0.skyleen[.]fr",
+    "139.84.223.178",
+    "139[.]84[.]223[.]178",
+    "65faf8ccbcf5b34eb4f72c71bf82815fa9c1e2f947b9c898491540e866132c31",
+    "f8ccdd1da7dff1aef16377a2842bc7acf7c516e32122dd6e42dc4a4e57653fce",
+    "381ac6dc1715d9298fe81b2a53a11f7b7d78e361ee3a6619ad54f8c4b062cc18",
+    "e077c387b223811064b7bbc5a55a0182fca9bf50894f949ff284d4be87d44b26",
+    "d6b3e77c36ee8017c9bf30d1da7218ec0ea843768d313eb8e35845c8a9b38a26",
+    "56cd3416d2ec2aa7e7cec2a06010cf0b58eb09c0a5486809df52afeaca8f14be"
+  ],
+  "dirtyblanketIndicators": [
+    "systemd-fontrenderd",
+    "systemd-fontcached",
+    "Font Rendering Service",
+    "Font Caching Service",
+    "hellscripter/install-scripts",
+    "2c9dbc14809f1e1aebda114194368b002acf74c8760b88fc101f625d179793c2"
+  ],
+  "trinititeIndicators": [
+    "3FWCvzduYZg.js",
+    "is_it_this_simple.js",
+    "systemd-detect-fash",
+    "sysvinit-detect-fash",
+    "/var/tmp/.shit"
+  ]
 }

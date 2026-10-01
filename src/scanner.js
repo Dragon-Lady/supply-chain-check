@@ -31,6 +31,11 @@ const LIFECYCLE_SCRIPTS = ["preinstall", "install", "postinstall", "prepare"];
 const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "coverage"]);
 const LITELLM_AFFECTED_MIN = "1.74.2";
 const LITELLM_FIXED = "1.83.7";
+const LITELLM_93355_MAX = "1.102.1";
+const MEMTENSOR_NPM_PACKAGE = "@memtensor/memos-cloud-openclaw-plugin";
+const MEMTENSOR_NPM_MIN = "0.1.21";
+const MEMORYOS_PYPI_NAME = "memoryos";
+const MEMORYOS_MIN = "2.0.34";
 const STARLETTE_FIXED = "1.0.1";
 const LANGFLOW_UPLOAD_FIXED = "1.9.1";
 const LANGFLOW_WEBHOOK_AFFECTED_MAX = "1.8.4";
@@ -227,6 +232,36 @@ function loadSplitAdvisoryData(dataDir) {
 
 function readJsonFile(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function loadOperatorNotes() {
+  try {
+    return readJsonFile(path.join(__dirname, "..", "data", "operator-notes.json"));
+  } catch (_error) {
+    return { notes: {}, byPackage: {}, byType: {} };
+  }
+}
+
+const OPERATOR_NOTES = loadOperatorNotes();
+
+function operatorNote(id) {
+  if (!id) return "";
+  const note = OPERATOR_NOTES.notes && OPERATOR_NOTES.notes[id];
+  return typeof note === "string" ? note : "";
+}
+
+function withPackageNote(packageName, message) {
+  const id = OPERATOR_NOTES.byPackage && OPERATOR_NOTES.byPackage[packageName];
+  const note = operatorNote(id);
+  if (!note || message.includes(note)) return message;
+  return `${message} ${note}`;
+}
+
+function withTypeNote(type, message) {
+  const id = OPERATOR_NOTES.byType && OPERATOR_NOTES.byType[type];
+  const note = operatorNote(id);
+  if (!note || message.includes(note)) return message;
+  return `${message} ${note}`;
 }
 
 function scanTarget(targetPath, options = {}) {
@@ -454,7 +489,7 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
   scanNpmStagedPublishSignals(filePath, rawText, trustSignals);
 
   if (manifest.name && manifest.version && versionIsListed(advisory.packages[manifest.name], manifest.version)) {
-    findings.push(finding("critical", "known-bad-version", filePath, `${manifest.name}@${manifest.version} is listed as compromised.`));
+    findings.push(finding("critical", "known-bad-version", filePath, withPackageNote(manifest.name, `${manifest.name}@${manifest.version} is listed as compromised.`)));
   }
 
   const dependencySections = ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies", "bundledDependencies"];
@@ -585,7 +620,15 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
   }
 
   if (versionIsListed(advisory.packages[name], spec)) {
-    findings.push(finding("critical", "known-bad-requested-version", filePath, `${section}.${name} requests compromised version ${spec}.`));
+    findings.push(finding("critical", "known-bad-requested-version", filePath, withPackageNote(name, `${section}.${name} requests compromised version ${spec}.`)));
+  }
+
+  if (name === MEMTENSOR_NPM_PACKAGE) {
+    for (const version of versionsInSpec(spec)) {
+      if (compareDottedVersion(version, MEMTENSOR_NPM_MIN) >= 0 && !versionIsListed(advisory.packages[name], version)) {
+        findings.push(finding("critical", "memtensor-supplychain-local-version", filePath, withTypeNote("memtensor-supplychain-local-version", `${section}.${name} references ${version}, in the reported MemTensor compromised range at and after ${MEMTENSOR_NPM_MIN}.`)));
+      }
+    }
   }
 
   scanLiteLlmDependencySpec(filePath, section, name, spec, findings);
@@ -650,13 +693,20 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
 
   for (const [pkg, versions] of Object.entries(advisory.packages)) {
     if (packageIsListedAllVersions(versions) && text.includes(pkg)) {
-      findings.push(finding("critical", "known-bad-lockfile-package", filePath, `Lockfile references ${pkg}, which is listed as compromised for all observed versions.`));
+      findings.push(finding("critical", "known-bad-lockfile-package", filePath, withPackageNote(pkg, `Lockfile references ${pkg}, which is listed as compromised for all observed versions.`)));
       continue;
     }
     for (const version of versions) {
       if (version === "*") continue;
       if (lockfileMentionsPackageVersion(text, pkg, version)) {
-        findings.push(finding("critical", "known-bad-lockfile-version", filePath, `Lockfile references ${pkg}@${version}.`));
+        findings.push(finding("critical", "known-bad-lockfile-version", filePath, withPackageNote(pkg, `Lockfile references ${pkg}@${version}.`)));
+      }
+    }
+    if (pkg === MEMTENSOR_NPM_PACKAGE) {
+      for (const version of versionsMentionedNearPackage(text, pkg)) {
+        if (compareDottedVersion(version, MEMTENSOR_NPM_MIN) >= 0 && !versionIsListed(versions, version)) {
+          findings.push(finding("critical", "memtensor-supplychain-local-version", filePath, withTypeNote("memtensor-supplychain-local-version", `Lockfile references ${pkg}@${version}, in the reported MemTensor compromised range at and after ${MEMTENSOR_NPM_MIN}.`)));
+        }
       }
     }
   }
@@ -693,12 +743,19 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
 
   for (const [pkg, versions] of Object.entries(advisory.pypiPackages || {})) {
     if (packageIsListedAllVersions(versions) && pythonFileMentionsPackage(text, pkg)) {
-      findings.push(finding("critical", "known-bad-pypi-package", filePath, `Python dependency file references ${pkg}, which is listed as compromised for all observed versions.`));
+      findings.push(finding("critical", "known-bad-pypi-package", filePath, withPackageNote(pkg, `Python dependency file references ${pkg}, which is listed as compromised for all observed versions.`)));
       continue;
     }
     for (const version of versions) {
       if (pythonFileMentionsPackageVersion(text, pkg, version)) {
-        findings.push(finding("critical", "known-bad-pypi-version", filePath, `Python dependency file references ${pkg}==${version}.`));
+        findings.push(finding("critical", "known-bad-pypi-version", filePath, withPackageNote(pkg, `Python dependency file references ${pkg}==${version}.`)));
+      }
+    }
+    if (pkg === MEMORYOS_PYPI_NAME) {
+      for (const version of caseInsensitivePackageVersions(text, "MemoryOS")) {
+        if (compareDottedVersion(version, MEMORYOS_MIN) >= 0 && !versionIsListed(versions, version)) {
+          findings.push(finding("critical", "memtensor-supplychain-local-version", filePath, withTypeNote("memtensor-supplychain-local-version", `Python dependency file references MemoryOS ${version}, in the reported MemTensor compromised range at and after ${MEMORYOS_MIN}.`)));
+        }
       }
     }
   }
@@ -1383,6 +1440,9 @@ function scanLiteLlmDependencySpec(filePath, section, name, spec, findings) {
     if (normalizedName === "litellm" && isVersionInRange(version, LITELLM_AFFECTED_MIN, LITELLM_FIXED)) {
       findings.push(finding("critical", "litellm-cve-2026-42271-vulnerable-version", filePath, `${section}.${name} references LiteLLM ${version}, affected by CVE-2026-42271. Upgrade to litellm>=${LITELLM_FIXED}.`));
     }
+    if (normalizedName === "litellm" && compareDottedVersion(version, LITELLM_93355_MAX) <= 0) {
+      findings.push(finding("critical", "litellm-cve-2026-93355-unpatched", filePath, withTypeNote("litellm-cve-2026-93355-unpatched", `${section}.${name} references LiteLLM ${version}, affected by CVE-2026-93355.`)));
+    }
     if (normalizedName === "starlette" && compareDottedVersion(version, STARLETTE_FIXED) < 0) {
       findings.push(finding("medium", "starlette-host-header-review", filePath, `${section}.${name} references Starlette ${version}. If deployed with LiteLLM, upgrade to starlette>=${STARLETTE_FIXED}.`));
     }
@@ -1500,6 +1560,9 @@ function scanLiteLlmText(filePath, text, findings, sourceLabel) {
     if (isVersionInRange(version, LITELLM_AFFECTED_MIN, LITELLM_FIXED)) {
       findings.push(finding("critical", "litellm-cve-2026-42271-vulnerable-version", filePath, `${sourceLabel} references LiteLLM ${version}, affected by CVE-2026-42271. Upgrade to litellm>=${LITELLM_FIXED}.`));
     }
+    if (compareDottedVersion(version, LITELLM_93355_MAX) <= 0) {
+      findings.push(finding("critical", "litellm-cve-2026-93355-unpatched", filePath, withTypeNote("litellm-cve-2026-93355-unpatched", `${sourceLabel} references LiteLLM ${version}, affected by CVE-2026-93355.`)));
+    }
   }
 
   if (hasLiteLlm) {
@@ -1584,7 +1647,11 @@ function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
     ["hades-indicator", indicators.hadesIndicators],
     ["ottercookie-indicator", indicators.otterCookieIndicators],
     ["solana-fakefix-indicator", indicators.solanaFakeFixIndicators],
-    ["jetbrains-ai-key-stealer-indicator", indicators.jetBrainsAiKeyStealerIndicators]
+    ["jetbrains-ai-key-stealer-indicator", indicators.jetBrainsAiKeyStealerIndicators],
+    ["phantomsub-indicator", indicators.phantomsubIndicators],
+    ["memtensor-indicator", indicators.memtensorIndicators],
+    ["dirtyblanket-indicator", indicators.dirtyblanketIndicators],
+    ["trinitite-indicator", indicators.trinititeIndicators]
   ];
 
   if (typeof indicators.tokenDescriptionIndicator === "string") {
@@ -1596,7 +1663,7 @@ function scanIndicatorStrings(filePath, text, advisory, findings, sourceLabel) {
     for (const value of values) {
       if (typeof value !== "string" || value.length === 0) continue;
       if (text.includes(value)) {
-        findings.push(finding("high", type, filePath, `${sourceLabel} references incident indicator: ${value}`));
+        findings.push(finding("high", type, filePath, withTypeNote(type, `${sourceLabel} references incident indicator: ${value}`)));
       }
     }
   }
@@ -1661,6 +1728,27 @@ function packageVersionsInText(text, packageName) {
 
 function versionsInSpec(spec) {
   return Array.from(String(spec).matchAll(/([0-9]+\.[0-9]+\.[0-9]+)/g), (match) => match[1]);
+}
+
+function versionsMentionedNearPackage(text, pkg) {
+  const escapedPkg = escapeRegExp(pkg);
+  const versions = new Set();
+  const patterns = [
+    new RegExp(`${escapedPkg}[^\\n\\r]{0,120}([0-9]+\\.[0-9]+\\.[0-9]+)`, "g"),
+    new RegExp(`node_modules/${escapedPkg}[\\s\\S]{0,240}"version"\\s*:\\s*"([0-9]+\\.[0-9]+\\.[0-9]+)"`, "g")
+  ];
+  for (const pattern of patterns) {
+    for (const match of text.matchAll(pattern)) versions.add(match[1]);
+  }
+  return Array.from(versions);
+}
+
+function caseInsensitivePackageVersions(text, packageName) {
+  const escaped = escapeRegExp(packageName);
+  const versions = new Set();
+  const pattern = new RegExp(`\\b${escaped}\\b\\s*(?:==|===|=|~=|>=|<=|>|<)\\s*["']?([0-9]+\\.[0-9]+\\.[0-9]+)`, "gi");
+  for (const match of text.matchAll(pattern)) versions.add(match[1]);
+  return Array.from(versions);
 }
 
 function isVersionInRange(version, inclusiveMin, exclusiveMax) {

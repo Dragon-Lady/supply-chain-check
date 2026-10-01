@@ -864,6 +864,7 @@ try {
   const report = scanTarget(liteLlmRoot);
   assert.strictEqual(report.risk, "likely-exposed");
   assert(report.findings.some((finding) => finding.type === "litellm-cve-2026-42271-vulnerable-version"));
+  assert(report.findings.some((finding) => finding.type === "litellm-cve-2026-93355-unpatched" && finding.message.includes("CVE-2026-93355") && finding.message.includes("1.83.7")));
   assert(report.findings.some((finding) => finding.type === "litellm-starlette-host-header-chain"));
   assert(report.findings.some((finding) => finding.type === "litellm-mcp-test-route-reference"));
   assert(report.findings.some((finding) => finding.type === "litellm-public-bind"));
@@ -1158,5 +1159,128 @@ try {
   assert(keyvReport.findings.some((f) => f.type === "network-indicator" && f.message.includes("npm-cache.com")));
   assert(keyvReport.findings.some((f) => f.type === "campaign-indicator" && f.message.includes("Math_Symbol.js")));
   fs.rmSync(keyvRoot, { recursive: true, force: true });
+
+  // July-pattern discipline: seed carriers are exact-version only. A safe keyv
+  // resolve must not fire name-only active-campaign-package noise.
+  const keyvSafeRoot = fs.mkdtempSync(path.join(os.tmpdir(), "hwg-keyv-safe-"));
+  write(
+    path.join(keyvSafeRoot, "package.json"),
+    JSON.stringify(
+      {
+        name: "keyv-safe-fixture",
+        dependencies: {
+          keyv: "5.5.0",
+          "flat-cache": "6.1.0",
+          cacheable: "2.4.0",
+          ecto: "4.0.0"
+        }
+      },
+      null,
+      2
+    )
+  );
+  write(
+    path.join(keyvSafeRoot, "package-lock.json"),
+    JSON.stringify(
+      {
+        name: "keyv-safe-fixture",
+        lockfileVersion: 3,
+        packages: {
+          "": {
+            name: "keyv-safe-fixture",
+            dependencies: {
+              keyv: "5.5.0",
+              "flat-cache": "6.1.0",
+              cacheable: "2.4.0",
+              ecto: "4.0.0"
+            }
+          },
+          "node_modules/keyv": {
+            version: "5.5.0",
+            resolved: "https://registry.npmjs.org/keyv/-/keyv-5.5.0.tgz"
+          },
+          "node_modules/flat-cache": {
+            version: "6.1.0",
+            resolved: "https://registry.npmjs.org/flat-cache/-/flat-cache-6.1.0.tgz"
+          },
+          "node_modules/cacheable": {
+            version: "2.4.0",
+            resolved: "https://registry.npmjs.org/cacheable/-/cacheable-2.4.0.tgz"
+          },
+          "node_modules/ecto": {
+            version: "4.0.0",
+            resolved: "https://registry.npmjs.org/ecto/-/ecto-4.0.0.tgz"
+          }
+        }
+      },
+      null,
+      2
+    )
+  );
+  const keyvSafeReport = scanTarget(keyvSafeRoot);
+  assert(!keyvSafeReport.findings.some((f) => f.type === "known-bad-lockfile-version"));
+  assert(!keyvSafeReport.findings.some((f) => f.type === "active-campaign-package"));
+  fs.rmSync(keyvSafeRoot, { recursive: true, force: true });
+
+const octoberCampaignRoot = makeFixture("scc-october-campaigns-");
+try {
+  write(
+    path.join(octoberCampaignRoot, "package.json"),
+    JSON.stringify({
+      dependencies: {
+        "ourin-baileys": "1.2.3",
+        "@memtensor/memos-cloud-openclaw-plugin": "0.1.24",
+        xeprews: "5.2.1",
+        "@7nohe/openapi-react-query-codegen": "1.6.3"
+      }
+    }, null, 2)
+  );
+  write(path.join(octoberCampaignRoot, "requirements.txt"), "MemoryOS==2.0.40\nlitellm==1.102.1\n");
+  write(
+    path.join(octoberCampaignRoot, "notes.js"),
+    [
+      "files.gifted[.]co.ke/file/chJids.json",
+      "sckit.runtime.v1",
+      "systemd-fontrenderd",
+      "systemd-detect-fash"
+    ].join("\n")
+  );
+  const report = scanTarget(octoberCampaignRoot);
+  assert.strictEqual(report.risk, "likely-exposed");
+  const messages = report.findings.map((finding) => `${finding.type} ${finding.message}`).join("\n");
+  assert(messages.includes("PhantomSub"), messages);
+  assert(messages.includes("memtensor-supplychain-local-version") && messages.includes("0.1.24"));
+  assert(messages.includes("MemoryOS 2.0.40"));
+  assert(messages.includes("DirtyBlanket"));
+  assert(messages.includes("Trinitite"));
+  assert(report.findings.some((finding) => finding.type === "litellm-cve-2026-93355-unpatched"));
+  assert(!report.findings.some((finding) => finding.type === "litellm-cve-2026-42271-vulnerable-version" && finding.message.includes("1.102.1")));
+  assert(report.findings.some((finding) => finding.type === "phantomsub-indicator"));
+  assert(report.findings.some((finding) => finding.type === "memtensor-indicator"));
+  assert(report.findings.some((finding) => finding.type === "dirtyblanket-indicator"));
+  assert(report.findings.some((finding) => finding.type === "trinitite-indicator"));
+} finally {
+  fs.rmSync(octoberCampaignRoot, { recursive: true, force: true });
+}
+
+const litellmFixed42271Root = makeFixture("scc-litellm-93355-only-");
+try {
+  write(path.join(litellmFixed42271Root, "requirements.txt"), "litellm==1.83.7\n");
+  const report = scanTarget(litellmFixed42271Root);
+  assert(report.findings.some((finding) => finding.type === "litellm-cve-2026-93355-unpatched"));
+  assert(!report.findings.some((finding) => finding.type === "litellm-cve-2026-42271-vulnerable-version"));
+} finally {
+  fs.rmSync(litellmFixed42271Root, { recursive: true, force: true });
+}
+
+const litellmPatched93355Root = makeFixture("scc-litellm-93355-clear-");
+try {
+  write(path.join(litellmPatched93355Root, "requirements.txt"), "litellm==1.102.2\n");
+  const report = scanTarget(litellmPatched93355Root);
+  assert(!report.findings.some((finding) => finding.type === "litellm-cve-2026-93355-unpatched"));
+  assert(!report.findings.some((finding) => finding.type === "litellm-cve-2026-42271-vulnerable-version"));
+} finally {
+  fs.rmSync(litellmPatched93355Root, { recursive: true, force: true });
+}
 
   console.log("smoke tests passed");

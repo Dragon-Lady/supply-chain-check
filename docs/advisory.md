@@ -115,3 +115,45 @@ recognized as strong trust evidence because npm staged publishes require
 maintainer 2FA approval before a version becomes installable. `supply-chain-check`
 records this as a `trustSignals` entry and does not treat staged publish
 approval metadata as a supply-chain finding.
+
+## August 2026 keyv / cacheable (ChainDrop / Shai-Hulud "Here We Go Again")
+
+**Ox Security** (2026-08-04; blog by Moshe Siman Tov Bustan; **Moshe Simon** / @MosheTov posted the findings on X with the Ox blog link) reports a live Shai-Hulud campaign hitting npm at
+roughly **444 packages**, **1,600+ versions**, and **over 2 billion monthly
+downloads**. The worm continues to spread; Ox publishes a partial package table
+and asks operators to treat inventory as incomplete until refreshed.
+
+**Behavior (same family as prior waves):** credential-stealing worm logic,
+self-propagation through stolen npm accounts, **IDE/AI persistence** (Claude,
+VS Code, and related agent/editor hooks), **GitHub exfiltration** as C2, and a
+**dead-man switch** that can react when a stolen GitHub token is revoked.
+Payload entry commonly uses `preinstall` → `setup.mjs` / Bun, then
+`math_init.js` or `Math_Symbol.js`.
+
+**New Ox-highlighted signals:**
+- Extortion / production-crash threat string:
+  `IfYouBlockThisAPIKeyItWillCrashTheLiveProductionServersOfAllThirdPartyClients`
+- Campaign RSA public encryption key published as an IOC (Ox: not yet
+  attributed; operator summary treats it as a possible **TeamPCP copycat**
+  signal rather than confirmed TeamPCP attribution)
+- Campaign strings/files including `Shai-Hulud: Here We Go Again`,
+  `Thebeautifulmarchoftime` / `thebeautifulmarchoftime`, `router_runtime.js`,
+  and git pin
+  `github:opensearch-project/opensearch-js#d446803f4c3bc116263faa3499a1d3f95b2825de`
+
+**Seed exact-version carriers** (peer-confirmed; not the full 444-package set):
+`keyv@6.0.0` and ten related jaredwray-family releases. Use Ox's table and the
+Wiz Research keyv packages CSV for broader inventory.
+
+**Ox recommended actions (operator-owned; this scanner is read-only):**
+1. Rotate keys and enable 2FA from a clean device.
+2. Downgrade affected packages to known-safe versions.
+3. Search for infected GitHub accounts/repositories and revoke/remove them if
+   affected—**after** dead-man persistence is handled under IR direction
+   (notify-only: do not blindly revoke while a monitor may still fire).
+
+Credits: **Ox Security**, Snyk, StepSecurity, Aikido, Wiz, JFrog, and npm
+Security. Primary Ox writeup:
+https://www.ox.security/blog/a-new-infostealer-worm-hits-npm-affecting-keyv-and-cacheable/
+
+Also check **actions-warden** (PyPI read-only auditor for risky or injected GitHub Actions workflow config) when reviewing repos that may have had tokens stolen or CI tampered with: `actions-warden /path/to/repo`. https://github.com/Dragon-Lady/actions-warden · https://pypi.org/project/actions-warden/. Read-only only.

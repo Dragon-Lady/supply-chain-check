@@ -5,6 +5,31 @@ const DEFAULT_REFERENCES = [
 
 const RULE_REFERENCES = [
   {
+    pattern: /PhantomSub|phantomsub-indicator/i,
+    label: "OX Security PhantomSub npm report",
+    sourceHint: "docs/sources.md#phantomsub"
+  },
+  {
+    pattern: /MemTensor|supplychain\.local|memtensor-indicator|memos-cloud-openclaw|MemoryOS/i,
+    label: "Aikido / Socket / SafeDep MemTensor supplychain.local report",
+    sourceHint: "docs/sources.md#memtensor"
+  },
+  {
+    pattern: /DirtyBlanket|dirtyblanket-indicator|systemd-fontrenderd|systemd-fontcached/i,
+    label: "SafeDep DirtyBlanket npm report",
+    sourceHint: "docs/sources.md#dirtyblanket"
+  },
+  {
+    pattern: /Trinitite|trinitite-indicator|openapi-react-query-codegen|systemd-detect-fash/i,
+    label: "JFrog Trinitite report",
+    sourceHint: "docs/sources.md#trinitite"
+  },
+  {
+    pattern: /CVE-2026-93355|litellm-cve-2026-93355/i,
+    label: "OX Security LiteLLM CVE-2026-93355 report",
+    sourceHint: "docs/sources.md#litellm-cve-2026-93355"
+  },
+  {
     pattern: /easy-day-js|mastra|setup\.cjs|23\.254\.164/i,
     label: "OX Security easy-day-js / Mastra npm supply-chain report",
     sourceHint: "docs/sources.md#easy-day-js-mastra"
@@ -116,6 +141,9 @@ function responseItem(finding) {
 }
 
 function nextStepsForFinding(finding) {
+  const campaignSteps = campaignNextSteps(finding);
+  if (campaignSteps) return campaignSteps;
+
   if (isExecutionSurface(finding)) {
     return [
       "Treat this as possible execution surface until reviewed.",
@@ -137,6 +165,46 @@ function nextStepsForFinding(finding) {
     "Compare the string or config shape against the linked source advisory.",
     "Escalate to host incident response if the matched code/config may have executed."
   ];
+}
+
+function campaignNextSteps(finding) {
+  const haystack = `${finding.type || ""}\n${finding.message || ""}`;
+  if (/PhantomSub|phantomsub-indicator/i.test(haystack)) {
+    return [
+      "Remove the PhantomSub package. Do not run it.",
+      "If a WhatsApp session was connected through it, report or block unexpected channels.",
+      "This campaign is not a credential worm. This tool is notify-only and does not uninstall or edit files."
+    ];
+  }
+  if (/MemTensor|supplychain\.local|memtensor-indicator|memos-cloud-openclaw|MemoryOS/i.test(haystack)) {
+    return [
+      "Stop using the MemTensor package. It is reported to run on invocation, not only at install.",
+      "If it ran, treat npm, PyPI, and GitHub tokens and the workstation as exposed and move to host incident response.",
+      "Notify-only: do not blind-revoke credentials from this scanner."
+    ];
+  }
+  if (/DirtyBlanket|dirtyblanket-indicator|systemd-fontrenderd|systemd-fontcached/i.test(haystack)) {
+    return [
+      "Do not run the DirtyBlanket package.",
+      "If a Linux machine installed one, treat that machine and every SSH key and npm token on it as compromised.",
+      "This is host incident response, not a dependency bump. Notify-only: this tool does not clean the host."
+    ];
+  }
+  if (/Trinitite|trinitite-indicator|openapi-react-query-codegen|systemd-detect-fash/i.test(haystack)) {
+    return [
+      "Isolate the machine. Do not revoke GitHub tokens until the monitor is gone.",
+      "Pin @7nohe/openapi-react-query-codegen to a last-safe line: 0.5.3, 1.6.2, 2.2.0, or 3.0.2.",
+      "Valid provenance is not a clean bill. After the monitor is gone, rotate credentials from a clean machine. Notify-only."
+    ];
+  }
+  if (/CVE-2026-93355|litellm-cve-2026-93355/i.test(haystack)) {
+    return [
+      "Treat this LiteLLM version as unpatched for CVE-2026-93355. Version 1.83.7 fixes CVE-2026-42271 only.",
+      "Require a verified email before the proxy trusts a JWT. No upstream fix is confirmed.",
+      "Notify-only: this tool does not change proxy configuration."
+    ];
+  }
+  return null;
 }
 
 function referenceForFinding(finding) {

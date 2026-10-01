@@ -49,10 +49,16 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   versions, Paperclip2 manifest-only reverse shells, `polymarket-kit`, Rollup
   lookalikes, and Paysafe/Skrill/Neteller payment-SDK typosquats
 - August 4, 2026 keyv / cacheable (ChainDrop / Shai-Hulud "Here We Go Again")
-  exact-version carriers (`keyv@6.0.0` and ten related packages), campaign
-  network markers, and package-lock v2/v3 path/tarball matching — credited to
-  Snyk, StepSecurity, Aikido, Wiz, and JFrog. **Cross-platform npm ecosystem
-  risk** (any OS/lane that installs these versions), not Linux-only.
+  exact-version seed carriers (`keyv@6.0.0` and ten related packages), campaign
+  network/text markers (including Ox Security extortion string, RSA public-key
+  fingerprint, `router_runtime.js`, opensearch-js git pin), and package-lock
+  v2/v3 path/tarball matching. **Ox Security** scale: ~444 packages / 1,600+
+  versions / 2B+ monthly downloads; same credential theft + IDE/AI persistence
+  + dead-man + GitHub exfil; recommended actions: rotate keys+2FA, downgrade
+  packages, search/revoke affected GitHub accounts (under IR order). Credits:
+  **Ox Security** and **Moshe Simon** (@MosheTov; X post → Ox blog), Snyk, StepSecurity, Aikido, Wiz, and JFrog.
+  **Cross-platform npm ecosystem risk** (any OS/lane), not Linux-only; scanners
+  stay read-only.
 - SafeDep procwire / routecraft Windows npm dropper indicators
 - JFrog / The Hacker News PostCSS-lookalike Windows RAT package and payload
   indicators
@@ -115,3 +121,9 @@ More detail: [docs/response-guide.md](docs/response-guide.md).
 ## License
 
 MIT
+
+## Related read-only tooling
+
+Complementary **read-only** tools in the same security kit:
+
+- **actions-warden** (PyPI, Dragon Lady) — read-only auditor for risky or injected GitHub Actions workflow config under `.github/workflows/`. After token theft, CI injection is a common next step. `pipx install actions-warden` then `actions-warden /path/to/repo`. Does not execute workflows or modify files. https://github.com/Dragon-Lady/actions-warden · https://pypi.org/project/actions-warden/
