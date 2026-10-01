@@ -79,10 +79,11 @@ already removed when OX published. Not a credential worm.
 
 ## MemTensor
 
-Aikido, Socket, and SafeDep. Compromised npm `@memtensor/memos-cloud-openclaw-plugin`
-at and after 0.1.21, and PyPI `MemoryOS` at and after 2.0.34. Benign history
-exists, so this is not an all-version pin. The reported behavior runs on
-invocation. Campaign id `cloud-openclaw-semi-nuclear`.
+Aikido, Socket, and SafeDep. Exact malicious npm versions of
+`@memtensor/memos-cloud-openclaw-plugin`: 0.1.21, 0.1.23, and 0.1.25. Exact
+malicious PyPI version of `MemoryOS`: 2.0.34. npm 0.1.22 and 0.1.24 are clean.
+The reported behavior runs on invocation, not install-only. Campaign id
+`cloud-openclaw-semi-nuclear`.
 
 ## DirtyBlanket
 

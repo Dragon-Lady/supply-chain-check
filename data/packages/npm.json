@@ -648,7 +648,8 @@
   ],
   "@memtensor/memos-cloud-openclaw-plugin": [
     "0.1.21",
-    "0.1.23"
+    "0.1.23",
+    "0.1.25"
   ],
   "@mikudeveloper/grace": [
     "*"

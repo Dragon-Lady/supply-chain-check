@@ -32,10 +32,6 @@ const SKIP_DIRS = new Set([".git", ".hg", ".svn", ".next", "dist", "build", "cov
 const LITELLM_AFFECTED_MIN = "1.74.2";
 const LITELLM_FIXED = "1.83.7";
 const LITELLM_93355_MAX = "1.102.1";
-const MEMTENSOR_NPM_PACKAGE = "@memtensor/memos-cloud-openclaw-plugin";
-const MEMTENSOR_NPM_MIN = "0.1.21";
-const MEMORYOS_PYPI_NAME = "memoryos";
-const MEMORYOS_MIN = "2.0.34";
 const STARLETTE_FIXED = "1.0.1";
 const LANGFLOW_UPLOAD_FIXED = "1.9.1";
 const LANGFLOW_WEBHOOK_AFFECTED_MAX = "1.8.4";
@@ -623,14 +619,6 @@ function inspectDependencySpec(filePath, section, name, spec, advisory, findings
     findings.push(finding("critical", "known-bad-requested-version", filePath, withPackageNote(name, `${section}.${name} requests compromised version ${spec}.`)));
   }
 
-  if (name === MEMTENSOR_NPM_PACKAGE) {
-    for (const version of versionsInSpec(spec)) {
-      if (compareDottedVersion(version, MEMTENSOR_NPM_MIN) >= 0 && !versionIsListed(advisory.packages[name], version)) {
-        findings.push(finding("critical", "memtensor-supplychain-local-version", filePath, withTypeNote("memtensor-supplychain-local-version", `${section}.${name} references ${version}, in the reported MemTensor compromised range at and after ${MEMTENSOR_NPM_MIN}.`)));
-      }
-    }
-  }
-
   scanLiteLlmDependencySpec(filePath, section, name, spec, findings);
   scanLangflowDependencySpec(filePath, section, name, spec, findings);
   scanOpenClawDependencySpec(filePath, section, name, spec, findings);
@@ -702,13 +690,6 @@ function scanTextFile(filePath, advisory, findings, trustSignals) {
         findings.push(finding("critical", "known-bad-lockfile-version", filePath, withPackageNote(pkg, `Lockfile references ${pkg}@${version}.`)));
       }
     }
-    if (pkg === MEMTENSOR_NPM_PACKAGE) {
-      for (const version of versionsMentionedNearPackage(text, pkg)) {
-        if (compareDottedVersion(version, MEMTENSOR_NPM_MIN) >= 0 && !versionIsListed(versions, version)) {
-          findings.push(finding("critical", "memtensor-supplychain-local-version", filePath, withTypeNote("memtensor-supplychain-local-version", `Lockfile references ${pkg}@${version}, in the reported MemTensor compromised range at and after ${MEMTENSOR_NPM_MIN}.`)));
-        }
-      }
-    }
   }
 
   for (const namespace of advisory.indicators.activeNamespaces || []) {
@@ -749,13 +730,6 @@ function scanPythonDependencyFile(filePath, advisory, findings) {
     for (const version of versions) {
       if (pythonFileMentionsPackageVersion(text, pkg, version)) {
         findings.push(finding("critical", "known-bad-pypi-version", filePath, withPackageNote(pkg, `Python dependency file references ${pkg}==${version}.`)));
-      }
-    }
-    if (pkg === MEMORYOS_PYPI_NAME) {
-      for (const version of caseInsensitivePackageVersions(text, "MemoryOS")) {
-        if (compareDottedVersion(version, MEMORYOS_MIN) >= 0 && !versionIsListed(versions, version)) {
-          findings.push(finding("critical", "memtensor-supplychain-local-version", filePath, withTypeNote("memtensor-supplychain-local-version", `Python dependency file references MemoryOS ${version}, in the reported MemTensor compromised range at and after ${MEMORYOS_MIN}.`)));
-        }
       }
     }
   }
@@ -1728,27 +1702,6 @@ function packageVersionsInText(text, packageName) {
 
 function versionsInSpec(spec) {
   return Array.from(String(spec).matchAll(/([0-9]+\.[0-9]+\.[0-9]+)/g), (match) => match[1]);
-}
-
-function versionsMentionedNearPackage(text, pkg) {
-  const escapedPkg = escapeRegExp(pkg);
-  const versions = new Set();
-  const patterns = [
-    new RegExp(`${escapedPkg}[^\\n\\r]{0,120}([0-9]+\\.[0-9]+\\.[0-9]+)`, "g"),
-    new RegExp(`node_modules/${escapedPkg}[\\s\\S]{0,240}"version"\\s*:\\s*"([0-9]+\\.[0-9]+\\.[0-9]+)"`, "g")
-  ];
-  for (const pattern of patterns) {
-    for (const match of text.matchAll(pattern)) versions.add(match[1]);
-  }
-  return Array.from(versions);
-}
-
-function caseInsensitivePackageVersions(text, packageName) {
-  const escaped = escapeRegExp(packageName);
-  const versions = new Set();
-  const pattern = new RegExp(`\\b${escaped}\\b\\s*(?:==|===|=|~=|>=|<=|>|<)\\s*["']?([0-9]+\\.[0-9]+\\.[0-9]+)`, "gi");
-  for (const match of text.matchAll(pattern)) versions.add(match[1]);
-  return Array.from(versions);
 }
 
 function isVersionInRange(version, inclusiveMin, exclusiveMax) {

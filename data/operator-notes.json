@@ -1,7 +1,7 @@
 {
   "notes": {
     "phantomsub": "PhantomSub (OX, 2026-09-28): malicious Baileys fork; all observed versions. Remove the package. If a WhatsApp session connected through it, report or block unexpected channels. Do not run it. Not a credential worm. Notify-only.",
-    "memtensor": "MemTensor supplychain.local (Aikido, Socket, SafeDep): compromised at npm @memtensor/memos-cloud-openclaw-plugin >=0.1.21 and PyPI MemoryOS >=2.0.34, including packages with benign history. It runs on invocation. Stop using it. If it ran, treat npm, PyPI, and GitHub tokens and the workstation as exposed and move to host incident response. Notify-only; do not blind-revoke.",
+    "memtensor": "MemTensor supplychain.local (Aikido, Socket, SafeDep): exact npm @memtensor/memos-cloud-openclaw-plugin versions 0.1.21, 0.1.23, and 0.1.25, and exact PyPI MemoryOS 2.0.34. Versions 0.1.22 and 0.1.24 are clean. It runs on invocation, not install-only. Do not load this plugin. If it ran, preserve evidence and treat credentials reachable from the host or CI runner as exposed; rotate them from a clean machine. Notify-only.",
     "dirtyblanket": "DirtyBlanket (SafeDep, 2026-09-29): exact dirtyblanket publishes. If a Linux machine installed one, treat that machine and every SSH key and npm token on it as compromised. Do not run the package. Host incident response, not a dependency bump. Notify-only.",
     "trinitite": "Trinitite (JFrog, XRAY-1065308): malicious @7nohe/openapi-react-query-codegen versions. Last safe lines are 0.5.3, 1.6.2, 2.2.0, and 3.0.2. Isolate. Do not revoke GitHub tokens until the monitor is gone. Pin a last-safe line, then rotate from a clean machine. Valid provenance is not a clean bill. Notify-only.",
     "litellm-93355": "CVE-2026-93355 (OX; Nir Zadok and Moshe Siman Tov Bustan): LiteLLM JWT email-fallback account takeover, including admin. Unpatched through 1.102.1 (OX reported through 1.100.1). No upstream fix confirmed. Require a verified email before the proxy trusts a JWT. LiteLLM 1.83.7 fixes CVE-2026-42271 only. Notify-only."
@@ -124,7 +124,6 @@
   "byType": {
     "phantomsub-indicator": "phantomsub",
     "memtensor-indicator": "memtensor",
-    "memtensor-supplychain-local-version": "memtensor",
     "dirtyblanket-indicator": "dirtyblanket",
     "trinitite-indicator": "trinitite",
     "litellm-cve-2026-93355-unpatched": "litellm-93355"

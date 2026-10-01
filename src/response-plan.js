@@ -178,9 +178,9 @@ function campaignNextSteps(finding) {
   }
   if (/MemTensor|supplychain\.local|memtensor-indicator|memos-cloud-openclaw|MemoryOS/i.test(haystack)) {
     return [
-      "Stop using the MemTensor package. It is reported to run on invocation, not only at install.",
-      "If it ran, treat npm, PyPI, and GitHub tokens and the workstation as exposed and move to host incident response.",
-      "Notify-only: do not blind-revoke credentials from this scanner."
+      "Do not load this plugin. Only npm 0.1.21, 0.1.23, and 0.1.25, and PyPI MemoryOS 2.0.34, are reported malicious. npm 0.1.22 and 0.1.24 are clean.",
+      "If it ran, preserve evidence and treat credentials reachable from the host or CI runner as exposed. Rotate them from a clean machine and move to host incident response.",
+      "Notify-only: this tool does not uninstall the package or revoke credentials."
     ];
   }
   if (/DirtyBlanket|dirtyblanket-indicator|systemd-fontrenderd|systemd-fontcached/i.test(haystack)) {

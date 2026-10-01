@@ -1229,13 +1229,13 @@ try {
     JSON.stringify({
       dependencies: {
         "ourin-baileys": "1.2.3",
-        "@memtensor/memos-cloud-openclaw-plugin": "0.1.24",
+        "@memtensor/memos-cloud-openclaw-plugin": "0.1.25",
         xeprews: "5.2.1",
         "@7nohe/openapi-react-query-codegen": "1.6.3"
       }
     }, null, 2)
   );
-  write(path.join(octoberCampaignRoot, "requirements.txt"), "MemoryOS==2.0.40\nlitellm==1.102.1\n");
+  write(path.join(octoberCampaignRoot, "requirements.txt"), "MemoryOS==2.0.34\nlitellm==1.102.1\n");
   write(
     path.join(octoberCampaignRoot, "notes.js"),
     [
@@ -1249,8 +1249,10 @@ try {
   assert.strictEqual(report.risk, "likely-exposed");
   const messages = report.findings.map((finding) => `${finding.type} ${finding.message}`).join("\n");
   assert(messages.includes("PhantomSub"), messages);
-  assert(messages.includes("memtensor-supplychain-local-version") && messages.includes("0.1.24"));
-  assert(messages.includes("MemoryOS 2.0.40"));
+  assert(messages.includes("known-bad-requested-version") && messages.includes("0.1.25"));
+  assert(messages.includes("0.1.21, 0.1.23, and 0.1.25"));
+  assert(report.findings.some((finding) => finding.type === "known-bad-pypi-version" && finding.message.includes("2.0.34")));
+  assert(!messages.includes("memtensor-supplychain-local-version"));
   assert(messages.includes("DirtyBlanket"));
   assert(messages.includes("Trinitite"));
   assert(report.findings.some((finding) => finding.type === "litellm-cve-2026-93355-unpatched"));
@@ -1261,6 +1263,23 @@ try {
   assert(report.findings.some((finding) => finding.type === "trinitite-indicator"));
 } finally {
   fs.rmSync(octoberCampaignRoot, { recursive: true, force: true });
+}
+
+const memtensorCleanRoot = makeFixture("scc-memtensor-clean-");
+try {
+  write(
+    path.join(memtensorCleanRoot, "package.json"),
+    JSON.stringify({
+      dependencies: {
+        "@memtensor/memos-cloud-openclaw-plugin": "0.1.24"
+      }
+    }, null, 2)
+  );
+  write(path.join(memtensorCleanRoot, "requirements.txt"), "MemoryOS==2.0.33\nMemoryOS==2.0.40\n");
+  const report = scanTarget(memtensorCleanRoot);
+  assert(!report.findings.some((finding) => /memtensor|memoryos/i.test(`${finding.type} ${finding.message}`)));
+} finally {
+  fs.rmSync(memtensorCleanRoot, { recursive: true, force: true });
 }
 
 const litellmFixed42271Root = makeFixture("scc-litellm-93355-only-");
