@@ -110,6 +110,19 @@ added. Require a verified email before the proxy trusts a JWT.
 This project intentionally avoids exploit reproduction steps, malware execution
 guidance, cleanup automation, token handling, and secret disclosure.
 
+## GlassWorm editor extension cluster (October 2026)
+
+Socket's October 2 investigation distinguishes confirmed malicious distributed
+builds from cluster-linked identities whose analyzed versions were not all
+weaponized. `microsoftvs.microsoftvs` and the Visual Studio Marketplace build
+of `cosmic-themes.theme-cosmic-nebula` were confirmed malicious;
+`cosmic-themes.sql-formatter` was identified in earlier GlassWorm Open VSX
+research. The five other exact IDs in this scanner are association signals for
+review, not proof of malware. Check the installed VSIX and source registry;
+repository source alone may differ from the distributed artifact.
+
+- https://www.socket.dev/blog/glassworm-vscode-themes
+
 ## August 2026 keyv / cacheable (ChainDrop)
 
 Cross-platform npm ecosystem compromise (not Linux-only). Applies to any
@@ -130,4 +143,3 @@ the scanned tree on the operator's platform.
 - JFrog Shai-Hulud August 2026 (keyv and 400+ packages): https://research.jfrog.com/post/shai-hulud-is-back-august/
 - StepSecurity ChainDrop npm worm analysis: https://www.stepsecurity.io/blog/chaindrop-npm-worm
 - actions-warden (Dragon Lady PyPI read-only GitHub Actions workflow auditor): https://github.com/Dragon-Lady/actions-warden · https://pypi.org/project/actions-warden/
-

@@ -161,6 +161,27 @@ try {
   fs.rmSync(extensionPermissionDriftRoot, { recursive: true, force: true });
 }
 
+const glassWormRoot = makeFixture("scc-glassworm-");
+try {
+  write(path.join(glassWormRoot, "installed", "package.json"), JSON.stringify({
+    publisher: "cosmic-themes", name: "theme-cosmic-nebula", version: "1.0.0"
+  }));
+  write(path.join(glassWormRoot, "linked", "package.json"), JSON.stringify({
+    publisher: "holiday-themes", name: "theme-coca-cola-christmas", version: "1.0.2"
+  }));
+  write(path.join(glassWormRoot, "lookalike", "package.json"), JSON.stringify({
+    publisher: "holiday-themes", name: "theme-coca-cola-christmas-safe", version: "1.0.2"
+  }));
+  write(path.join(glassWormRoot, "microsoftvs.microsoftvs-1.0.0.vsix"), "test archive placeholder");
+  const report = scanTarget(glassWormRoot);
+  assert(report.findings.some((item) => item.type === "glassworm-confirmed-build-identity-review" && item.path.includes("installed")));
+  assert(report.findings.some((item) => item.type === "glassworm-cluster-identity-review" && item.path.includes("linked")));
+  assert(report.findings.some((item) => item.type === "glassworm-confirmed-build-identity-review" && item.path.endsWith(".vsix")));
+  assert(!report.findings.some((item) => item.type.startsWith("glassworm-") && item.path.includes("lookalike")));
+} finally {
+  fs.rmSync(glassWormRoot, { recursive: true, force: true });
+}
+
 const adblockYoutubeRoot = makeFixture("scc-adblock-youtube-");
 try {
   write(

@@ -45,6 +45,11 @@ const RULE_REFERENCES = [
     sourceHint: "docs/sources.md#jetbrains"
   },
   {
+    pattern: /glassworm-/i,
+    label: "Socket GlassWorm editor extension investigation",
+    sourceHint: "docs/sources.md#glassworm-editor-extension-cluster-october-2026"
+  },
+  {
     pattern: /glasswasm|openvsx|vsix|tinygo/i,
     label: "Socket GlassWASM / Open VSX report",
     sourceHint: "docs/sources.md#glasswasm"
@@ -169,6 +174,20 @@ function nextStepsForFinding(finding) {
 
 function campaignNextSteps(finding) {
   const haystack = `${finding.type || ""}\n${finding.message || ""}`;
+  if (finding.type === "glassworm-confirmed-build-identity-review") {
+    return [
+      "Record the extension registry, exact version, and installed artifact hash. Socket confirmed malicious builds under this identity, not every possible copy or future version.",
+      "Do not activate the extension while reviewing it. If a reported malicious build ran, preserve editor-host and network evidence and review credentials reachable from that host.",
+      "Follow incident-response order before removal or credential rotation; this scanner changes nothing."
+    ];
+  }
+  if (finding.type === "glassworm-cluster-identity-review") {
+    return [
+      "Check the extension registry, version, and distributed VSIX contents against Socket's report.",
+      "This is a cluster association, not proof that this extension version carried malware.",
+      "Review executable entrypoints and update history before deciding whether to disable or remove it."
+    ];
+  }
   if (/PhantomSub|phantomsub-indicator/i.test(haystack)) {
     return [
       "Remove the PhantomSub package. Do not run it.",

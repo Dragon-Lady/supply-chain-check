@@ -94,6 +94,22 @@ const GLASSWASM_TEXT_INDICATORS = [
   "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFM"
 ];
 
+// Socket confirmed malicious Marketplace builds under the first two identities
+// and an earlier malicious Open VSX build under the third. An identity match
+// alone does not establish which registry or version supplied an installed file.
+const GLASSWORM_CONFIRMED_EXTENSION_IDS = new Set([
+  "microsoftvs.microsoftvs",
+  "cosmic-themes.theme-cosmic-nebula",
+  "cosmic-themes.sql-formatter"
+]);
+const GLASSWORM_CLUSTER_EXTENSION_IDS = new Set([
+  "holiday-themes.theme-coca-cola-christmas",
+  "lohsebhipolg2s.theme-aurora-borealis",
+  "aurora-them-creator.theme-aurora-nocturne",
+  "solidity-syntax.deep-focus",
+  "charcoal-mint-studio.theme-charcoal-mint"
+]);
+
 const JETBRAINS_AI_KEY_PLUGIN_IDS = [
   "org.sm.yms.toolkit",
   "com.json.simple.kit",
@@ -479,6 +495,7 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
   scanMiasmaText(filePath, rawText, findings, "Manifest");
   scanHadesText(filePath, rawText, findings, "Manifest");
   scanGlassWasmText(filePath, rawText, findings, "Manifest");
+  scanGlassWormExtensionManifest(filePath, manifest, findings);
   scanExtensionCommerceSdkText(filePath, rawText, findings, "Manifest");
   scanOpenClawText(filePath, rawText, findings, "Manifest");
   scanNpmV12Manifest(filePath, rawText, manifest, findings, trustSignals);
@@ -814,10 +831,33 @@ function scanVsixFile(filePath, findings) {
     findings.push(finding("critical", "glasswasm-openvsx-vsix-file", filePath, `Known GlassWASM Open VSX trojanized VSIX filename is present: ${base}`));
   }
 
+  const extensionId = base.replace(/-\d[^/]*\.vsix$/i, "").toLowerCase();
+  scanGlassWormExtensionId(filePath, extensionId, findings, "VSIX filename");
+
   const hash = hashFileSha256(filePath);
+  if (hash === "a276b76d3b00f302bb4dfb3690125c85ff472b16049c3c37476ac5e51096df07") {
+    findings.push(finding("critical", "glassworm-confirmed-malicious-vsix-hash", filePath,
+      "VSIX SHA-256 matches Socket's confirmed malicious Aurora Nocturne Marketplace build."));
+  }
   if (hash === "3aa31999398e7f80231c03d7137ffdb554a84b83dbcffc59ce16c9a65f9e5d58"
     || hash === "1e283327ad048bea39f4a8501770858a20f3555e87fe3e202274f2e87f8a3c25") {
     findings.push(finding("critical", "glasswasm-openvsx-vsix-hash", filePath, `VSIX file matches Socket GlassWASM affected package SHA-256 ${hash}.`));
+  }
+}
+
+function scanGlassWormExtensionManifest(filePath, manifest, findings) {
+  if (!manifest || typeof manifest.publisher !== "string" || typeof manifest.name !== "string") return;
+  const extensionId = `${manifest.publisher}.${manifest.name}`.toLowerCase();
+  scanGlassWormExtensionId(filePath, extensionId, findings, "Extension manifest");
+}
+
+function scanGlassWormExtensionId(filePath, extensionId, findings, sourceLabel) {
+  if (GLASSWORM_CONFIRMED_EXTENSION_IDS.has(extensionId)) {
+    findings.push(finding("high", "glassworm-confirmed-build-identity-review", filePath,
+      `${sourceLabel} names ${extensionId}; Socket confirmed a malicious distributed build under this identity. Verify registry, version, and installed artifact before classifying this copy.`));
+  } else if (GLASSWORM_CLUSTER_EXTENSION_IDS.has(extensionId)) {
+    findings.push(finding("medium", "glassworm-cluster-identity-review", filePath,
+      `${sourceLabel} names ${extensionId}; Socket linked this identity to the GlassWorm theme cluster but did not establish that every version is malicious.`));
   }
 }
 

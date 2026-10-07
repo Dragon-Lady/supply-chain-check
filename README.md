@@ -52,8 +52,10 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   exact-version seed carriers (`keyv@6.0.0` and ten related packages), campaign
   network/text markers (including Ox Security extortion string, RSA public-key
   fingerprint, `router_runtime.js`, opensearch-js git pin), and package-lock
-  v2/v3 path/tarball matching. **Ox Security** scale: ~444 packages / 1,600+
-  versions / 2B+ monthly downloads; same credential theft + IDE/AI persistence
+  v2/v3 path/tarball matching. Ox Security's August 4 report gave an early
+  estimate of ~444 packages / 1,600+ versions / 2B+ monthly downloads; this
+  scanner covers the named seed carriers, not the full later inventory.
+  The campaign involved credential theft + IDE/AI persistence
   + dead-man + GitHub exfil; recommended actions: rotate keys+2FA, downgrade
   packages, search/revoke affected GitHub accounts (under IR order). Credits:
   **Ox Security** and **Moshe Simon** (@MosheTov; X post → Ox blog), Snyk, StepSecurity, Aikido, Wiz, and JFrog.
@@ -75,6 +77,10 @@ Coverage includes current supply-chain and developer-tooling indicators from:
   and broad v3 Composer constraints requiring lockfile verification
 - Solana FakeFix / CMS loader packages and wallet/key exfil strings
 - GlassWASM Open VSX extension indicators
+- Socket's October GlassWorm editor-extension report: exact identities for
+  confirmed malicious distributed builds trigger artifact/source review;
+  related theme-cluster identities remain review-only because not every version
+  was weaponized
 - JetBrains Marketplace AI-key stealer plugin IDs, endpoint, static auth token,
   and save/apply exfiltration indicators
 - Supply Chain Attack catalog npm malware packages, including `free-claude`,
