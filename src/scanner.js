@@ -1,4 +1,5 @@
 const fs = require("fs");
+const tensorlake = require("./tensorlake");
 const path = require("path");
 const crypto = require("crypto");
 
@@ -287,6 +288,7 @@ function scanTarget(targetPath, options = {}) {
   walk(root, (filePath, dirent) => {
     seen.files += 1;
     const base = dirent.name;
+    findings.push(...tensorlake.inspectFile(filePath));
 
     scanMiasmaPath(filePath, findings);
     scanHadesPath(filePath, findings);
@@ -423,6 +425,8 @@ function scanTarget(targetPath, options = {}) {
     },
     trustSignals: dedupedTrustSignals,
     findings: dedupedFindings,
+    safeRemovalGuidance: tensorlake.safeRemovalGuidance(dedupedFindings),
+    tensorlakeCoverage: { candidateReadsComplete: !dedupedFindings.some(f => f.type === "tensorlake-coverage-incomplete"), scope: "Visited Tensorlake metadata and named payload candidates only; this field does not assess discovery completeness" },
     guidance: guidanceForRisk(risk)
   };
 }
@@ -486,6 +490,7 @@ function scanPackageJson(filePath, advisory, findings, trustSignals) {
   try {
     rawText = fs.readFileSync(filePath, "utf8");
     manifest = JSON.parse(rawText);
+    if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("Invalid package metadata");
   } catch (error) {
     findings.push(finding("low", "parse-error", filePath, `Could not parse package.json: ${error.message}`));
     return;

@@ -143,3 +143,10 @@ the scanned tree on the operator's platform.
 - JFrog Shai-Hulud August 2026 (keyv and 400+ packages): https://research.jfrog.com/post/shai-hulud-is-back-august/
 - StepSecurity ChainDrop npm worm analysis: https://www.stepsecurity.io/blog/chaindrop-npm-worm
 - actions-warden (Dragon Lady PyPI read-only GitHub Actions workflow auditor): https://github.com/Dragon-Lady/actions-warden · https://pypi.org/project/actions-warden/
+
+## Tensorlake, checked 2026-10-08
+
+- Discovery: https://x.com/MosheTov/status/2108048212724425206
+- Technical analysis: https://www.stepsecurity.io/blog/tensorlake-npm-compromised-hostage-token-worm
+- Source revision: https://github.com/tensorlakeai/tensorlake/tree/6386121c561e74fec143a138d5cc3d3bbabdfe8c/typescript
+- Upstream report (not a maintainer confirmation): https://github.com/tensorlakeai/tensorlake/issues/1014

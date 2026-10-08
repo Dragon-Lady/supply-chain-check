@@ -45,7 +45,9 @@ function main(argv) {
     }
   }
 
-  return report.risk === "likely-exposed" ? 2 : 0;
+  if (report.safeRemovalGuidance.sequenceSensitive) return 4;
+  if (report.risk === "likely-exposed") return 2;
+  return report.tensorlakeCoverage.candidateReadsComplete ? 0 : 3;
 }
 
 function parseArgs(argv) {
@@ -99,6 +101,8 @@ Options:
 Exit codes:
   0  no known critical indicators found
   2  likely exposure indicators found
+  3  incomplete Tensorlake candidate inspection
+  4  sequence-sensitive token-monitor artifact; follow STOP guidance
 `);
 }
 
@@ -110,6 +114,7 @@ function printHuman(report, writtenReportPath) {
   console.log(`Findings: ${report.summary.findings}`);
   console.log("");
 
+  if (report.safeRemovalGuidance?.required) console.log(report.safeRemovalGuidance.firstAction + "\n");
   printPlainLanguageSummary(report);
 
   if (report.findings.length > 0) {

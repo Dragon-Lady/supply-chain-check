@@ -157,3 +157,62 @@ Security. Primary Ox writeup:
 https://www.ox.security/blog/a-new-infostealer-worm-hits-npm-affecting-keyv-and-cacheable/
 
 Also check **actions-warden** (PyPI read-only auditor for risky or injected GitHub Actions workflow config) when reviewing repos that may have had tokens stolen or CI tampered with: `actions-warden /path/to/repo`. https://github.com/Dragon-Lady/actions-warden · https://pypi.org/project/actions-warden/. Read-only only.
+
+
+## Tensorlake response update — 2026-10-08
+
+The default scan now recognizes exact `tensorlake@0.5.144` references in npm
+manifests, installed package metadata, npm lockfiles/shrinkwrap, Yarn and pnpm
+lockfiles. Unresolved ranges are not reported as confirmed affected versions;
+inspect a resolved lockfile or installed manifest. Similar names, scoped
+lookalikes and adjacent versions do not match this rule.
+
+The scanner also hashes `setup.mjs` and `Math_Symbol.js` candidates. An exact
+SHA-256 match establishes identical bytes, not execution. A filename with a
+different hash produces a review finding, not confirmed payload evidence.
+Local token-monitor filenames receive sequence-sensitive guidance and exit
+code **4**, which takes priority over exposure exit **2**. A package match
+alone never establishes an installed or armed dead-man switch.
+
+If affected code may have run, preserve evidence and involve incident response
+to assess and safely disarm token-monitor persistence **before revoking
+credentials from any device**. Rotate exposed credentials afterward from a
+clean device. The scanner never runs samples, probes token validity, stops
+services, removes files or revokes credentials. Do not try to test a suspected
+switch by invalidating a token.
+
+### Evidence and limits
+
+- [Moshe Siman Tov Bustan's discovery post](https://x.com/MosheTov/status/2108048212724425206) identifies the package and
+  payload filenames; its attached image shows public-repository creation code.
+- [StepSecurity's technical analysis](https://www.stepsecurity.io/blog/tensorlake-npm-compromised-hostage-token-worm) reports credential theft,
+  propagation, editor persistence and a token-revocation-triggered destructive
+  monitor. Behavior and activation paths are attributed to that research;
+  these passive scanners do not establish whether a host's monitor is armed.
+- Both inert source files at [the reported upstream revision](https://github.com/tensorlakeai/tensorlake/tree/6386121c561e74fec143a138d5cc3d3bbabdfe8c/typescript) were
+  independently hashed and matched the research. No payload was executed.
+  `setup.mjs`: `25a0735d0db7dc40e5d45ce42d9c106067e6a66e184d967cfecfab17c3bcb5ef`.
+  `Math_Symbol.js`: `b50a00900399ba99fb6ce1fc151519cb99d44320ef2a631f2237e1aea0ad6fec`.
+- A public npm metadata check on 2026-10-08 returned 404 for `0.5.144`; the
+  package document listed `0.5.143` as latest and omitted `0.5.144` from its
+  versions. Removal does not undo an earlier installation. Registry state can
+  change; the scanner itself makes no registry requests.
+- This rule bounds each candidate read to 2 MiB and reports unreadable,
+  changed, oversized or invalid candidates as `tensorlake-coverage-incomplete`.
+  Existing traversal exclusions still apply. It does not unpack archives,
+  interpret obfuscated code, inspect Windows scheduled-task state or verify
+  live services. A negative result is not a host all-clear.
+- Signed provenance establishes build origin, not harmlessness. Researcher
+  citations acknowledge sources; they do not imply endorsement or partnership.
+
+### Reproduce without malware
+
+Run `npm test` from this trusted scanner checkout. `test/tensorlake.js` uses
+inert fixtures to check exact/adjacent versions, lockfile aliases, benign
+filenames, monitor warning priority, text/JSON exit codes, secret-canary
+non-disclosure, incomplete reads and passive scanning. Digest-branch unit
+tests substitute a digest for harmless text; they contain no malware. A
+separate private verification read the two independently hashed source files
+as data and confirmed detection without execution, network calls or changes
+to fixture bytes, size, inode, mode or modification time. Those payload files
+are not distributed with this tool.

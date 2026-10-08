@@ -1,5 +1,10 @@
 # supply-chain-check
 
+October 8 update: exact Tensorlake 0.5.144 package/payload checks and ordered
+token-monitor warnings are in the default scan. See the
+[dated evidence, limitations and inert test instructions](docs/advisory.md#tensorlake-response-update--2026-10-08).
+
+
 `--report` creates a new private file (0600 on POSIX). Existing destinations,
 including symlink, hard-link, and parent-directory aliases of scanned files,
 are refused. Choose a new report filename for each run; its parent must exist.

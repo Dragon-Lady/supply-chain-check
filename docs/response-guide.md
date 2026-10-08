@@ -37,3 +37,14 @@ devcontainer may have run.
 
 If evidence shows payload execution or credential access, stop treating the
 case as dependency review and follow your incident-response playbook.
+
+## Tensorlake response order (2026-10-08)
+
+For exact Tensorlake 0.5.144 or matching payload evidence, establish whether
+execution occurred. If it may have, preserve evidence and ask incident
+responders to assess and safely disarm token-monitor persistence before
+revoking credentials from any device. A clean device alone does not prevent
+remote revocation from being noticed by a running monitor. Rotate afterward
+from a clean device. Do not test token revocation or run downloaded samples.
+A candidate monitor pathname is not proof of an armed switch. The scanner
+only reports evidence and guidance; see [the dated advisory](advisory.md#tensorlake-response-update--2026-10-08).

@@ -104,7 +104,7 @@ function buildResponsePlan(report) {
     mode: "information-only",
     title: "Supply-chain response plan",
     boundary: "This tool reports matched indicators and next references only; it does not clean, uninstall, revoke, rotate, delete, quarantine, or change files.",
-    summary: summaryForReport(report, findings),
+    summary: [...(report.safeRemovalGuidance?.required ? [report.safeRemovalGuidance.firstAction] : []), ...summaryForReport(report, findings)],
     items,
     references: DEFAULT_REFERENCES
   };
@@ -174,6 +174,7 @@ function nextStepsForFinding(finding) {
 
 function campaignNextSteps(finding) {
   const haystack = `${finding.type || ""}\n${finding.message || ""}`;
+  if (/^tensorlake-|^token-monitor-artifact$/.test(finding.type || "")) return [finding.message, "Source: https://www.stepsecurity.io/blog/tensorlake-npm-compromised-hostage-token-worm"];
   if (finding.type === "glassworm-confirmed-build-identity-review") {
     return [
       "Record the extension registry, exact version, and installed artifact hash. Socket confirmed malicious builds under this identity, not every possible copy or future version.",
