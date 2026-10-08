@@ -60,6 +60,15 @@ the project itself but always scanned inside installed dependencies, including
 when the scan target is itself inside `node_modules` (for example
 `node_modules/<pkg>`).
 
+Known gap: an extracted npm package scanned outside `node_modules` (for
+example the `package/` folder from `npm pack` or a downloaded tarball) looks
+like a project root, so its build-output folders (`dist`, `build`,
+`coverage` and `.next`) are still skipped. The complete workaround is to
+place the package under a `node_modules/` folder before scanning (for
+example `node_modules/<pkg>`). Scanning `package/dist` directly is only a
+partial workaround: build-output folders nested inside it (such as
+`package/dist/build`) are still skipped.
+
 ## What It Catches
 
 Coverage includes current supply-chain and developer-tooling indicators from:

@@ -28,3 +28,14 @@ Not yet released. No release date is set.
   to one) now also walks its `dist/` and `build/` folders.
 - A directory that could not be listed used to be skipped silently. It is
   now reported and marks the scan incomplete.
+
+## Known gap
+
+- An extracted npm package scanned outside `node_modules` (for example the
+  `package/` folder from `npm pack` or a downloaded tarball) cannot be told
+  apart from a project root, so its build-output folders (`dist`, `build`,
+  `coverage` and `.next`) are still skipped.
+- The complete workaround is to place the package under a `node_modules/`
+  folder before scanning. Scanning `package/dist` directly is only partial:
+  build-output folders nested inside it (such as `package/dist/build`) are
+  still skipped.
