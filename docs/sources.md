@@ -148,5 +148,9 @@ the scanned tree on the operator's platform.
 
 - Discovery: https://x.com/MosheTov/status/2108048212724425206
 - Technical analysis: https://www.stepsecurity.io/blog/tensorlake-npm-compromised-hostage-token-worm
+- Independent package analysis and host cleanup order: https://socket.dev/blog/tensorlake-compromise
+- Browser store collection, HackBrowserData, and contract resolver analysis: https://www.aikido.dev/blog/tensorlake-npm-package-compromised
+- News coverage and public warning: https://thehackernews.com/2026/10/tensorlake-npm-package-compromised-to.html
+- The Hacker News X post and illustration: https://x.com/TheHackersNews/status/2108074255011455084
 - Source revision: https://github.com/tensorlakeai/tensorlake/tree/6386121c561e74fec143a138d5cc3d3bbabdfe8c/typescript
 - Upstream report (not a maintainer confirmation): https://github.com/tensorlakeai/tensorlake/issues/1014

@@ -204,6 +204,10 @@ switch by invalidating a token.
   live services. A negative result is not a host all-clear.
 - Signed provenance establishes build origin, not harmlessness. Researcher
   citations acknowledge sources; they do not imply endorsement or partnership.
+- [Socket Research's package analysis](https://socket.dev/blog/tensorlake-compromise) independently reports the install-time loader, broad credential collection, Ethereum-based endpoint resolution, persistence that can outlive package removal, and the sequence-sensitive token monitor. Its approximate weekly download figure is overall package usage, not confirmed malicious-version installs.
+- [Aikido's analysis](https://www.aikido.dev/blog/tensorlake-npm-package-compromised) identifies browser extension stores and a retrieved HackBrowserData binary as additional collection targets, plus a contract-based alternate endpoint. Aikido reports no evidence at publication that Tensorlake's separate PyPI or Cargo packages were poisoned; this update makes no claim that those ecosystems are safe indefinitely.
+- [The Hacker News article](https://thehackernews.com/2026/10/tensorlake-npm-package-compromised-to.html) and [X post](https://x.com/TheHackersNews/status/2108074255011455084) broadened the public warning. Their shorthand to remove the package and rotate credentials omits the monitor ordering: on a host where it may have run, preserve evidence, isolate, assess and safely disarm the monitor before any GitHub token revocation from any device. Removing the dependency alone does not remove host or repository persistence.
+- These follow-up reports expand response context, not the scanner's detector claims. The tool still checks the exact npm version, the two byte-exact payload hashes, and supported local persistence candidates. It does not inspect browser stores, query Ethereum, determine whether an implant ran, or assert that any particular credential was stolen.
 
 ### Reproduce without malware
 

@@ -1,6 +1,6 @@
 {
   "name": "supply-chain-check",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Read-only dependency and source risk checker for pre-execution supply-chain review.",
   "license": "MIT",
   "type": "commonjs",
