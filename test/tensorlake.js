@@ -97,6 +97,13 @@ test("monitor text inside documentation is not an installed monitor", () => fixt
   assert.strictEqual(report.safeRemovalGuidance.sequenceSensitive, false);
 }));
 
+test("object prototype names are not payload names", () => fixture((_root, home) => {
+  for (const base of ["constructor", "toString", "__proto__"]) {
+    const file = path.join(home, base); write(file, "ordinary text");
+    assert.deepStrictEqual(check.inspectFile(file), []);
+  }
+}));
+
 test("benign candidate filename is review only", () => fixture((_root, home) => {
   const file = path.join(home, "setup.mjs"); write(file, "// inert harmless setup\n");
   const findings = check.inspectFile(file);

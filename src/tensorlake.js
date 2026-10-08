@@ -8,6 +8,7 @@ const MAX_BYTES = 2 * 1024 * 1024;
 const MONITOR = ["gh-token", "monitor"].join("-");
 const MONITOR_FILES = new Set([`${MONITOR}.service`, `${MONITOR}.sh`, `com.user.${MONITOR}.plist`]);
 const HASHES = {
+  __proto__: null,
   "setup.mjs": "25a0735d0db7dc40e5d45ce42d9c106067e6a66e184d967cfecfab17c3bcb5ef",
   "Math_Symbol.js": "b50a00900399ba99fb6ce1fc151519cb99d44320ef2a631f2237e1aea0ad6fec"
 };
@@ -40,6 +41,7 @@ function exactVersionInMetadata(text, base) {
         if (value.dependencies) pending.push(value.dependencies);
       }
     }
+    if (pending.length) throw Error("metadata traversal limit");
     return false;
   }
   if (base === "pnpm-lock.yaml") {
