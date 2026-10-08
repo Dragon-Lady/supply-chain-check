@@ -284,6 +284,7 @@ function scanTarget(targetPath, options = {}) {
   const findings = [];
   const trustSignals = [];
   const seen = { files: 0, manifests: 0, lockfiles: 0 };
+  let unlistableDirectories = 0;
 
   walk(root, (filePath, dirent) => {
     seen.files += 1;
@@ -407,6 +408,7 @@ function scanTarget(targetPath, options = {}) {
       scanJavaScriptSourceFile(filePath, advisory, findings);
     }
   }, (dirPath, error) => {
+    unlistableDirectories += 1;
     findings.push(finding("low", "read-error", dirPath, `Could not list directory; its contents were not scanned: ${error.code || error.message}`));
   });
 
@@ -428,6 +430,7 @@ function scanTarget(targetPath, options = {}) {
     trustSignals: dedupedTrustSignals,
     findings: dedupedFindings,
     safeRemovalGuidance: tensorlake.safeRemovalGuidance(dedupedFindings),
+    coverage: { complete: unlistableDirectories === 0, unlistableDirectories },
     tensorlakeCoverage: { candidateReadsComplete: !dedupedFindings.some(f => f.type === "tensorlake-coverage-incomplete"), scope: "Visited Tensorlake metadata and named payload candidates only; this field does not assess discovery completeness" },
     guidance: guidanceForRisk(risk)
   };
@@ -435,6 +438,17 @@ function scanTarget(targetPath, options = {}) {
 
 function isInsideNodeModules(fullPath, root) {
   return path.relative(root, fullPath).split(path.sep).includes("node_modules");
+}
+
+// The scan root itself may be an installed package (node_modules/<pkg>),
+// given either directly or through a symlink.
+function rootIsInsideNodeModules(root) {
+  if (path.resolve(root).split(path.sep).includes("node_modules")) return true;
+  try {
+    return fs.realpathSync(root).split(path.sep).includes("node_modules");
+  } catch (_error) {
+    return false;
+  }
 }
 
 // Build-output directories are skipped in the project itself, but never inside
@@ -452,6 +466,7 @@ function walk(root, onFile, onUnreadableDirectory) {
     return;
   }
 
+  const keepBuildDirs = rootIsInsideNodeModules(root);
   const stack = [root];
   while (stack.length > 0) {
     const current = stack.pop();
@@ -466,7 +481,7 @@ function walk(root, onFile, onUnreadableDirectory) {
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name);
       if (entry.isDirectory()) {
-        if (SKIP_DIRS.has(entry.name) && !isInsideNodeModules(fullPath, root)) continue;
+        if (SKIP_DIRS.has(entry.name) && !keepBuildDirs && !isInsideNodeModules(fullPath, root)) continue;
         stack.push(fullPath);
       } else if (entry.isFile()) {
         onFile(fullPath, entry);

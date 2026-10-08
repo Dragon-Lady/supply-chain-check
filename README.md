@@ -44,9 +44,21 @@ node ./bin/supply-chain-check.js /path/to/project --json --response-plan --repor
 
 Exit codes:
 
-- `0`: no likely exposure found
+- `0`: no likely exposure found and the scan was complete
 - `1`: scanner/runtime error
 - `2`: likely exposure indicators found
+- `3`: scan incomplete: a directory could not be listed (reported as a low
+  `read-error` finding; `coverage.complete` is false in the JSON report), or
+  Tensorlake candidate inspection was incomplete. Review the reported paths.
+- `4`: sequence-sensitive token-monitor artifact found; follow the STOP
+  guidance before revoking tokens or removing anything
+
+Precedence when several apply: `4` > `2` > `3` > `0`.
+
+Build-output folders (`dist`, `build`, `coverage`, `.next`) are skipped in
+the project itself but always scanned inside installed dependencies, including
+when the scan target is itself inside `node_modules` (for example
+`node_modules/<pkg>`).
 
 ## What It Catches
 

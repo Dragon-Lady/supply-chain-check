@@ -47,7 +47,9 @@ function main(argv) {
 
   if (report.safeRemovalGuidance.sequenceSensitive) return 4;
   if (report.risk === "likely-exposed") return 2;
-  return report.tensorlakeCoverage.candidateReadsComplete ? 0 : 3;
+  if (!report.tensorlakeCoverage.candidateReadsComplete) return 3;
+  if (report.coverage && !report.coverage.complete) return 3;
+  return 0;
 }
 
 function parseArgs(argv) {
@@ -101,7 +103,8 @@ Options:
 Exit codes:
   0  no known critical indicators found
   2  likely exposure indicators found
-  3  incomplete Tensorlake candidate inspection
+  3  scan incomplete: a directory could not be listed, or Tensorlake
+     candidate inspection was incomplete; review the reported paths
   4  sequence-sensitive token-monitor artifact; follow STOP guidance
 `);
 }
@@ -112,6 +115,10 @@ function printHuman(report, writtenReportPath) {
   console.log(`Risk: ${report.risk}`);
   console.log(`Scanned: ${report.summary.filesScanned} files, ${report.summary.packageManifestsScanned} package manifests, ${report.summary.lockfilesScanned} lockfiles`);
   console.log(`Findings: ${report.summary.findings}`);
+  if (report.coverage && !report.coverage.complete) {
+    const n = report.coverage.unlistableDirectories;
+    console.log(`Coverage: INCOMPLETE - ${n} director${n === 1 ? "y" : "ies"} could not be listed (see read-error findings)`);
+  }
   console.log("");
 
   if (report.safeRemovalGuidance?.required) console.log(report.safeRemovalGuidance.firstAction + "\n");
