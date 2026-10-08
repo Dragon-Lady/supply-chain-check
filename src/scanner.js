@@ -406,6 +406,8 @@ function scanTarget(targetPath, options = {}) {
     if (isJavaScriptSourceFile(filePath)) {
       scanJavaScriptSourceFile(filePath, advisory, findings);
     }
+  }, (dirPath, error) => {
+    findings.push(finding("low", "read-error", dirPath, `Could not list directory; its contents were not scanned: ${error.code || error.message}`));
   });
 
   const dedupedFindings = dedupeFindings(findings);
@@ -431,7 +433,13 @@ function scanTarget(targetPath, options = {}) {
   };
 }
 
-function walk(root, onFile) {
+function isInsideNodeModules(fullPath, root) {
+  return path.relative(root, fullPath).split(path.sep).includes("node_modules");
+}
+
+// Build-output directories are skipped in the project itself, but never inside
+// installed dependencies: compromised packages commonly ship payloads in dist/.
+function walk(root, onFile, onUnreadableDirectory) {
   let rootStat;
   try {
     rootStat = fs.statSync(root);
@@ -451,13 +459,14 @@ function walk(root, onFile) {
     try {
       entries = fs.readdirSync(current, { withFileTypes: true });
     } catch (error) {
+      if (onUnreadableDirectory) onUnreadableDirectory(current, error);
       continue;
     }
 
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name);
       if (entry.isDirectory()) {
-        if (SKIP_DIRS.has(entry.name)) continue;
+        if (SKIP_DIRS.has(entry.name) && !isInsideNodeModules(fullPath, root)) continue;
         stack.push(fullPath);
       } else if (entry.isFile()) {
         onFile(fullPath, entry);
