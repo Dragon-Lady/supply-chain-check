@@ -1,5 +1,9 @@
 # supply-chain-check
 
+`--report` creates a new private file (0600 on POSIX). Existing destinations,
+including symlink, hard-link, and parent-directory aliases of scanned files,
+are refused. Choose a new report filename for each run; its parent must exist.
+
 Read-only supply-chain scanner for checking a project before you run installs,
 builds, tests, dev servers, editor tasks, or agent tooling.
 

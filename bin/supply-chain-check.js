@@ -4,6 +4,20 @@ const path = require("path");
 const { scanTarget } = require("../src/scanner");
 const { buildResponsePlan } = require("../src/response-plan");
 
+function writeNewReport(destination, report) {
+  const data = `${JSON.stringify(report, null, 2)}\n`;
+  const flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | (fs.constants.O_NOFOLLOW || 0);
+  let descriptor;
+  try {
+    descriptor = fs.openSync(destination, flags, 0o600);
+  } catch (error) {
+    if (error.code === "EEXIST") throw new Error("Report destination already exists; choose a new file.");
+    throw error;
+  }
+  try { fs.writeFileSync(descriptor, data); }
+  finally { fs.closeSync(descriptor); }
+}
+
 function main(argv) {
   const args = parseArgs(argv);
   if (args.help) {
@@ -19,7 +33,7 @@ function main(argv) {
   let writtenReportPath = "";
   if (args.reportPath) {
     writtenReportPath = path.resolve(args.reportPath);
-    fs.writeFileSync(writtenReportPath, `${JSON.stringify(report, null, 2)}\n`);
+    writeNewReport(writtenReportPath, report);
   }
 
   if (args.json) {
