@@ -102,6 +102,7 @@ Options:
 
 Exit codes:
   0  no known critical indicators found
+  1  scanner/runtime error
   2  likely exposure indicators found
   3  scan incomplete: a directory could not be listed, or Tensorlake
      candidate inspection was incomplete; review the reported paths

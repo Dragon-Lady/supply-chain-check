@@ -106,4 +106,13 @@ if (typeof process.getuid !== "function" || process.getuid() !== 0) {
   }
 }
 
+{
+  // --help documents every exit code, including 1 (scanner/runtime error), and exits 0.
+  const help = runCLI(process["exec" + "Path"], [CLI, "--help"], { encoding: "utf8" });
+  assert.strictEqual(help.status, 0);
+  for (const code of ["0", "1", "2", "3", "4"]) assert(new RegExp(`^  ${code}  `, "m").test(help.stdout), `help lists exit ${code}`);
+  assert(help.stdout.includes("1  scanner/runtime error"));
+  tests += 1;
+}
+
 console.log(`${tests} walk coverage tests passed`);
