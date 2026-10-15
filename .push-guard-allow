@@ -1,0 +1,9 @@
+# Reviewed Push Guard allow list for this repository.
+# Format: <path> rule-id,rule-id ...  (exact paths, exact rule ids only)
+# Personal, private-list and private-path matches can never be allowed.
+
+# Detector source: IOC patterns the scanner matches.
+src/scanner.js workflow.dprk_socketio_node_exec
+
+# Detector data: IOC strings the scanner loads.
+data/indicators.json workflow.trinitite_payload_marker
