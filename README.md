@@ -45,7 +45,7 @@ node ./bin/supply-chain-check.js /path/to/project --json --response-plan --repor
 Exit codes:
 
 - `0`: no likely exposure found and the scan was complete
-- `1`: scanner/runtime error
+- `1`: scanner/runtime error, including missing or unsupported explicit targets
 - `2`: likely exposure indicators found
 - `3`: scan incomplete: a directory could not be listed (reported as a low
   `read-error` finding; `coverage.complete` is false in the JSON report), or

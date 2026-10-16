@@ -454,17 +454,13 @@ function rootIsInsideNodeModules(root) {
 // Build-output directories are skipped in the project itself, but never inside
 // installed dependencies: compromised packages commonly ship payloads in dist/.
 function walk(root, onFile, onUnreadableDirectory) {
-  let rootStat;
-  try {
-    rootStat = fs.statSync(root);
-  } catch (error) {
-    return;
-  }
+  const rootStat = fs.statSync(root);
 
   if (rootStat.isFile()) {
     onFile(root, { name: path.basename(root) });
     return;
   }
+  if (!rootStat.isDirectory()) throw new Error("Target must be a regular file or directory");
 
   const keepBuildDirs = rootIsInsideNodeModules(root);
   const stack = [root];

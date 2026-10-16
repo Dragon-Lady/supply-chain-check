@@ -1,6 +1,6 @@
-# v0.1.3 (Unreleased)
+# v0.1.3
 
-Not yet released. No release date is set.
+GitHub release. Registry publication is separate.
 
 ## Behavior changes
 
@@ -20,6 +20,9 @@ Not yet released. No release date is set.
   trees may take a little longer and may see new findings there.
 
 ## Fixes
+
+- Missing or unsupported scan roots now return a scanner error instead of a
+  successful empty scan.
 
 - Build-output folders were skipped at any depth, including inside
   `node_modules`, where compromised packages often ship their payload. They
