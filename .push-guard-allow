@@ -2,12 +2,9 @@
 # Format: <path> rule-id,rule-id ...  (exact paths, exact rule ids only)
 # Personal, private-list and private-path matches can never be allowed.
 
-# Detector source: IOC patterns the scanner matches.
-src/scanner.js workflow.dprk_socketio_node_exec
-
 # Detector data: IOC strings the scanner loads.
 data/indicators.json workflow.trinitite_payload_marker
 
 # Reviewed 0.4.3 migration: detector text, inert fixtures and local test harnesses.
 # Preserve existing policy restrictions; credentials and private terms cannot be allowed.
-test/smoke.js workflow.dprk_socketio_node_exec,workflow.ottercookie_npm_package,workflow.ottercookie_ssh_backdoor_shape,workflow.ottercookie_vercel_c2
+test/smoke.js workflow.ottercookie_npm_package,workflow.ottercookie_vercel_c2

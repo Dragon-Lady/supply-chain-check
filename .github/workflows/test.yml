@@ -26,7 +26,7 @@ jobs:
       - run: npm pack --dry-run --ignore-scripts
 
   security:
-    name: Push Guard range and package
+    name: ${{ github.event_name == 'pull_request' && 'Push Guard PR gate' || 'Push Guard main-policy scan' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -47,8 +47,12 @@ jobs:
           ref: 87b1c8c210a6d6d8d584f49304157b5f1a321ac0
           path: .ci-push-guard
           persist-credentials: false
+      - name: Reject candidate module shadowing in both scans
+        env:
+          PYTHONPATH: ${{ github.workspace }}/.ci-push-guard/src
+        run: python3 -P test/security-gate.py
       - name: Scan the outgoing range and complete npm tarball
         env:
           PYTHONPATH: ${{ github.workspace }}/.ci-push-guard/src
-          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_REF: ${{ github.event.pull_request.base.sha || 'origin/main' }}
         run: bash .github/scripts/check-package.sh "$BASE_REF"

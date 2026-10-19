@@ -210,3 +210,9 @@ Python support covers exact requirements, supported pyproject requirement string
 uv/Pipfile locks and explicitly visited METADATA files; other formats and ranges
 need manual resolution. RPM inventory and live network reachability are outside
 these additions. Releases remain subject to review and package scanning.
+
+Static review now includes Windows, Linux and macOS task overrides and
+case-insensitive fake-font filename variants. Tensorlake dependency metadata
+has a 32 MiB inspection budget; named payload files retain their 2 MiB limit.
+Malformed incidental fixture/example manifests produce a visible scope notice;
+active manifests and malformed content mentioning Tensorlake remain incomplete.

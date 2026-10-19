@@ -158,3 +158,31 @@ test('large lock metadata finds MALFEX beyond the former 2 MiB cutoff',t=>{
  fs.writeFileSync(file,' '.repeat(32*1024*1024+1));
  assert.equal(inspectFile(file,{root})[0].type,'october-review-incomplete');
 });
+
+for(const platform of ['windows','linux','osx']) test('platform folder-open task '+platform,()=>{
+ const spec={command:'echo harmless',runOptions:{runOn:'folderOpen'},[platform]:{command:'NODE',args:['./PUBLIC/FONTS/'+font.toUpperCase()]}};
+ assert(has('tasks.json',json({tasks:[spec]}),'vscode-autorun-fake-font-task'));
+ spec[platform].runOptions={runOn:'default'};
+ assert(!has('tasks.json',json({tasks:[spec]}),'vscode-autorun-fake-font-task'));
+});
+test('platform args and Windows path separators are preserved',()=>{
+ const command=String.raw`"C:\Program Files\nodejs\node.exe"`;
+ const file=String.raw`C:\assets`+"\\"+font.toUpperCase();
+ assert(has('tasks.json',json({tasks:[{command,args:[file],runOptions:{runOn:'folderOpen'},windows:{command}}]}),'vscode-autorun-fake-font-task'));
+ assert(!has('tasks.json',json({tasks:[{command:'cp',args:[file],runOptions:{runOn:'folderOpen'}}]}),'vscode-autorun-fake-font-task'));
+});
+
+for(const name of ['Apache.Airflow.Providers.SSH','APACHE__AIRFLOW.PROVIDERS--SFTP'])
+ test('normalized Python distribution name '+name,()=>{
+  assert(has('requirements.txt',name+'==6.0.1','airflow-host-key-version'));
+  assert(has('pyproject.toml','dependencies = ["'+name+'==6.0.1"]','airflow-host-key-version'));
+  assert(has('uv.lock','[[package]]\nname = "'+name+'"\nversion = "6.0.1"','airflow-host-key-version'));
+  assert(has('Pipfile.lock',json({default:{[name]:{version:'==6.0.1'}}}),'airflow-host-key-version'));
+ });
+test('inactive Python dependency comments cannot become version findings',()=>{
+ for(const file of ['requirements.txt','pyproject.toml']) {
+  assert.deepEqual(inspectText(file,'# Apache.Airflow.Providers.SSH==6.0.1\n# apache-airflow-providers-sftp==6.0.1'),[]);
+  assert(has(file,'"apache-airflow-providers-ssh==6.0.1" # active pin','airflow-host-key-version'));
+  assert(!has(file,'"apache-airflow-providers-ssh==7.0.0" # apache-airflow-providers-ssh==6.0.1','airflow-host-key-version'));
+ }
+});

@@ -2,6 +2,7 @@
 // Bounded static metadata inspection. No subprocesses, imports of targets or network calls.
 const fs = require("fs");
 const path = require("path");
+const {incidentalJson} = require("./metadata-scope");
 const SOURCES = {
  malfex: "https://safedep.io/malfex-imgdecode-npm-native-addon-loader/",
  apex: "https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages",
@@ -22,22 +23,7 @@ function metadataCandidate(file) {
  const base=path.basename(file);
  return NPM.has(base)||PYTHON.has(base)||base==='tasks.json'||base==='Dockerfile'||base==='status'||/\.(?:ya?ml|cfg|ini)$/.test(base);
 }
-function incidentalJson(file,root) {
- if(!root) return false;
- const rel=path.relative(root,file).split(path.sep);
- const base=path.basename(file);
- if(base==='tasks.json') return rel.at(-2)!=='.vscode';
- if(base!=='package.json') return false;
- if(rel.length===1) return false;
- const last=rel.lastIndexOf('node_modules');
- if(last>=0) {
-  const tail=rel.slice(last+1);
-  return !(tail.length===2 || (tail.length===3 && tail[0].startsWith('@')));
- }
- // Project manifests remain required; only explicit test/example/generated trees
- // are incidental. Valid metadata in these paths is still inspected normally.
- return rel.slice(0,-1).some(x=>/^(?:tests?|__tests__|fixtures?|__fixtures__|examples?|dist|build|coverage)$/.test(x));
-}
+
 function compare(a,b) { const x=a.split('.').map(Number),y=b.split('.').map(Number); for(let i=0;i<3;i++) if(x[i]!==y[i]) return x[i]<y[i]?-1:1; return 0; }
 function curlAffected(v) {
  if(!EXACT.test(v)) return null;
@@ -109,6 +95,19 @@ function parseTaskJson(text) {
  return JSON.parse(normalized);
 }
 
+function activeDependencyText(text) {
+ // Requirements/TOML hash comments are inactive; retain hashes inside strings.
+ let out='', quote=null, escaped=false;
+ for(let i=0;i<text.length;i++) {
+  const c=text[i];
+  if(quote) {out+=c;if(escaped) escaped=false;else if(c==='\\' && quote==='"') escaped=true;else if(c===quote) quote=null;continue;}
+  if(c==='"'||c==="'") {quote=c;out+=c;continue;}
+  if(c==='#') {while(i<text.length&&text[i]!=='\n') i++;out+='\n';continue;}
+  out+=c;
+ }
+ return out;
+}
+
 function inspectText(file,text) {
  const base=path.basename(file), out=[];
  const add=(severity,type,message,source)=>out.push({severity,type,path:file,message:message+' '+SOURCES[source]});
@@ -122,25 +121,26 @@ function inspectText(file,text) {
  }
  if(PYTHON.has(base)) {
   // Exact requirement pins and package records only; never borrow a nearby package's version.
+  const activeText=["requirements.txt","pyproject.toml","uv.lock"].includes(base)?activeDependencyText(text):text;
   const refs=[];
-  for(const m of text.matchAll(/(?:^|[\s"'])apache[-_]airflow[-_]providers[-_](ssh|sftp)(?:\[[^\]\r\n]*\])?\s*==\s*(\d+\.\d+\.\d+)(?=[\s"';,#]|$)/gm)) refs.push([m[1],m[2]]);
+  for(const m of activeText.matchAll(/(?:^|[\s"'])apache[-_.]+airflow[-_.]+providers[-_.]+(ssh|sftp)(?:\[[^\]\r\n]*\])?\s*==\s*(\d+\.\d+\.\d+)(?=[\s"';,#]|$)/gmi)) refs.push([m[1].toLowerCase(),m[2]]);
   if(base==='Pipfile.lock') {
-   const obj=JSON.parse(text);
+   const obj=JSON.parse(activeText);
    for(const group of ['default','develop']) for(const [name,item] of Object.entries(obj[group]||{})) {
-    const m=name.match(/^apache[-_]airflow[-_]providers[-_](ssh|sftp)$/);
-    const v=item?.version?.match(/^==(\d+\.\d+\.\d+)$/)?.[1]; if(m&&v) refs.push([m[1],v]);
+    const m=name.match(/^apache[-_.]+airflow[-_.]+providers[-_.]+(ssh|sftp)$/i);
+    const v=item?.version?.match(/^==(\d+\.\d+\.\d+)$/)?.[1]; if(m&&v) refs.push([m[1].toLowerCase(),v]);
    }
   }
-  if(base==='uv.lock') for(const block of text.split(/^\[\[package\]\]\s*$/m)) {
-   const name=block.match(/^name\s*=\s*"apache[-_]airflow[-_]providers[-_](ssh|sftp)"\s*$/m)?.[1];
-   const version=block.match(/^version\s*=\s*"(\d+\.\d+\.\d+)"\s*$/m)?.[1]; if(name&&version) refs.push([name,version]);
+  if(base==='uv.lock') for(const block of activeText.split(/^\[\[package\]\]\s*$/m)) {
+   const name=block.match(/^name\s*=\s*"apache[-_.]+airflow[-_.]+providers[-_.]+(ssh|sftp)"\s*$/mi)?.[1];
+   const version=block.match(/^version\s*=\s*"(\d+\.\d+\.\d+)"\s*$/m)?.[1]; if(name&&version) refs.push([name.toLowerCase(),version]);
   }
   if(base==='METADATA') {
-   const name=text.match(/^Name:\s*apache[-_]airflow[-_]providers[-_](ssh|sftp)\s*$/mi)?.[1];
-   const version=text.match(/^Version:\s*(\d+\.\d+\.\d+)\s*$/m)?.[1]; if(name&&version) refs.push([name.toLowerCase(),version]);
+   const name=activeText.match(/^Name:\s*apache[-_.]+airflow[-_.]+providers[-_.]+(ssh|sftp)\s*$/mi)?.[1];
+   const version=activeText.match(/^Version:\s*(\d+\.\d+\.\d+)\s*$/m)?.[1]; if(name&&version) refs.push([name.toLowerCase(),version]);
   }
   for(const [provider,version] of refs) if(compare(version,'7.0.0')<0) add('medium','airflow-host-key-version',`Airflow ${provider} provider ${version} predates 7.0.0 host-key verification fixes (CVE-2026-94134${provider==='sftp'?' / CVE-2026-94135, including async SFTP':''}). Verify every connection's host-key settings; a pin alone does not establish runtime exposure.`, 'airflow');
-  if(/apache[-_]airflow[-_]providers[-_](ssh|sftp)/.test(text)&&refs.length===0) add('medium','airflow-provider-review','Airflow SSH/SFTP dependency is not an exact supported pin. Resolve its installed provider version and verify host-key configuration.','airflow');
+  if(/apache[-_.]+airflow[-_.]+providers[-_.]+(ssh|sftp)/i.test(activeText)&&refs.length===0) add('medium','airflow-provider-review','Airflow SSH/SFTP dependency is not an exact supported pin. Resolve its installed provider version and verify host-key configuration.','airflow');
  }
  if(/\.(?:py|json|cfg|ini|ya?ml)$/.test(base) && /airflow|SFTPHook|SSHHook|SFTPTrigger/.test(text)) {
   if(/no_host_key_check["']?\s*[:=]\s*(?:["']?true\b|True\b)|known_hosts\s*=\s*None\b/.test(text)) add('medium','airflow-host-key-disabled','Airflow-context text explicitly disables host-key verification. Review the referenced connection or async path; this is static evidence, not runtime confirmation.','airflow');
@@ -149,9 +149,14 @@ function inspectText(file,text) {
  if(base==='tasks.json') {
   const data=parseTaskJson(text);
   for(const task of Array.isArray(data.tasks)?data.tasks:[]) {
-   const command=[task.command,...(Array.isArray(task.args)?task.args:[])].filter(x=>typeof x==='string').join(' ');
-   if(task.runOptions?.runOn==='folderOpen' && /(?:^|\s|\/)node(?:\.exe)?["']?\s+/.test(command) && /(?:^|[\s/])fa-solid-400\.woff2(?:["')]|\s|$)/.test(command))
-    add('high','vscode-autorun-fake-font-task','A folder-open task runs a reported fake-font filename through Node. Review before opening the project; an ordinary font asset alone is not a match.','font');
+   if(!task || typeof task!=='object') continue;
+   // Inspect each platform's effective command without borrowing another task's autorun.
+   const variants=[task,...['windows','linux','osx'].filter(key=>task[key] && typeof task[key]==='object' && !Array.isArray(task[key])).map(key=>({...task,...task[key],runOptions:{...task.runOptions,...task[key].runOptions}}))];
+   for(const effective of variants) {
+    const command=[effective.command,...(Array.isArray(effective.args)?effective.args:[])].filter(x=>typeof x==='string').join(' ');
+    if(effective.runOptions?.runOn==='folderOpen' && /(?:^|[\s/\\"'])node(?:\.exe)?["']?\s+/i.test(command) && /(?:^|[\s/\\"'])fa-solid-400\.woff2(?:["')]|\s|$)/i.test(command))
+     add('high','vscode-autorun-fake-font-task','A folder-open task runs a reported fake-font filename through Node. Review before opening the project; an ordinary font asset alone is not a match.','font');
+   }
   }
  }
  if(/\.(?:ya?ml|js|cjs|mjs|sh|ps1|json)$/.test(base)) {
