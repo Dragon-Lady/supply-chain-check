@@ -17,6 +17,27 @@ const PYTHON = new Set(["requirements.txt", "pyproject.toml", "uv.lock", "Pipfil
 const EXACT = /^\d+\.\d+\.\d+$/;
 const APICES = new Set(["@apexacc/cli", "@apexacc/audit"]);
 const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_METADATA_BYTES = 32 * 1024 * 1024;
+function metadataCandidate(file) {
+ const base=path.basename(file);
+ return NPM.has(base)||PYTHON.has(base)||base==='tasks.json'||base==='Dockerfile'||base==='status'||/\.(?:ya?ml|cfg|ini)$/.test(base);
+}
+function incidentalJson(file,root) {
+ if(!root) return false;
+ const rel=path.relative(root,file).split(path.sep);
+ const base=path.basename(file);
+ if(base==='tasks.json') return rel.at(-2)!=='.vscode';
+ if(base!=='package.json') return false;
+ if(rel.length===1) return false;
+ const last=rel.lastIndexOf('node_modules');
+ if(last>=0) {
+  const tail=rel.slice(last+1);
+  return !(tail.length===2 || (tail.length===3 && tail[0].startsWith('@')));
+ }
+ // Project manifests remain required; only explicit test/example/generated trees
+ // are incidental. Valid metadata in these paths is still inspected normally.
+ return rel.slice(0,-1).some(x=>/^(?:tests?|__tests__|fixtures?|__fixtures__|examples?|dist|build|coverage)$/.test(x));
+}
 function compare(a,b) { const x=a.split('.').map(Number),y=b.split('.').map(Number); for(let i=0;i<3;i++) if(x[i]!==y[i]) return x[i]<y[i]?-1:1; return 0; }
 function curlAffected(v) {
  if(!EXACT.test(v)) return null;
@@ -158,19 +179,28 @@ function candidate(file) {
  const base=path.basename(file);
  return NPM.has(base)||PYTHON.has(base)||base==='Dockerfile'||base==='status'||/\.(?:ya?ml|js|cjs|mjs|sh|ps1|json|py|cfg|ini)$/.test(base);
 }
-function inspectFile(file) {
+function inspectFile(file,options={}) {
  if(!candidate(file)) return [];
  let fd;
  try {
   if(fs.lstatSync(file).isSymbolicLink()) throw Error('symlink');
   fd=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW|fs.constants.O_NONBLOCK);
-  const before=fs.fstatSync(fd); if(!before.isFile()||before.size>MAX_BYTES) throw Error('size');
+  const before=fs.fstatSync(fd); if(!before.isFile()) throw Error('type');
+  const metadata=metadataCandidate(file);
+  if(!metadata && before.size>MAX_BYTES) return [{severity:'info',type:'october-review-text-out-of-scope',path:file,message:'General source text exceeds the 2 MiB October text-rule scope and was not inspected by these rules. Dependency/configuration metadata has a separate 32 MiB budget; other scanner rules retain their own scope.'}];
+  if(before.size>(metadata?MAX_METADATA_BYTES:MAX_BYTES)) throw Error('size');
   const buffer=Buffer.alloc(before.size); let offset=0;
   while(offset<buffer.length) {const n=fs.readSync(fd,buffer,offset,buffer.length-offset,offset);if(!n) throw Error('changed');offset+=n;}
   const after=fs.fstatSync(fd); if(before.size!==after.size||before.mtimeMs!==after.mtimeMs||before.ctimeMs!==after.ctimeMs) throw Error('changed');
-  return inspectText(file,buffer.toString('utf8'));
+  const text=buffer.toString('utf8');
+  try { return inspectText(file,text); }
+  catch(error) {
+   if(error instanceof SyntaxError && incidentalJson(file,options.root) && !/imgdecode|apexacc|apache[-_]airflow|fa-solid-400|\\[ux]/i.test(text))
+    return [{severity:'low',type:'october-review-incidental-json',path:file,message:'Malformed JSON in an incidental test/example/generated path was not parsed. It is not treated as active dependency or editor configuration; valid metadata in these paths is still inspected.'}];
+   throw error;
+  }
  } catch {
-  return [{severity:'medium',type:'october-review-incomplete',path:file,message:'Candidate could not be read or parsed within the 2 MiB static inspection limit. Coverage is incomplete; contents and error details are withheld.'}];
+  return [{severity:'medium',type:'october-review-incomplete',path:file,message:'Candidate could not be read or parsed within its static inspection budget (32 MiB for dependency/configuration metadata; 2 MiB for general text). Coverage is incomplete; contents and error details are withheld.'}];
  } finally {if(fd!==undefined) fs.closeSync(fd);}
 }
 module.exports={inspectFile,inspectText,curlAffected,harborAffected};

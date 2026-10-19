@@ -291,7 +291,7 @@ function scanTarget(targetPath, options = {}) {
     seen.files += 1;
     const base = dirent.name;
     findings.push(...tensorlake.inspectFile(filePath));
-    findings.push(...octoberReview.inspectFile(filePath));
+    findings.push(...octoberReview.inspectFile(filePath, { root }));
 
     scanMiasmaPath(filePath, findings);
     scanHadesPath(filePath, findings);

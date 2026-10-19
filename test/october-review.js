@@ -102,3 +102,59 @@ test('JSONC tasks preserve strings and accept comments and trailing commas',()=>
  assert(has('tasks.json',text,'vscode-autorun-fake-font-task'));
  assert(!has('tasks.json','{"tasks":[{"command":"echo https://example.invalid/", "runOptions":{"runOn":"folderOpen"}}]}','vscode-autorun-fake-font-task'));
 });
+
+test('large ordinary source is outside text scope without a false risk escalation',t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'october-scope-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const file=path.join(root,'node_modules','typescript','lib','typescript.js');
+ fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,'// ordinary library text\n'.repeat(400000));
+ const hits=inspectFile(file,{root});
+ assert.equal(hits.length,1);assert.equal(hits[0].severity,'info');
+ assert.equal(hits[0].type,'october-review-text-out-of-scope');
+ if(fs.existsSync(path.join(__dirname,'../src/scanner.js'))) {
+  const report=require('../src/scanner').scanTarget(root);
+  assert.equal(report.risk,'no-known-indicators');assert.equal(report.coverage.complete,true);
+  assert(report.findings.some(f=>f.type==='october-review-text-out-of-scope'));
+ }
+});
+test('incidental malformed JSON does not masquerade as broken active configuration',t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'october-scope-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ for(const relative of ['node_modules/tool/test/fixtures/broken/package.json','test/fixtures/tasks.json']) {
+  const file=path.join(root,relative);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,'{invalid');
+  const hits=inspectFile(file,{root});assert.equal(hits[0].type,'october-review-incidental-json');assert.equal(hits[0].severity,'low');
+ }
+ if(fs.existsSync(path.join(__dirname,'../src/scanner.js'))) {
+  const report=require('../src/scanner').scanTarget(root);
+  assert.equal(report.coverage.complete,true);
+  assert(!report.findings.some(f=>f.type==='october-review-incomplete'));
+  // Tensorlake retains its separate existing malformed-manifest coverage policy.
+  assert(report.findings.filter(f=>f.type.startsWith('october-review-')).every(f=>f.severity==='low'));
+ }
+ for(const relative of ['package.json','packages/app/package.json','node_modules/tool/package.json','node_modules/@scope/tool/package.json','.vscode/tasks.json']) {
+  const file=path.join(root,relative);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,'{invalid');
+  assert.equal(inspectFile(file,{root})[0].type,'october-review-incomplete');
+ }
+});
+test('incidental metadata still detects malicious versions and refuses ambiguous escapes',t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'october-scope-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const file=path.join(root,'test','fixtures','package.json');fs.mkdirSync(path.dirname(file),{recursive:true});
+ fs.writeFileSync(file,json({dependencies:{imgdecode:'1.0.3'}}));
+ assert(inspectFile(file,{root}).some(f=>f.type==='malfex-imgdecode-version'));
+ for(const text of ['{imgdecode',String.raw`{"name":"\u0069mgdecode",invalid`]) {
+  fs.writeFileSync(file,text);assert.equal(inspectFile(file,{root})[0].type,'october-review-incomplete');
+ }
+});
+test('large lock metadata finds MALFEX beyond the former 2 MiB cutoff',t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'october-large-lock-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const file=path.join(root,'package-lock.json');
+ fs.writeFileSync(file,json({name:'ordinary-project',description:'x'.repeat(9*1024*1024),packages:{'node_modules/imgdecode':{version:'1.0.3'}}}));
+ assert(inspectFile(file,{root}).some(f=>f.type==='malfex-imgdecode-version'));
+ const host=fs.existsSync(path.join(__dirname,'../src/checker.js'));
+ const report=host?require('../src/checker').scanHost({targetRoot:root,homePath:root}):require('../src/scanner').scanTarget(root);
+ assert(report.findings.some(f=>(f.id||f.type)==='malfex-imgdecode-version'));
+ fs.writeFileSync(file,' '.repeat(32*1024*1024+1));
+ assert.equal(inspectFile(file,{root})[0].type,'october-review-incomplete');
+});
