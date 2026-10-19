@@ -1,5 +1,6 @@
 const fs = require("fs");
 const tensorlake = require("./tensorlake");
+const octoberReview = require("./october-review");
 const path = require("path");
 const crypto = require("crypto");
 
@@ -290,6 +291,7 @@ function scanTarget(targetPath, options = {}) {
     seen.files += 1;
     const base = dirent.name;
     findings.push(...tensorlake.inspectFile(filePath));
+    findings.push(...octoberReview.inspectFile(filePath));
 
     scanMiasmaPath(filePath, findings);
     scanHadesPath(filePath, findings);
@@ -430,7 +432,7 @@ function scanTarget(targetPath, options = {}) {
     trustSignals: dedupedTrustSignals,
     findings: dedupedFindings,
     safeRemovalGuidance: tensorlake.safeRemovalGuidance(dedupedFindings),
-    coverage: { complete: unlistableDirectories === 0, unlistableDirectories },
+    coverage: { complete: unlistableDirectories === 0 && !dedupedFindings.some(f => f.type === "october-review-incomplete"), unlistableDirectories },
     tensorlakeCoverage: { candidateReadsComplete: !dedupedFindings.some(f => f.type === "tensorlake-coverage-incomplete"), scope: "Visited Tensorlake metadata and named payload candidates only; this field does not assess discovery completeness" },
     guidance: guidanceForRisk(risk)
   };

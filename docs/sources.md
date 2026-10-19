@@ -154,3 +154,18 @@ the scanned tree on the operator's platform.
 - The Hacker News X post and illustration: https://x.com/TheHackersNews/status/2108074255011455084
 - Source revision: https://github.com/tensorlakeai/tensorlake/tree/6386121c561e74fec143a138d5cc3d3bbabdfe8c/typescript
 - Upstream report (not a maintainer confirmation): https://github.com/tensorlakeai/tensorlake/issues/1014
+
+## October review additions
+
+- MALFEX: https://safedep.io/malfex-imgdecode-npm-native-addon-loader/
+- Apex identities (version scope unresolved): https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages
+- Fake-font task behavior: https://research.jfrog.com/post/hijacked-npm-vscode-tasks-blockchain/
+- GhostAction collector context (domain operator attribution unresolved): https://opensourcemalware.com/blog/ghostaction-attack-escalates
+- Airflow synchronous host-key defaults: https://seclists.org/oss-sec/2026/q4/173
+- Airflow async SFTP defaults: https://seclists.org/oss-sec/2026/q4/174
+- curl upstream ranges and maintenance fixes: https://curl.se/docs/CVE-2026-92392.html
+- AnyDesk Linux 8.0.2 research / 8.0.3 fix: https://github.com/v12-security/pocs/tree/main/anydesk
+- Harbor webhook SSRF: https://github.com/goharbor/harbor/security/advisories/GHSA-2phj-cp9f-qq6w
+
+Verified 2026-10-19. Local version or endpoint matches require corroboration;
+no malware was fetched or executed to validate these rules.
