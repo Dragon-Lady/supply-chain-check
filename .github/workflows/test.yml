@@ -47,6 +47,10 @@ jobs:
           ref: 87b1c8c210a6d6d8d584f49304157b5f1a321ac0
           path: .ci-push-guard
           persist-credentials: false
+      - name: Reject candidate module shadowing in both scans
+        env:
+          PYTHONPATH: ${{ github.workspace }}/.ci-push-guard/src
+        run: python3 -P test/security-gate.py
       - name: Scan the outgoing range and complete npm tarball
         env:
           PYTHONPATH: ${{ github.workspace }}/.ci-push-guard/src

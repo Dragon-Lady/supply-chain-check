@@ -5,6 +5,21 @@ on:
 permissions:
   contents: read
 jobs:
+  test:
+    if: ${{ vars.ENABLE_NPM_PUBLISH == 'true' && !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+      - run: npm test
+
   prepare:
     # Keep disabled until release approval, stable Push Guard, npm trust and
     # required-reviewer protection on the npm environment are all configured.
@@ -44,7 +59,6 @@ jobs:
       - name: Require released Push Guard protection
         run: |
           sfw pip install --require-hashes --only-binary=:all: --no-deps -r .github/requirements/push-guard.txt
-      - run: npm test
       - name: Scan complete package with required private terms
         id: guard
         env:
@@ -70,7 +84,7 @@ jobs:
           compression-level: 0
 
   publish:
-    needs: prepare
+    needs: [test, prepare]
     if: ${{ vars.ENABLE_NPM_PUBLISH == 'true' && !github.event.release.prerelease }}
     environment: npm
     runs-on: ubuntu-latest

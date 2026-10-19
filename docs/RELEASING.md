@@ -23,7 +23,9 @@ and sets the repository variable `ENABLE_NPM_PUBLISH` to `true`. Before enabling
    matching `vX.Y.Z` tag and publish a GitHub release only when authorized.
 
 The workflow requires the matching stable tag to be an ancestor of `main`, runs
-all tests, and scans the complete tarball in a preparation job without OIDC.
+tests on a separate runner without secrets or OIDC, then scans the complete
+tarball in a preparation job without OIDC. Candidate test code cannot modify
+the scanner installation or artifact in the preparation job.
 That job uses the hash-pinned Push Guard wheel and required private terms. It
 uploads the scanned tarball and passes its SHA-256 and artifact ID through job
 outputs. The separate OIDC job downloads that ID, verifies the exact tarball
@@ -38,7 +40,9 @@ npm tarball using the destination-base policy for both scans. A policy added in
 the candidate change cannot allow its own findings. Pull requests use the PR
 base SHA; all push events use `origin/main`, never the prior branch tip.
 Require **Push Guard PR gate** in branch protection with strict/up-to-date checks;
-the push job has a distinct name, **Push Guard main-policy scan**, and cannot
+scanner invocations use Python safe-path mode (`-P`) so candidate modules and
+startup hooks in the current directory cannot shadow the trusted scanner.
+The push job has a distinct name, **Push Guard main-policy scan**, and cannot
 satisfy the PR check. Set the required check only after the new workflow has
 reported it successfully.
 The temporary scanner checkout is pinned and has no install dependencies.
