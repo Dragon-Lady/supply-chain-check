@@ -2,9 +2,11 @@
 // Static inspection only. Never load the inspected file as a module.
 const fs = require("fs");
 const path = require("path");
+const {incidentalJson} = require("./metadata-scope");
 const crypto = require("crypto");
 const SOURCE = "https://www.stepsecurity.io/blog/tensorlake-npm-compromised-hostage-token-worm";
 const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_METADATA_BYTES = 32 * 1024 * 1024;
 const MONITOR = ["gh-token", "monitor"].join("-");
 const MONITOR_FILES = new Set([`${MONITOR}.service`, `${MONITOR}.sh`, `com.user.${MONITOR}.plist`]);
 const HASHES = {
@@ -61,12 +63,12 @@ function exactVersionInMetadata(text, base) {
   return false;
 }
 
-function readLimited(filePath) {
+function readLimited(filePath, limit) {
   if (fs.lstatSync(filePath).isSymbolicLink()) throw Error("symlink candidate");
   const fd = fs.openSync(filePath, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0) | (fs.constants.O_NONBLOCK || 0));
   try {
     const before = fs.fstatSync(fd);
-    if (!before.isFile() || before.size > MAX_BYTES) throw Error("unsupported or oversized file");
+    if (!before.isFile() || before.size > limit) throw Error("unsupported or oversized file");
     const data = Buffer.alloc(before.size);
     let offset = 0;
     while (offset < data.length) {
@@ -88,17 +90,24 @@ function inspectFile(filePath, options = {}) {
   }
   if (!HASHES[base] && !(options.packages !== false && METADATA.has(base))) return [];
   try {
-    const data = readLimited(filePath);
+    const data = readLimited(filePath, METADATA.has(base) ? MAX_METADATA_BYTES : MAX_BYTES);
     if (HASHES[base]) {
       if (crypto.createHash("sha256").update(data).digest("hex") === HASHES[base]) {
         return [make("critical", "tensorlake-payload-hash", `${base} byte-matches a reported tensorlake@0.5.144 payload. Execution and monitor activation are not established. ${ORDER}`)];
       }
       return [make("medium", "tensorlake-filename-review", `${base} is a reported Tensorlake payload name, but its hash does not match this incident. A filename alone does not establish compromise.`)];
     }
-    return exactVersionInMetadata(data.toString("utf8"), base)
-      ? [make("critical", "tensorlake-exact-version", "Exact npm tensorlake@0.5.144 metadata matches the October 2026 compromise. A package reference does not prove execution or an armed switch. " + ORDER)] : [];
+    const text = data.toString("utf8");
+    try {
+      return exactVersionInMetadata(text, base)
+        ? [make("critical", "tensorlake-exact-version", "Exact npm tensorlake@0.5.144 metadata matches the October 2026 compromise. A package reference does not prove execution or an armed switch. " + ORDER)] : [];
+    } catch (error) {
+      if (error instanceof SyntaxError && incidentalJson(filePath, options.root) && !/tensorlake|\\[ux]/i.test(text))
+        return [make("low", "tensorlake-incidental-json", "Malformed JSON in an incidental test/example/generated path was not parsed. It is not treated as an active dependency manifest; valid metadata in these paths is still inspected.")];
+      throw error;
+    }
   } catch (_error) {
-    return [make("medium", "tensorlake-coverage-incomplete", "Tensorlake inspection could not read or parse this candidate within its 2 MiB limit; coverage is incomplete. File content and error details are withheld.")];
+    return [make("medium", "tensorlake-coverage-incomplete", "Tensorlake inspection could not read or parse this candidate within its static budget (32 MiB for metadata; 2 MiB for named payloads); coverage is incomplete. File content and error details are withheld.")];
   }
 }
 

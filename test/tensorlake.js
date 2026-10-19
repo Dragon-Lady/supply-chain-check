@@ -125,7 +125,7 @@ test("hash evidence does not imply monitor activation", () => fixture((_root, ho
 
 test("invalid or oversized metadata reports incomplete without disclosing content", () => fixture((_root, home) => {
   const file = path.join(home, "package.json");
-  for (const content of [canary, "null", "[]", " ".repeat(2 * 1024 * 1024 + 1)]) {
+  for (const content of [canary, "null", "[]", " ".repeat(32 * 1024 * 1024 + 1)]) {
     write(file, content);
     const findings = check.inspectFile(file);
     assert.strictEqual(findings[0].type, "tensorlake-coverage-incomplete");
@@ -187,3 +187,26 @@ if (linux) test("a directory alone does not establish a sequence-sensitive monit
 }));
 
 console.log(`${tests} Tensorlake metadata, response-order, CLI, privacy and passive-scan tests passed`);
+
+
+test("large lockfiles retain exact-version detection through the metadata budget", () => fixture((_root, home) => {
+  const file=path.join(home,"package-lock.json");
+  write(file,JSON.stringify({padding:" ".repeat(5*1024*1024),packages:{"node_modules/tensorlake":{version:"0.5.144"}}}));
+  assert(check.inspectFile(file,{root:home}).some(f=>f.type==="tensorlake-exact-version"));
+  write(file,JSON.stringify({padding:" ".repeat(5*1024*1024),packages:{}}));
+  assert.deepStrictEqual(check.inspectFile(file,{root:home}),[]);
+}));
+test("incidental malformed fixtures stay visible without active-manifest alarms", () => fixture((_root, home) => {
+  for(const rel of ["examples/package.json","node_modules/demo/test/package.json","node_modules/@scope/demo/fixtures/package.json"]) {
+    const file=path.join(home,rel);write(file,"not json");
+    assert.strictEqual(check.inspectFile(file,{root:home})[0].type,"tensorlake-incidental-json");
+    write(file,"tensorlake malformed");
+    assert.strictEqual(check.inspectFile(file,{root:home})[0].type,"tensorlake-coverage-incomplete");
+    write(file,JSON.stringify({dependencies:{tensorlake:"0.5.144"}}));
+    assert.strictEqual(check.inspectFile(file,{root:home})[0].type,"tensorlake-exact-version");
+  }
+  for(const rel of ["package.json","packages/app/package.json","node_modules/demo/package.json","node_modules/@scope/demo/package.json"]) {
+    const file=path.join(home,rel);write(file,"not json");
+    assert.strictEqual(check.inspectFile(file,{root:home})[0].type,"tensorlake-coverage-incomplete");
+  }
+}));

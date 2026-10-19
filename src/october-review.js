@@ -2,6 +2,7 @@
 // Bounded static metadata inspection. No subprocesses, imports of targets or network calls.
 const fs = require("fs");
 const path = require("path");
+const {incidentalJson} = require("./metadata-scope");
 const SOURCES = {
  malfex: "https://safedep.io/malfex-imgdecode-npm-native-addon-loader/",
  apex: "https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages",
@@ -22,22 +23,7 @@ function metadataCandidate(file) {
  const base=path.basename(file);
  return NPM.has(base)||PYTHON.has(base)||base==='tasks.json'||base==='Dockerfile'||base==='status'||/\.(?:ya?ml|cfg|ini)$/.test(base);
 }
-function incidentalJson(file,root) {
- if(!root) return false;
- const rel=path.relative(root,file).split(path.sep);
- const base=path.basename(file);
- if(base==='tasks.json') return rel.at(-2)!=='.vscode';
- if(base!=='package.json') return false;
- if(rel.length===1) return false;
- const last=rel.lastIndexOf('node_modules');
- if(last>=0) {
-  const tail=rel.slice(last+1);
-  return !(tail.length===2 || (tail.length===3 && tail[0].startsWith('@')));
- }
- // Project manifests remain required; only explicit test/example/generated trees
- // are incidental. Valid metadata in these paths is still inspected normally.
- return rel.slice(0,-1).some(x=>/^(?:tests?|__tests__|fixtures?|__fixtures__|examples?|dist|build|coverage)$/.test(x));
-}
+
 function compare(a,b) { const x=a.split('.').map(Number),y=b.split('.').map(Number); for(let i=0;i<3;i++) if(x[i]!==y[i]) return x[i]<y[i]?-1:1; return 0; }
 function curlAffected(v) {
  if(!EXACT.test(v)) return null;
@@ -149,9 +135,14 @@ function inspectText(file,text) {
  if(base==='tasks.json') {
   const data=parseTaskJson(text);
   for(const task of Array.isArray(data.tasks)?data.tasks:[]) {
-   const command=[task.command,...(Array.isArray(task.args)?task.args:[])].filter(x=>typeof x==='string').join(' ');
-   if(task.runOptions?.runOn==='folderOpen' && /(?:^|\s|\/)node(?:\.exe)?["']?\s+/.test(command) && /(?:^|[\s/])fa-solid-400\.woff2(?:["')]|\s|$)/.test(command))
-    add('high','vscode-autorun-fake-font-task','A folder-open task runs a reported fake-font filename through Node. Review before opening the project; an ordinary font asset alone is not a match.','font');
+   if(!task || typeof task!=='object') continue;
+   // Inspect each platform's effective command without borrowing another task's autorun.
+   const variants=[task,...['windows','linux','osx'].filter(key=>task[key] && typeof task[key]==='object' && !Array.isArray(task[key])).map(key=>({...task,...task[key],runOptions:{...task.runOptions,...task[key].runOptions}}))];
+   for(const effective of variants) {
+    const command=[effective.command,...(Array.isArray(effective.args)?effective.args:[])].filter(x=>typeof x==='string').join(' ');
+    if(effective.runOptions?.runOn==='folderOpen' && /(?:^|[\s/\\"'])node(?:\.exe)?["']?\s+/i.test(command) && /(?:^|[\s/\\"'])fa-solid-400\.woff2(?:["')]|\s|$)/i.test(command))
+     add('high','vscode-autorun-fake-font-task','A folder-open task runs a reported fake-font filename through Node. Review before opening the project; an ordinary font asset alone is not a match.','font');
+   }
   }
  }
  if(/\.(?:ya?ml|js|cjs|mjs|sh|ps1|json)$/.test(base)) {

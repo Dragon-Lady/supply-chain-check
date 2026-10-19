@@ -26,7 +26,7 @@ jobs:
       - run: npm pack --dry-run --ignore-scripts
 
   security:
-    name: Push Guard range and package
+    name: ${{ github.event_name == 'pull_request' && 'Push Guard PR gate' || 'Push Guard main-policy scan' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -50,5 +50,5 @@ jobs:
       - name: Scan the outgoing range and complete npm tarball
         env:
           PYTHONPATH: ${{ github.workspace }}/.ci-push-guard/src
-          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_REF: ${{ github.event.pull_request.base.sha || 'origin/main' }}
         run: bash .github/scripts/check-package.sh "$BASE_REF"

@@ -1,0 +1,4 @@
+# RELEASE BLOCKER: add the independently verified PyPI wheel SHA-256 after
+# stable 0.4.3 is published. --require-hashes deliberately refuses this file
+# until that review supplies the real hash. Never insert a placeholder digest.
+push-guard==0.4.3

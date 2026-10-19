@@ -158,3 +158,16 @@ test('large lock metadata finds MALFEX beyond the former 2 MiB cutoff',t=>{
  fs.writeFileSync(file,' '.repeat(32*1024*1024+1));
  assert.equal(inspectFile(file,{root})[0].type,'october-review-incomplete');
 });
+
+for(const platform of ['windows','linux','osx']) test('platform folder-open task '+platform,()=>{
+ const spec={command:'echo harmless',runOptions:{runOn:'folderOpen'},[platform]:{command:'NODE',args:['./PUBLIC/FONTS/'+font.toUpperCase()]}};
+ assert(has('tasks.json',json({tasks:[spec]}),'vscode-autorun-fake-font-task'));
+ spec[platform].runOptions={runOn:'default'};
+ assert(!has('tasks.json',json({tasks:[spec]}),'vscode-autorun-fake-font-task'));
+});
+test('platform args and Windows path separators are preserved',()=>{
+ const command=String.raw`"C:\Program Files\nodejs\node.exe"`;
+ const file=String.raw`C:\assets`+"\\"+font.toUpperCase();
+ assert(has('tasks.json',json({tasks:[{command,args:[file],runOptions:{runOn:'folderOpen'},windows:{command}}]}),'vscode-autorun-fake-font-task'));
+ assert(!has('tasks.json',json({tasks:[{command:'cp',args:[file],runOptions:{runOn:'folderOpen'}}]}),'vscode-autorun-fake-font-task'));
+});
