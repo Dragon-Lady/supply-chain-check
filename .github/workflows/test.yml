@@ -24,3 +24,31 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm test
       - run: npm pack --dry-run --ignore-scripts
+
+  security:
+    name: Push Guard range and package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Check out the independently reviewed scanner
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Dragon-Lady/push-guard
+          ref: 87b1c8c210a6d6d8d584f49304157b5f1a321ac0
+          path: .ci-push-guard
+          persist-credentials: false
+      - name: Scan the outgoing range and complete npm tarball
+        env:
+          PYTHONPATH: ${{ github.workspace }}/.ci-push-guard/src
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: bash .github/scripts/check-package.sh "$BASE_REF"

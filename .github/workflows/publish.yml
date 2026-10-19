@@ -1,0 +1,54 @@
+name: Gated npm release
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+jobs:
+  publish:
+    # Keep disabled until release approval, stable Push Guard, npm trust and
+    # required-reviewer protection on the npm environment are all configured.
+    if: ${{ vars.ENABLE_NPM_PUBLISH == 'true' && !github.event.release.prerelease }}
+    environment: npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Require a stable tag already merged into main
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          node <<'JS'
+          const {version} = require('./package.json');
+          if (!/^\d+\.\d+\.\d+$/.test(version) || process.env.GITHUB_REF_NAME !== 'v' + version)
+            throw new Error('A matching stable release tag is required');
+          JS
+      - uses: socketdev/action@ba6de6cc0565af1f42295590380973573297e31f
+        with:
+          mode: firewall-free
+          firewall-version: '1.15.4'
+      - name: Require released Push Guard protection
+        run: sfw pip install 'push-guard>=0.4.3,<0.5'
+      - run: npm test
+      - name: Scan complete package with required private terms
+        id: guard
+        env:
+          REQUIRE_PRIVATE_TERMS: 'true'
+          PUSH_GUARD_BLOCKED_TERMS: ${{ secrets.PUSH_GUARD_BLOCKED_TERMS }}
+        run: bash .github/scripts/check-package.sh origin/main
+      - name: Publish the exact scanned tarball through npm trusted publishing
+        env:
+          TARBALL: ${{ steps.guard.outputs.tarball }}
+        run: npm publish "$TARBALL" --provenance --access public --ignore-scripts

@@ -163,3 +163,50 @@ MIT
 Complementary **read-only** tools in the same security kit:
 
 - **actions-warden** (PyPI, Dragon Lady) — read-only auditor for risky or injected GitHub Actions workflow config under `.github/workflows/`. After token theft, CI injection is a common next step. `pipx install actions-warden` then `actions-warden /path/to/repo`. Does not execute workflows or modify files. https://github.com/Dragon-Lady/actions-warden · https://pypi.org/project/actions-warden/
+
+## Push Guard upgrade preparation
+
+The reviewed `.push-guard-allow` file scopes exceptions to exact workflow rules
+and files containing detector definitions, inert fixtures or scanner metadata.
+It cannot exempt credentials, personal terms or private paths. Review any change
+to an allowed file; an exception applies to that rule throughout that file.
+
+Keep the shared hook tool at 0.4.2 during migration. Existing inline fixture
+comments remain temporarily because its pre-push command does not read this
+policy. Push Guard 0.4.3 ignores those comments and reads policy from the
+destination base commit. Establish and review the policy there before upgrading;
+adding it in the same push as a matching fixture cannot approve that fixture.
+New destination refs have no base policy and receive no exceptions.
+
+Verify outgoing ranges and built packages with the reviewed candidate scanner
+before upgrading. Package scans must select this reviewed repository policy
+explicitly. Do not disable verification to get a fixture through the hook.
+
+## Reviewed October additions (unreleased)
+
+Static checks cover exact MALFEX `imgdecode` 1.0.0–1.0.3 metadata and
+Apex package identities as review leads, including npm manifests and supported
+lock records. Version ranges are not treated as resolved malicious artifacts.
+Folder-open tasks executing the reported fake-font path are checked by default;
+JSONC comments and trailing commas are supported. Ordinary font assets do not
+trigger that behavior rule. Collector endpoints are correlation leads.
+
+Airflow SSH/SFTP exact provider pins before 7.0.0 prompt host-key configuration
+review, with async SFTP called out separately. Explicit verification opt-ins do
+not certify other connections. Harbor image tags use the three published
+advisory ranges. Debian package status records provide curl backport-review
+leads and AnyDesk Linux inventory; no executable is launched. curl maintenance
+fixes are excluded, while distribution patch status remains unverified.
+
+These additions inspect dependency/configuration metadata up to 32 MiB and
+general source text up to 2 MiB. Larger general source files are explicitly
+reported as outside the October text-rule scope, without raising project risk
+or claiming those contents were scanned. Unreadable, oversized or malformed
+required metadata still makes coverage incomplete. Malformed incidental test,
+example or generated JSON is reported at low severity when it contains no
+campaign or escape markers; valid metadata there is still inspected. They never contact
+listed infrastructure, and do not establish execution or runtime exploitability.
+Python support covers exact requirements, supported pyproject requirement strings,
+uv/Pipfile locks and explicitly visited METADATA files; other formats and ranges
+need manual resolution. RPM inventory and live network reachability are outside
+these additions. Releases remain subject to review and package scanning.
