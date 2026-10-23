@@ -86,3 +86,44 @@ test("incidental malformed fixtures remain informational but relevant text is no
  fs.writeFileSync(f,JSON.stringify({dependencies:{"event-bus-lite-testmetest":"0.0.1"}}));
  assert.equal(detector.inspectFile(f,{root:home})[0].type,"testmetest-exact-version");
 }));
+
+test("review: hash-pinned requirements continuations detect exact LiteLLM versions",()=>fixture(({write,scan})=>{
+ write("requirements.txt", 'litellm[proxy]==1.107.0 \\\n    --hash=sha256:'+'a'.repeat(64)+' \\\n    --hash=sha256:'+'b'.repeat(64)+'\n');
+ assert(ids(scan()).includes("litellm-october-compromised-version"));
+ for(const text of ['litellm==1.107.00 \\\n --hash=sha256:abc\n','# litellm==1.107.0 \\\n --hash=sha256:abc\n','other==1.107.0 \\\n --hash=sha256:abc\n']) assert.equal(detector.pythonMatch(text,"requirements.txt"),false);
+}));
+test("review: pyproject extras and prior extras do not truncate dependency arrays",()=>fixture(({write,scan})=>{
+ const file=write("pyproject.toml","");
+ for(const dependencies of ['["litellm[proxy]==1.107.0"]','["uvicorn[standard]>=0.30", "litellm==1.107.0"]',"[\n 'httpx[http2]', # array comment ]\n 'litellm[proxy]==1.107.0; python_version >= \\\"3.10\\\"',\n]"]){
+  // The first two examples reproduce the review verbatim; use ordinary TOML quotes for the marker case.
+  const source='[project]\ndependencies = '+dependencies.replace(/\\"/g,'"')+'\n';
+  fs.writeFileSync(file,source);assert(ids(scan()).includes("litellm-october-compromised-version"),source);
+ }
+ for(const text of ['[project]\ndescription = "litellm==1.107.0"\ndependencies = ["httpx[http2]"]','[project]\ndependencies = ["litellm[proxy]==1.107.00"]','[project]\ndependencies = ["httpx"] # "litellm==1.107.0"','[project]\ndescription = """\n[project]\ndependencies = [\'litellm==1.107.0\']\n"""']) assert.equal(detector.pythonMatch(text,"pyproject.toml"),false,text);
+}));
+test("review: Poetry inline version tables stay scoped to the LiteLLM entry",()=>fixture(({write,scan})=>{
+ const file=write("pyproject.toml","");
+ for(const value of ['{version = "1.107.0", extras = ["proxy"]}',"{extras = ['proxy'], version = '==1.107.0'}",'"1.107.0" # pinned']) {
+  fs.writeFileSync(file,'[tool.poetry.dependencies]\nlitellm = '+value+'\n');assert(ids(scan()).includes("litellm-october-compromised-version"),value);
+ }
+ for(const value of ['{version = "1.106.2", extras = ["proxy"]}','{version = "^1.107.0"}','{note = "version = \'1.107.0\'"}']) assert.equal(detector.pythonMatch('[tool.poetry.dependencies]\nlitellm = '+value+'\n',"pyproject.toml"),false);
+ assert.equal(detector.pythonMatch('[tool.poetry.dependencies]\nother = {version = "1.107.0"}\nlitellm = "1.106.2"',"pyproject.toml"),false);
+}));
+test("review: untagged LiteLLM images are floating tags, not exact compromised artifacts",()=>fixture(({write,home,scan})=>{
+ const file=write("compose.yaml",'services:\n  proxy:\n    image: ghcr.io/berriai/litellm\n');
+ assert(ids(scan()).includes("litellm-container-window-review"));
+ for(const name of ['ghcr.io/berriai/litellm','ghcr.io/berriai/litellm-database','ghcr.io/berriai/litellm-non_root','litellm/litellm','docker.io/litellm/litellm']) {
+  fs.writeFileSync(file,'image: "'+name+'" # floating\n');const hit=detector.inspectFile(file,{root:home});assert.equal(hit[0].type,"litellm-container-window-review");assert.equal(hit[0].severity,"medium");
+ }
+ for(const name of ['ghcr.io/berriai/litellm-other','other/litellm','ghcr.io/berriai/litellm:1.106.2']) {fs.writeFileSync(file,'image: '+name+'\n');assert.deepEqual(detector.inspectFile(file,{root:home}),[]);}
+}));
+test("review: vendor digest prefixes request review only for their image variants",()=>fixture(({write,home,scan})=>{
+ const file=write("Dockerfile","");
+ for(const [variant,prefix] of [['database','c00f9d92c427'],['non_root','7b00e91cd2fe']]) {
+  // Synthetic suffix: the advisory publishes only these prefixes, not full digests.
+  fs.writeFileSync(file,'FROM ghcr.io/berriai/litellm-'+variant+'@sha256:'+prefix+'0'.repeat(52)+'\n');
+  assert(ids(scan()).includes("litellm-container-digest-review"));
+  const hit=detector.inspectFile(file,{root:home})[0];assert.equal(hit.severity,"medium");assert.match(hit.message,/prefix/);assert.doesNotMatch(hit.message,/confirmed compromised image digest/);
+ }
+ for(const image of ['ghcr.io/berriai/litellm-database@sha256:7b00e91cd2fe'+'0'.repeat(52),'other/litellm-database@sha256:c00f9d92c427'+'0'.repeat(52),'ghcr.io/berriai/litellm-non_root@sha256:'+'0'.repeat(64)]) {fs.writeFileSync(file,'FROM '+image+'\n');assert.deepEqual(detector.inspectFile(file,{root:home}),[]);}
+}));

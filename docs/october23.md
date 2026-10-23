@@ -24,11 +24,16 @@ Source: https://safedep.io/testmetest-npm-worm-miasma-variant/
 
 The rule identifies exact 1.107.0 pins in requirements.txt, supported pyproject
 dependency fields, uv/Poetry package tables, Pipfile.lock and installed Python
-METADATA/PKG-INFO. It is separate from older LiteLLM vulnerability checks.
+METADATA/PKG-INFO. Hash-pinned requirements continuations, dependency extras and
+Poetry inline version tables are supported. It is separate from older LiteLLM
+vulnerability checks.
 Cook startup hooks are review candidates. Generic sitecustomize.py is not enough;
 related payload strings must co-occur. Dockerfile and Compose image declarations
 distinguish the confirmed published digest from affected or floating tags needing
-pull-window verification. Other image digests and registries are not cleared.
+pull-window verification, including untagged images (implicit latest). The vendor
+publishes only digest prefixes for database and non_root variants; matching those
+prefixes requests review and does not claim an exact full-digest identity. Other
+image digests and registries are not cleared.
 
 Do not start Python or pip to investigate a suspected environment: startup hooks
 can execute before imports. Contain and rebuild affected environments; rotate
@@ -48,7 +53,9 @@ Source: https://safedep.io/hugo-paper-mevn-cli-forged-commit-preinstall-dropper/
 ## Limits and supported runtime
 
 Use patched Node 22.23.4+, 24.22.1+, or 26.12.1+ within those supported major
-lines. The package engines field expresses these minima. Node's October 21
+lines. This patch intentionally drops Node 18 and 20 from supported runtimes;
+legacy CI coverage is not a runtime-support promise. The package engines field
+expresses these minima. Node's October 21
 security update includes Brotli and certificate-trust fixes. Runtime maintenance
 is separate from detecting malware in a scanned project.
 Source: https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
@@ -59,4 +66,8 @@ boundaries mean a negative result is not comprehensive clearance. Detected parse
 read and budget failures are reported without copying candidate contents.
 LSCG's dedicated discovery visits virtual environments and node_modules under its
 configured roots, with an entry budget per root and no symlink traversal.
+LSCG defaults to 100000 entries per root. On larger installations use, for example,
+`--october23-max-entries 250000` (API: `october23MaxEntries: 250000`). The accepted
+range is 1 to 10000000; exhausted budgets remain incomplete. Explicit `--exclude`
+still marks omitted coverage incomplete; it is not a way to certify skipped files.
 Project scanners retain their existing directory/exclusion scope.

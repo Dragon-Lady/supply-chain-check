@@ -25,6 +25,8 @@ const STARTUP_FILES = new Set(["cook.pth", "cook.py", "sitecustomize.py"]);
 const SERVICE_FILES = new Set(["net-health-checker.service", "pkg-runtime.service", "net-health-checker.sh", "com.user.net-health-checker.plist", "com.user.pkg-runtime.plist"]);
 const ORDER = "If execution is possible, preserve evidence and have incident response assess and safely stop the token-revocation wiper before revoking or rotating credentials from any device. A match does not prove execution or an armed wiper. This scanner makes no changes.";
 const LITELLM_ORDER = "Do not start Python or pip in a suspected affected environment: startup hooks can run before imports. Preserve evidence and contain/rebuild the environment; rotate exposed credentials from a clean device after containment. A metadata match does not establish execution.";
+// The vendor gives only prefixes for these variants. They require review, not an exact-hash verdict.
+const DIGEST_PREFIXES = {"ghcr.io/berriai/litellm-database":"c00f9d92c427", "ghcr.io/berriai/litellm-non_root":"7b00e91cd2fe"};
 const DIGEST = "1bbcb1443bc962e45f5aad53fe3d2c30600e0379715fb6c664cdd3ac126c339e";
 const within = (root, file) => { const relative = path.relative(path.resolve(root), path.resolve(file)); return relative === "" || (!relative.startsWith(".." + path.sep) && relative !== ".." && !path.isAbsolute(relative)); };
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -89,20 +91,77 @@ function npmMatches(text, base) {
   }
   return [...matches];
 }
+// Split TOML statements/items only outside strings, arrays and inline tables.
+// This reads supported dependency fields; it never evaluates TOML or imports code.
+function tomlParts(text, separator) {
+  const parts=[], brackets=[]; let value="", quote="", escaped=false;
+  const finish=()=>{ if(value.trim()) parts.push(value.trim()); value=""; if(parts.length>100000) throw Error("metadata budget"); };
+  for(let i=0;i<text.length;i++) {
+    const c=text[i];
+    if(quote) {
+      if(escaped) {value+=c;escaped=false;continue;}
+      if(quote[0]==='"' && c==='\\') {value+=c;escaped=true;continue;}
+      if(text.startsWith(quote,i)) {value+=quote;i+=quote.length-1;quote="";continue;}
+      value+=c;continue;
+    }
+    if(c==='#') {while(i<text.length && text[i]!=='\n')i++; if(i===text.length)break;}
+    const next=text[i];
+    if(next==='"' || next==="'") {
+      quote=text.startsWith(next.repeat(3),i)?next.repeat(3):next;
+      value+=quote;i+=quote.length-1;continue;
+    }
+    if(next==='[' || next==='{')brackets.push(next);
+    else if(next===']' || next==='}') {if(brackets.pop()!==(next===']'?'[':'{'))throw Error("malformed metadata");}
+    if(next===separator && brackets.length===0)finish();else value+=next;
+  }
+  if(quote || brackets.length)throw Error("incomplete metadata");
+  finish();return parts;
+}
+function tomlString(value) {
+  if(/^"(?:[^"\\]|\\.)*"$/.test(value) && !value.startsWith('"""'))return JSON.parse(value);
+  if(/^'[^']*'$/.test(value))return value.slice(1,-1);
+  throw Error("unsupported dependency string");
+}
+function tomlPair(statement) {
+  const m=statement.match(/^([A-Za-z0-9_-]+|"[^"\r\n]+"|'[^'\r\n]+')\s*=\s*([\s\S]+)$/);
+  if(!m)return null;
+  return [m[1].startsWith('"')||m[1].startsWith("'")?tomlString(m[1]):m[1],m[2].trim()];
+}
 function pythonMatch(text, base) {
   if (base === "METADATA" || base === "PKG-INFO") return /^Name:\s*litellm\s*$/mi.test(text) && /^Version:\s*1\.107\.0\s*$/mi.test(text);
-  if (base === "requirements.txt") return /^\s*litellm(?:\[[^\]\r\n]+\])?\s*==\s*1\.107\.0(?=\s*(?:;|#|--hash|$))/mi.test(text);
+  if (base === "requirements.txt") return /^\s*litellm(?:\[[^\]\r\n]+\])?\s*==\s*1\.107\.0(?=\s*(?:;|#|--hash|$))/mi.test(text.replace(/\\\r?\n/g," "));
   if (base === "Pipfile.lock") { const data=JSON.parse(text); return [data.default,data.develop].some(section=>section?.litellm?.version === "==1.107.0"); }
-  // Limit TOML matching to dependency strings or a single package table.
-  const clean = text.split(/\r?\n/).filter(line=>!/^\s*#/.test(line)).join("\n");
-  if (base === "pyproject.toml") {
-    const project = clean.match(/(?:^|\n)\[project\]\s*\n([\s\S]*?)(?=\n\[|$)/)?.[1] || "";
-    const dependencies = project.match(/(?:^|\n)dependencies\s*=\s*\[([\s\S]*?)\]/)?.[1] || "";
-    if (/["']litellm\s*==\s*1\.107\.0(?:\s*;[^"']*)?["']/i.test(dependencies)) return true;
-    const poetry = clean.match(/(?:^|\n)\[tool\.poetry\.dependencies\]\s*\n([\s\S]*?)(?=\n\[|$)/)?.[1] || "";
-    return /^\s*litellm\s*=\s*["'](?:==)?1\.107\.0["']\s*$/mi.test(poetry);
+  let section="", packageName="", packageVersion="", matched=false;
+  const packageMatches=()=>packageName.toLowerCase()==="litellm" && packageVersion==="1.107.0";
+  for(const statement of tomlParts(text,"\n")) {
+    if(statement.startsWith("[")) {
+      matched=matched||packageMatches();packageName="";packageVersion="";section=statement;continue;
+    }
+    const pair=tomlPair(statement);if(!pair)continue;
+    const [key,value]=pair;
+    if(base==="pyproject.toml" && section==="[project]" && key==="dependencies") {
+      if(!value.startsWith("[") || !value.endsWith("]"))throw Error("dependency array required");
+      for(const item of tomlParts(value.slice(1,-1),",")) {
+        const requirement=tomlString(item);
+        if(/^litellm(?:\[[^\]\r\n]+\])?\s*==\s*1\.107\.0(?:\s*;[^\r\n]*)?$/i.test(requirement))matched=true;
+      }
+    } else if(base==="pyproject.toml" && section==="[tool.poetry.dependencies]" && key.toLowerCase()==="litellm") {
+      let version=value;
+      if(value.startsWith("{")) {
+        if(!value.endsWith("}"))throw Error("inline table required");
+        const fields=tomlParts(value.slice(1,-1),",").map(tomlPair);
+        const versions=fields.filter(field=>field?.[0]==="version");
+        if(versions.length>1)throw Error("duplicate version");
+        if(!versions.length)continue;
+        version=versions[0][1];
+      }
+      if(/^(?:==)?1\.107\.0$/.test(tomlString(version)))matched=true;
+    } else if(base!=="pyproject.toml" && section==="[[package]]") {
+      if(key==="name")packageName=tomlString(value);
+      if(key==="version")packageVersion=tomlString(value);
+    }
   }
-  return clean.split(/(?=^\[\[package\]\])/m).map(block=>block.split(/\n\[/,1)[0]).some(block=>/^\[\[package\]\]/.test(block) && /^name\s*=\s*["']litellm["']\s*$/mi.test(block) && /^version\s*=\s*["']1\.107\.0["']\s*$/m.test(block));
+  return matched||packageMatches();
 }
 function inspectFile(file, options={}) {
   if (!candidate(file)) return [];
@@ -130,10 +189,13 @@ function inspectFile(file, options={}) {
       if (correlated || base === "cook.pth") emit(correlated?"high":"medium","litellm-startup-review",`Python startup artifact requires review${correlated?"; reported payload terms co-occur":"; filename alone is not proof of compromise"}. ${LITELLM_ORDER}`,SOURCES.litellm);
     }
     if (CONTAINER_FILES.has(base)) {
-      for (const match of text.matchAll(/^\s*(?:image:\s*|FROM\s+(?:--platform=\S+\s+)?)["']?((?:ghcr\.io\/berriai\/litellm(?:-database|-non_root)?|(?:docker\.io\/)?litellm\/litellm)(?::[^\s"'#]+|@sha256:[a-f0-9]{64}))(?=[\s"'#]|$)/gmi)) {
+      for (const match of text.matchAll(/^\s*(?:image:\s*|FROM\s+(?:--platform=\S+\s+)?)["']?((?:ghcr\.io\/berriai\/litellm(?:-database|-non_root)?|(?:docker\.io\/)?litellm\/litellm)(?::[^\s"'#]+|@sha256:[a-f0-9]{64})?)(?=[\s"'#]|$)/gmi)) {
         const image=match[1];
+        const digest=image.match(/@sha256:([a-f0-9]{64})$/i)?.[1];
+        const prefix=DIGEST_PREFIXES[image.split(/[:@]/,1)[0]];
         if (image.endsWith("@sha256:"+DIGEST)) emit("critical","litellm-container-digest",`Container configuration references the confirmed compromised image digest. This does not prove a pull or execution. ${LITELLM_ORDER}`,SOURCES.litellm);
-        else if (/:(?:v1\.107\.0|latest|main-latest|main-stable)$/.test(image)) emit("medium","litellm-container-window-review","Review the image digest and pull history for October 21, 2026 (11:46–14:20 UTC). These tags were affected during that window; a tag now is not proof of compromise. Do not start the image to investigate.",SOURCES.litellm);
+        else if (prefix && digest?.startsWith(prefix)) emit("medium","litellm-container-digest-review",`Image digest matches a vendor-reported prefix for this variant. Verify the full digest and pull history; a prefix match alone is not an exact artifact identification. ${LITELLM_ORDER}`,SOURCES.litellm);
+        else if (!image.includes(":") || /:(?:v1\.107\.0|latest|main-latest|main-stable)$/.test(image)) emit("medium","litellm-container-window-review","Review the image digest and pull history for October 21, 2026 (11:46–14:20 UTC). These tags (including implicit latest when no tag is given) were affected during that window; a tag now is not proof of compromise. Do not start the image to investigate.",SOURCES.litellm);
       }
     }
     if (base === "preinstall.js" && /https?:\/\/buildwithknexus\.xyz\/(?:check_m|check_w)\b/.test(text)) emit("high","forged-preinstall-endpoint","A reported forged-commit downloader endpoint occurs in an install-script candidate. Do not execute it; inspect source history and contain the environment if it ran. Text alone does not prove execution.",SOURCES.dropper);
@@ -144,9 +206,13 @@ function safeRemovalGuidance(findings, fallback) {
   if (!findings.some(f=>/^testmetest-/.test(f.type||f.id||""))) return fallback;
   return {required:true, sequenceSensitive:true, activation:"not-assessed", firstAction:ORDER, instructionDestination:SOURCES.worm};
 }
+function entryBudget(value=100000) {
+  if(!Number.isSafeInteger(value) || value<1 || value>10000000)throw Error("October 23 entry budget must be an integer from 1 to 10000000");
+  return value;
+}
 function discover(root, options={}) {
   const files=[], findings=[], stack=[root]; let visited=0;
-  const maxEntries = options.maxEntries || 100000;
+  const maxEntries = entryBudget(options.maxEntries);
   let discoveryIncomplete = false;
   const excluded=(options.excludePaths||[]).map(p=>path.resolve(p));
   while (stack.length) {
@@ -172,4 +238,4 @@ function discover(root, options={}) {
   if (discoveryIncomplete) findings.push(incomplete(root));
   return {files,findings};
 }
-module.exports={inspectFile,discover,safeRemovalGuidance,npmMatches,pythonMatch,SOURCES,ORDER};
+module.exports={inspectFile,entryBudget,discover,safeRemovalGuidance,npmMatches,pythonMatch,SOURCES,ORDER};
