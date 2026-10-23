@@ -146,6 +146,7 @@ function responseItem(finding) {
 }
 
 function nextStepsForFinding(finding) {
+  if (/^(testmetest-|litellm-october-|litellm-startup-|litellm-container-|forged-preinstall-)/.test(finding.type || "")) return [finding.message, "Source: " + finding.evidence.source];
   const campaignSteps = campaignNextSteps(finding);
   if (campaignSteps) return campaignSteps;
 

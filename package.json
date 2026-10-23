@@ -1,6 +1,6 @@
 {
   "name": "supply-chain-check",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Read-only dependency and source risk checker for pre-execution supply-chain review.",
   "license": "MIT",
   "type": "commonjs",
@@ -15,14 +15,15 @@
     "docs/response-guide.md",
     "docs/sources.md",
     "LICENSE",
-    "NOTICE.md"
+    "NOTICE.md",
+    "docs/october23.md"
   ],
   "scripts": {
     "scan": "node bin/supply-chain-check.js",
     "smoke": "node bin/supply-chain-check.js --help",
-    "test": "node --check bin/supply-chain-check.js && node --check src/scanner.js && node --check src/response-plan.js && node test/smoke.js && node test/response-plan.js && node test/report-preservation.js && node test/walk-coverage.js && node --check src/tensorlake.js && node test/tensorlake.js && node --test test/functional-boundaries.js && node --check src/october-review.js && node --test test/october-review.js"
+    "test": "node --check bin/supply-chain-check.js && node --check src/scanner.js && node --check src/response-plan.js && node test/smoke.js && node test/response-plan.js && node test/report-preservation.js && node test/walk-coverage.js && node --check src/tensorlake.js && node test/tensorlake.js && node --test test/functional-boundaries.js && node --check src/october-review.js && node --test test/october-review.js && node --check src/october23.js && node --test test/october23.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^22.23.4 || ^24.22.1 || ^26.12.1"
   }
 }

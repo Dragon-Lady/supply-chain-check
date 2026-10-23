@@ -169,3 +169,12 @@ the scanned tree on the operator's platform.
 
 Verified 2026-10-19. Local version or endpoint matches require corroboration;
 no malware was fetched or executed to validate these rules.
+
+## October 23, 2026 refresh
+
+See [coverage and response order](october23.md). Sources rechecked 2026-10-23:
+
+- https://safedep.io/testmetest-npm-worm-miasma-variant/
+- https://docs.litellm.ai/blog/security-incident-oct-21-2026
+- https://safedep.io/hugo-paper-mevn-cli-forged-commit-preinstall-dropper/
+- https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
