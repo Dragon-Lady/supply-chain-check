@@ -1,5 +1,6 @@
 const fs = require("fs");
 const tensorlake = require("./tensorlake");
+const october23 = require("./october23");
 const octoberReview = require("./october-review");
 const path = require("path");
 const crypto = require("crypto");
@@ -291,6 +292,7 @@ function scanTarget(targetPath, options = {}) {
     seen.files += 1;
     const base = dirent.name;
     findings.push(...tensorlake.inspectFile(filePath, { root }));
+    findings.push(...october23.inspectFile(filePath, { root }));
     findings.push(...octoberReview.inspectFile(filePath, { root }));
 
     scanMiasmaPath(filePath, findings);
@@ -431,10 +433,10 @@ function scanTarget(targetPath, options = {}) {
     },
     trustSignals: dedupedTrustSignals,
     findings: dedupedFindings,
-    safeRemovalGuidance: tensorlake.safeRemovalGuidance(dedupedFindings),
-    coverage: { complete: unlistableDirectories === 0 && !dedupedFindings.some(f => f.type === "october-review-incomplete"), unlistableDirectories },
+    safeRemovalGuidance: october23.safeRemovalGuidance(dedupedFindings, tensorlake.safeRemovalGuidance(dedupedFindings)),
+    coverage: { complete: unlistableDirectories === 0 && !dedupedFindings.some(f => ["october-review-incomplete", "october23-coverage-incomplete"].includes(f.type)), unlistableDirectories },
     tensorlakeCoverage: { candidateReadsComplete: !dedupedFindings.some(f => f.type === "tensorlake-coverage-incomplete"), scope: "Visited Tensorlake metadata and named payload candidates only; this field does not assess discovery completeness" },
-    guidance: guidanceForRisk(risk)
+    guidance: october23.safeRemovalGuidance(dedupedFindings, {}).required ? [october23.ORDER] : guidanceForRisk(risk)
   };
 }
 
