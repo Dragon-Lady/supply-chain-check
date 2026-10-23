@@ -131,9 +131,9 @@ function tomlPair(statement) {
 }
 function pythonPackages(text, base) {
   const packages=[];
-  const add=(name,version)=>{
+  const add=(name,version,poetryArray=false)=>{
     name=String(name).toLowerCase().replace(/[-_.]+/g,"-");
-    if(["litellm","brotli","brotlicffi","pillow"].includes(name))packages.push({name,version});
+    if(["litellm","brotli","brotlicffi","pillow"].includes(name))packages.push({name,version,poetryArray});
   };
   const requirement=line=>{
     const m=line.trim().match(/^([A-Za-z0-9][A-Za-z0-9._-]*)(?:\[[^\]\r\n]+\])?(?=\s|[<>=!~@(;#]|$)(.*)$/);
@@ -179,6 +179,8 @@ function pythonPackages(text, base) {
       for(const item of tomlParts(value.slice(1,-1),","))requirement(tomlString(item));
     } else if(base==="pyproject.toml" && section==="[tool.poetry.dependencies]") {
       if(!["litellm","brotli","brotlicffi","pillow"].includes(key.toLowerCase()))continue;
+      // Multiple Poetry constraints are unresolved here; keep scanning siblings.
+      if(value.startsWith("[") && value.endsWith("]")) {add(key,null,true);continue;}
       let version=value;
       if(value.startsWith("{")) {
         if(!value.endsWith("}"))throw Error("inline table required");
@@ -202,6 +204,10 @@ function pythonMatch(text,base) {
 }
 function pythonVulnerability(item) {
   const {name,version}=item;
+  if(name==="litellm" && item.poetryArray)return {
+    severity:"medium",type:"litellm-october-version-review",source:SOURCES.litellm,
+    message:"LiteLLM has multiple Poetry constraints; resolve each branch from trusted metadata before ruling out the compromised 1.107.0 release. Do not start Python or pip in a suspected environment. Markers are not evaluated; this is not proof of installation or execution."
+  };
   if(!["brotli","brotlicffi","pillow"].includes(name))return null;
   const pillow=name==="pillow", cve=pillow?"CVE-2026-112900":"CVE-2026-111497";
   const source=pillow?SOURCES.pillow:SOURCES.brotli;

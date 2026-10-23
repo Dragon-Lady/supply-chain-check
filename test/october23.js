@@ -206,3 +206,30 @@ test("default reports include both advisories without executing Python or activa
   assert.match(f.message||f.title,/not proof/);assert.doesNotMatch(f.message||f.title,/rotate|revoke|delete/);
  }
 }));
+
+test("Poetry constraint arrays preserve other findings and request version review",()=>fixture(({write,home,scan})=>{
+ const file=write("pyproject.toml","");
+ const array='[\n  {version = "^9", python = "<3.8"},\n  {version = "^10", python = ">=3.8"},\n]';
+ for(const name of ["pillow","brotli","brotlicffi","litellm"]) {
+  // Reproduce the reported Poetry-only case; use a project pin when the array
+  // itself is LiteLLM so both declarations remain legal TOML.
+  const pin=name==="litellm"?'[project]\ndependencies = ["litellm==1.107.0"]\n':'litellm = "1.107.0"\n';
+  const forms=name==="litellm"
+   ?[pin+'[tool.poetry.dependencies]\nlitellm = '+array, '[tool.poetry.dependencies]\nlitellm = '+array+'\n'+pin]
+   :['[tool.poetry.dependencies]\npython = "^3.10"\n'+pin+name+' = '+array, '[tool.poetry.dependencies]\n'+name+' = '+array+'\n'+pin];
+  for(const text of forms) {
+   fs.writeFileSync(file,text+'\n');
+   const hits=detector.inspectFile(file,{root:home});
+   assert(hits.some(h=>h.type==="litellm-october-compromised-version" && h.severity==="critical"),name);
+   const review=hits.find(h=>h.type.endsWith("-version-review"));assert(review,name);assert.equal(review.severity,"medium");
+   assert(!hits.some(h=>h.type==="october23-coverage-incomplete"),name);
+   assert(ids(scan()).includes("litellm-october-compromised-version"),name);
+  }
+ }
+ fs.writeFileSync(file,'[tool.poetry.dependencies]\nlitellm = '+array+'\n');
+ const hits=detector.inspectFile(file,{root:home});
+ assert.equal(hits.length,1);assert.equal(hits[0].type,"litellm-october-version-review");
+ assert.equal(hits[0].evidence.activation,"not-assessed");
+ fs.writeFileSync(file,'[tool.poetry.dependencies]\npillow = [\n{version="^9"}\n');
+ assert.equal(detector.inspectFile(file,{root:home})[0].type,"october23-coverage-incomplete");
+}));

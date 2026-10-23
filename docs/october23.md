@@ -118,3 +118,8 @@ Sources checked October 23, 2026:
 - https://github.com/advisories/GHSA-9v8h-qqgm-4m35
 - https://pypi.org/project/brotlicffi/
 - https://github.com/python-pillow/Pillow/security/advisories/GHSA-w889-685w-c8fh
+
+Poetry multiple-constraint arrays for Brotli, brotlicffi, Pillow and LiteLLM
+produce a version-review finding without discarding other dependency findings
+in the same file. Array branches and their environment markers are not resolved;
+malformed TOML still reports incomplete coverage.
