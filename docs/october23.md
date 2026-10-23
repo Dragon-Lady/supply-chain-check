@@ -71,3 +71,50 @@ LSCG defaults to 100000 entries per root. On larger installations use, for examp
 range is 1 to 10000000; exhausted budgets remain incomplete. Explicit `--exclude`
 still marks omitted coverage incomplete; it is not a way to certify skipped files.
 Project scanners retain their existing directory/exclusion scope.
+
+## Python Brotli and Pillow vulnerability checks
+
+These are vulnerable-dependency findings, not malicious-package indicators.
+Both rules read the same supported Python fields as the LiteLLM rule above:
+requirements.txt, project.dependencies and tool.poetry.dependencies in
+pyproject.toml, uv/Poetry package tables, Pipfile.lock default/develop sections,
+and installed METADATA/PKG-INFO headers. Extras and hash continuations work.
+No Python interpreter, package import, installer, network lookup or exploit is run.
+
+- CVE-2026-111497: Brotli final releases from 1.0.3 below 1.2.1, and brotlicffi
+  final releases from 1.0.3 below 1.2.1.0, receive an affected-version finding.
+  Exploitation requires decoding attacker-controlled Brotli data. Upgrade Python
+  Brotli to 1.2.1+ or brotlicffi to 1.2.1.0+; updating Node alone is insufficient.
+  Upstream C-library backports 1.0.10 and 1.1.1 exist, but their version labels
+  do not establish that a custom Python binding contains those fixes. Labels
+  in those maintenance branches at/above the backports receive version-review
+  findings instead of being classified affected or cleared.
+- CVE-2026-112900: Pillow final releases from 2.6.0 below 13.0.0 receive an
+  affected-version finding. Upgrade to 13.0.0+. The affected path renders EPS
+  through Ghostscript with an attacker-controlled filename; that path and its
+  reachability are not assessed. This rule covers this advisory only, not every
+  Pillow vulnerability. Finding severity is medium, following the maintainer's
+  Moderate rating, rather than the aggregator's Critical rating.
+
+Unresolved ranges, direct references, missing versions, pre/dev/post releases,
+nonzero epochs and local/vendor versions produce a medium version-review finding.
+Numeric final versions support case-insensitive names, a v prefix, zero epoch,
+leading zeros and zero-padded release comparisons. Environment markers are not
+evaluated, so optional/platform-specific declarations can still be reported.
+Review findings do not establish an affected installation. Even an affected-version
+finding needs verification of deployment and vendor backports; it is not proof of
+exploitation. No credential rotation or malware-removal order is triggered by
+these two vulnerability checks alone.
+
+Included requirements files, requirements-*.txt, optional-dependencies and dependency
+groups remain outside these rules. System libraries, embedded C copies, distro
+backport status and actual exploitability are not inventoried. A quiet result is
+not machine-wide clearance. Existing directory, size and entry limits still apply.
+
+Sources checked October 23, 2026:
+- https://github.com/google/brotli/releases/tag/v1.2.1
+- https://github.com/google/brotli/releases/tag/v1.1.1
+- https://github.com/google/brotli/releases/tag/v1.0.10
+- https://github.com/advisories/GHSA-9v8h-qqgm-4m35
+- https://pypi.org/project/brotlicffi/
+- https://github.com/python-pillow/Pillow/security/advisories/GHSA-w889-685w-c8fh

@@ -127,3 +127,82 @@ test("review: vendor digest prefixes request review only for their image variant
  }
  for(const image of ['ghcr.io/berriai/litellm-database@sha256:7b00e91cd2fe'+'0'.repeat(52),'other/litellm-database@sha256:c00f9d92c427'+'0'.repeat(52),'ghcr.io/berriai/litellm-non_root@sha256:'+'0'.repeat(64)]) {fs.writeFileSync(file,'FROM '+image+'\n');assert.deepEqual(detector.inspectFile(file,{root:home}),[]);}
 }));
+
+test("Python advisory boundaries distinguish affected, patched and unresolved versions",()=>fixture(({write,home})=>{
+ const file=write("requirements.txt","");
+ const cases=[
+  ["Brotli","1.0.2",null],["brotli","1.0.3","affected"],["brotli","1.0.9","affected"],
+  ["brotli","1.0.10","review"],["brotli","1.1.0","affected"],["brotli","1.1.1","review"],
+  ["brotli","1.2.0","affected"],["brotli","1.2.1",null],["brotli","1.3.0",null],
+  ["brotlicffi","1.0.9.2","affected"],["brotlicffi","1.2.0.2","affected"],["brotlicffi","1.2.1.0",null],
+  ["Pillow","2.5.0",null],["pillow","2.6.0","affected"],["pillow","12.3.0","affected"],
+  ["pillow","13.0.0",null],["pillow","13.0",null],["pillow","14.0.0",null],
+  ["pillow","13.0.0rc1","review"],["brotli","1.2.1.dev0","review"],
+  ["pillow","12.3.0+vendor.1","review"],["brotli","1.2.*","review"],
+  ["pillow","v12.03.0","affected"],["brotli","0!1.2.0","affected"],
+  ["pillow","1!12.3.0","review"],["pillow","99999999999999999.0","review"]
+ ];
+ for(const [name,version,status] of cases) {
+  fs.writeFileSync(file,`${name}==${version}\n`);
+  const hits=detector.inspectFile(file,{root:home});
+  if(status===null)assert.deepEqual(hits,[],`${name} ${version}`);
+  else {assert.equal(hits.length,1,`${name} ${version}`);assert.match(hits[0].type,status==="review"?/-version-review$/:/-affected-version$/);assert.equal(hits[0].evidence.activation,"not-assessed");}
+ }
+}));
+test("Brotli and Pillow are found across supported Python metadata formats",()=>fixture(({write,home})=>{
+ const cases=[
+  ["requirements.txt",'Brotli==1.2.0 \\\n --hash=sha256:'+'a'.repeat(64)+'\nPillow[extra]==12.3.0 ; python_version < "1.0"\n'],
+  ["pyproject.toml",'[project]\ndependencies = ["httpx[http2]", "Brotli==1.2.0", "Pillow[extra] (==12.3.0)"]\n'],
+  ["pyproject.toml",'[tool.poetry.dependencies]\nBrotli = "1.2.0"\nPillow = {version = "==12.3.0", extras = ["extra"]}\n'],
+  ["uv.lock",'[[package]]\nname = "Brotli"\nversion = "1.2.0"\n[[package]]\nname = "Pillow"\nversion = "12.3.0"\n'],
+  ["poetry.lock","[[package]]\nname='brotli'\nversion='1.2.0'\n[package.files]\nother=[]\n[[package]]\nname='pillow'\nversion='12.3.0'\n"],
+  ["Pipfile.lock",JSON.stringify({default:{Brotli:{version:"==1.2.0"}},develop:{Pillow:{version:"==12.3.0"}}})]
+ ];
+ for(const [base,text] of cases) {
+  const hits=detector.inspectFile(write("formats/"+base,text),{root:home});
+  assert.deepEqual(hits.map(h=>h.type).sort(),["pillow-ghostscript-affected-version","python-brotli-decoder-affected-version"],base);
+ }
+ for(const base of ["METADATA","PKG-INFO"]) {
+  const hit=detector.inspectFile(write("installed/"+base,"Metadata-Version: 2.4\nName: brotlicffi\nVersion: 1.2.0.2\n\nlong description\n"),{root:home});
+  assert.equal(hit[0].type,"python-brotli-decoder-affected-version");
+ }
+}));
+test("unresolved Python declarations request review without leaking source values",()=>fixture(({write,home})=>{
+ const syntheticReference="fixture-private-reference";
+ for(const [base,text] of [
+  ["requirements.txt",`brotli>=1.2.0\npillow @ https://example.invalid/${syntheticReference}.whl\n`],
+  ["pyproject.toml",'[project]\ndependencies=["brotli", "pillow~=12.0"]'],
+  ["pyproject.toml",`[tool.poetry.dependencies]\nbrotli={git="https://example.invalid/${syntheticReference}"}\npillow="^12.0"`],
+  ["Pipfile.lock",JSON.stringify({default:{brotli:{version:"*"},pillow:{path:syntheticReference}}})]
+ ]) {
+  const hits=detector.inspectFile(write("unresolved/"+base,text),{root:home});
+  assert.equal(hits.length,2,base);assert(hits.every(h=>h.type.endsWith("-version-review")));assert(!JSON.stringify(hits).includes(syntheticReference));
+ }
+}));
+test("Python advisory decoys, unrelated packages and metadata descriptions stay clear",()=>fixture(({write,home})=>{
+ for(const [base,text] of [
+  ["requirements.txt","# pillow==12.3.0\nbrotli-helper==1.2.0\nother==12.3.0\n--index-url https://example.invalid/pillow==12.3.0\n"],
+  ["pyproject.toml",'[project]\ndescription="pillow==12.3.0"\ndependencies=["brotli-helper==1.2.0"]\n[tool.example]\npillow="12.3.0"'],
+  ["uv.lock",'[[package]]\nname="pillow"\nversion="13.0.0"\n[package.metadata]\nversion="12.3.0"\n[[package]]\nname="other"\nversion="1.2.0"'],
+  ["METADATA","Name: other\nVersion: 1.2.0\n\nName: pillow\nVersion: 12.3.0\n"],
+  ["package.json",JSON.stringify({dependencies:{brotli:"1.2.0",pillow:"12.3.0"}})]
+ ])assert.deepEqual(detector.inspectFile(write("decoys/"+base,text),{root:home}),[],base);
+}));
+test("malformed Python metadata is incomplete rather than silently cleared",()=>fixture(({write,home})=>{
+ for(const [base,text] of [
+  ["pyproject.toml",'[project]\ndependencies=["pillow==12.3.0"'],
+  ["Pipfile.lock",'{"default":{"pillow":'],
+  ["uv.lock",'[[package]]\nname="pillow"\nversion="12.3.0"\nversion="13.0.0"'],
+  ["METADATA","Name: pillow\nVersion: 12.3.0\nVersion: 13.0.0\n"]
+ ])assert.equal(detector.inspectFile(write("broken/"+base,text),{root:home})[0].type,"october23-coverage-incomplete",base);
+}));
+test("default reports include both advisories without executing Python or activating worm response",()=>fixture(({write,scan})=>{
+ write("requirements.txt","brotli==1.2.0\nPillow==12.3.0\n");
+ write("sitecustomize.py","throw new Error('must never execute inspected Python');\n");
+ const r=scan();
+ for(const type of ["python-brotli-decoder-affected-version","pillow-ghostscript-affected-version"])assert(ids(r).includes(type));
+ assert(!r.safeRemovalGuidance?.sequenceSensitive);
+ for(const f of r.findings.filter(f=>/^(python-brotli-decoder|pillow-ghostscript)/.test(f.type||f.id||""))) {
+  assert.match(f.message||f.title,/not proof/);assert.doesNotMatch(f.message||f.title,/rotate|revoke|delete/);
+ }
+}));

@@ -6,7 +6,9 @@ const {incidentalJson} = require("./metadata-scope");
 const SOURCES = {
   worm: "https://safedep.io/testmetest-npm-worm-miasma-variant/",
   litellm: "https://docs.litellm.ai/blog/security-incident-oct-21-2026",
-  dropper: "https://safedep.io/hugo-paper-mevn-cli-forged-commit-preinstall-dropper/"
+  dropper: "https://safedep.io/hugo-paper-mevn-cli-forged-commit-preinstall-dropper/",
+  brotli: "https://github.com/advisories/GHSA-9v8h-qqgm-4m35",
+  pillow: "https://github.com/python-pillow/Pillow/security/advisories/GHSA-w889-685w-c8fh"
 };
 // Only versions explicitly classified malicious in the dated research table.
 const BAD_NPM = {
@@ -127,41 +129,103 @@ function tomlPair(statement) {
   if(!m)return null;
   return [m[1].startsWith('"')||m[1].startsWith("'")?tomlString(m[1]):m[1],m[2].trim()];
 }
-function pythonMatch(text, base) {
-  if (base === "METADATA" || base === "PKG-INFO") return /^Name:\s*litellm\s*$/mi.test(text) && /^Version:\s*1\.107\.0\s*$/mi.test(text);
-  if (base === "requirements.txt") return /^\s*litellm(?:\[[^\]\r\n]+\])?\s*==\s*1\.107\.0(?=\s*(?:;|#|--hash|$))/mi.test(text.replace(/\\\r?\n/g," "));
-  if (base === "Pipfile.lock") { const data=JSON.parse(text); return [data.default,data.develop].some(section=>section?.litellm?.version === "==1.107.0"); }
-  let section="", packageName="", packageVersion="", matched=false;
-  const packageMatches=()=>packageName.toLowerCase()==="litellm" && packageVersion==="1.107.0";
-  for(const statement of tomlParts(text,"\n")) {
-    if(statement.startsWith("[")) {
-      matched=matched||packageMatches();packageName="";packageVersion="";section=statement;continue;
+function pythonPackages(text, base) {
+  const packages=[];
+  const add=(name,version)=>{
+    name=String(name).toLowerCase().replace(/[-_.]+/g,"-");
+    if(["litellm","brotli","brotlicffi","pillow"].includes(name))packages.push({name,version});
+  };
+  const requirement=line=>{
+    const m=line.trim().match(/^([A-Za-z0-9][A-Za-z0-9._-]*)(?:\[[^\]\r\n]+\])?(?=\s|[<>=!~@(;#]|$)(.*)$/);
+    if(!m)return;
+    const spec=m[2].split(/[;#]/,1)[0].replace(/\s+--hash=.*$/,"").trim();
+    const pin=spec.match(/^\(?\s*==\s*([^\s(),]+)\s*\)?$/);
+    add(m[1],pin?pin[1]:null);
+  };
+  if(base==="METADATA" || base==="PKG-INFO") {
+    // Only headers identify the installed distribution; ignore long descriptions.
+    const headers=text.split(/\r?\n\r?\n/,1)[0];
+    const names=[...headers.matchAll(/^Name:[ \t]*(\S+)[ \t]*$/gmi)];
+    const versions=[...headers.matchAll(/^Version:[ \t]*(\S+)[ \t]*$/gmi)];
+    if(names.length>1 || versions.length>1)throw Error("duplicate metadata");
+    if(names.length)add(names[0][1],versions[0]?.[1]||null);
+    return packages;
+  }
+  if(base==="requirements.txt") {
+    for(const line of text.replace(/\\\r?\n/g," ").split(/\r?\n/))requirement(line);
+    return packages;
+  }
+  if(base==="Pipfile.lock") {
+    const data=JSON.parse(text);
+    if(!data || typeof data!=="object" || Array.isArray(data))throw Error("lock object required");
+    for(const section of [data.default,data.develop]) {
+      if(section==null)continue;
+      if(typeof section!=="object" || Array.isArray(section))throw Error("lock section required");
+      for(const [name,item] of Object.entries(section)) {
+        const pin=typeof item?.version==="string"?item.version.match(/^==([^\s,]+)$/):null;
+        add(name,pin?pin[1]:null);
+      }
     }
+    return packages;
+  }
+  let section="", packageName="", packageVersion=null;
+  const finish=()=>{if(packageName)add(packageName,packageVersion);packageName="";packageVersion=null;};
+  for(const statement of tomlParts(text,"\n")) {
+    if(statement.startsWith("[")) {finish();section=statement;continue;}
     const pair=tomlPair(statement);if(!pair)continue;
     const [key,value]=pair;
     if(base==="pyproject.toml" && section==="[project]" && key==="dependencies") {
       if(!value.startsWith("[") || !value.endsWith("]"))throw Error("dependency array required");
-      for(const item of tomlParts(value.slice(1,-1),",")) {
-        const requirement=tomlString(item);
-        if(/^litellm(?:\[[^\]\r\n]+\])?\s*==\s*1\.107\.0(?:\s*;[^\r\n]*)?$/i.test(requirement))matched=true;
-      }
-    } else if(base==="pyproject.toml" && section==="[tool.poetry.dependencies]" && key.toLowerCase()==="litellm") {
+      for(const item of tomlParts(value.slice(1,-1),","))requirement(tomlString(item));
+    } else if(base==="pyproject.toml" && section==="[tool.poetry.dependencies]") {
+      if(!["litellm","brotli","brotlicffi","pillow"].includes(key.toLowerCase()))continue;
       let version=value;
       if(value.startsWith("{")) {
         if(!value.endsWith("}"))throw Error("inline table required");
         const fields=tomlParts(value.slice(1,-1),",").map(tomlPair);
         const versions=fields.filter(field=>field?.[0]==="version");
         if(versions.length>1)throw Error("duplicate version");
-        if(!versions.length)continue;
+        if(!versions.length){add(key,null);continue;}
         version=versions[0][1];
       }
-      if(/^(?:==)?1\.107\.0$/.test(tomlString(version)))matched=true;
+      const pin=tomlString(version).match(/^(?:==)?([^\s<>=!~^*,]+)$/);
+      add(key,pin?pin[1]:null);
     } else if(base!=="pyproject.toml" && section==="[[package]]") {
-      if(key==="name")packageName=tomlString(value);
-      if(key==="version")packageVersion=tomlString(value);
+      if(key==="name") {if(packageName)throw Error("duplicate name");packageName=tomlString(value);}
+      if(key==="version") {if(packageVersion!==null)throw Error("duplicate version");packageVersion=tomlString(value);}
     }
   }
-  return matched||packageMatches();
+  finish();return packages;
+}
+function pythonMatch(text,base) {
+  return pythonPackages(text,base).some(p=>p.name==="litellm" && p.version==="1.107.0");
+}
+function pythonVulnerability(item) {
+  const {name,version}=item;
+  if(!["brotli","brotlicffi","pillow"].includes(name))return null;
+  const pillow=name==="pillow", cve=pillow?"CVE-2026-112900":"CVE-2026-111497";
+  const source=pillow?SOURCES.pillow:SOURCES.brotli;
+  const type=pillow?"pillow-ghostscript":"python-brotli-decoder";
+  const guidance=pillow
+    ?"Upgrade Pillow to 13.0.0 or later. The vulnerable path requires EPS processing through Ghostscript with an attacker-controlled filename; this scan does not assess that runtime path."
+    :`Upgrade ${name} to ${name==="brotlicffi"?"1.2.1.0":"1.2.1"} or later. Exposure requires decoding attacker-controlled Brotli data. Updating Node does not update Python bindings.`;
+  // This intentionally handles only final numeric releases. Other PEP 440 forms,
+  // ranges and direct references need review, never a guessed safe verdict.
+  const final=typeof version==="string" && version.match(/^v?(?:0!)?(\d+(?:\.\d+){1,3})$/i);
+  const parts=final?final[1].split(".").map(Number):null;
+  const compare=other=>{for(let i=0;i<Math.max(parts.length,other.length);i++){const d=(parts[i]||0)-(other[i]||0);if(d)return Math.sign(d);}return 0;};
+  let review=!parts || parts.some(n=>!Number.isSafeInteger(n));
+  // Upstream C-library backports exist, but these versions are not PyPI releases
+  // in the dated advisory. Do not equate a custom binding's label with its C build.
+  if(!review && name==="brotli" && compare([1,2,0])<0 &&
+     ((parts[0]===1 && parts[1]===0 && compare([1,0,10])>=0) || (parts[0]===1 && parts[1]===1 && compare([1,1,1])>=0)))review=true;
+  if(review)return {severity:"medium",type:type+"-version-review",source,
+    message:`${name} is declared, but its exact upstream patch status for ${cve} needs review (unresolved, non-final, custom, or backported version). Inspect the resolved artifact and vendor fix evidence. ${guidance} Markers are not evaluated; this is not proof of installation or exploitation.`};
+  const affected=pillow?compare([2,6,0])>=0 && compare([13,0,0])<0
+    :compare([1,0,3])>=0 && compare(name==="brotlicffi"?[1,2,1,0]:[1,2,1])<0;
+  if(!affected)return null;
+  return {severity:pillow?"medium":"high",type:type+"-affected-version",source,
+    message:`${name} ${parts.join(".")} metadata falls in the affected upstream range for ${cve}. ${guidance} Verify vendor backports and the deployed artifact. Markers are not evaluated; this is not proof of installation, malicious packaging, or exploitation.`};
 }
 function inspectFile(file, options={}) {
   if (!candidate(file)) return [];
@@ -178,7 +242,16 @@ function inspectFile(file, options={}) {
         else throw error;
       }
     }
-    if (PYTHON_FILES.has(base) && pythonMatch(text,base)) emit("critical","litellm-october-compromised-version",`LiteLLM 1.107.0 metadata matches the October 21 compromised release. ${LITELLM_ORDER}`,SOURCES.litellm);
+    if (PYTHON_FILES.has(base)) {
+      const packages=pythonPackages(text,base);
+      if(packages.some(p=>p.name==="litellm" && p.version==="1.107.0")) emit("critical","litellm-october-compromised-version",`LiteLLM 1.107.0 metadata matches the October 21 compromised release. ${LITELLM_ORDER}`,SOURCES.litellm);
+      const seen=new Set();
+      for(const item of packages) {
+        const hit=pythonVulnerability(item);
+        if(!hit || seen.has(hit.message))continue;
+        seen.add(hit.message);emit(hit.severity,hit.type,hit.message,hit.source);
+      }
+    }
     if (base === "binding.gyp" && /<!\([^\r\n)]*\bnode\s+(?:\.\/)?index\.js\b[^\r\n)]*\)/.test(text)) emit("high","testmetest-gyp-loader-review",`Build metadata invokes an index.js loader using command expansion, consistent with the reported worm trigger. Legitimate builds can also execute commands; review context. ${ORDER}`);
     if (SERVICE_FILES.has(base)) {
       const correlated = /net-health-checker|\.local\/share\/runtimes|sync\.py|msync-3f7a|aiarmor\.website/.test(text);
